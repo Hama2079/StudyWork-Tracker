@@ -3,953 +3,2231 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>AetherFocus - Online Cloud AI Study Tracker</title>
-  <meta name="theme-color" content="#030712">
+  <title>AetherFocus - Precision AI Study Engine</title>
+  <meta name="theme-color" content="#05070c">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="description" content="Online cloud-synchronized AI focus timer, Pomodoro engine, and heatmap calendar tracker.">
+  <meta name="apple-mobile-web-app-title" content="AetherFocus">
+  <meta name="description" content="Offline-first high-precision study timer, customizable Pomodoro with background clock sync and Screen Wake Lock">
 
-  <!-- Tailwind CSS CDN for modern responsive UI -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              black: '#030712',
-              card: '#0a0f1d',
-              surface: '#0f172a',
-              border: '#1e293b',
-              neon: '#00f0ff',
-              blue: '#2563eb',
-              glow: 'rgba(0, 240, 255, 0.35)'
-            }
-          }
-        }
-      }
-    };
-  </script>
+  <link rel="manifest" id="pwa-manifest">
 
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+    :root {
+      --bg-primary: #04060a;
+      --bg-surface: #090d18;
+      --bg-card: #0e1424;
+      --bg-card-hover: #131b30;
+      --border-subtle: rgba(0, 240, 255, 0.12);
+      --border-active: rgba(0, 240, 255, 0.45);
+      --accent-neon: #00f0ff;
+      --accent-blue: #0070f3;
+      --accent-indigo: #6366f1;
+      --accent-glow: rgba(0, 240, 255, 0.35);
+      --text-main: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-dim: #64748b;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --success: #10b981;
+      --break-green: #34d399;
+      --break-purple: #c084fc;
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+    }
 
-    body {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      background-color: #030712;
-      color: #f8fafc;
-      overflow-x: hidden;
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
       -webkit-tap-highlight-color: transparent;
     }
 
-    .font-mono {
-      font-family: 'JetBrains Mono', monospace;
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      font-family: var(--font-family);
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
     }
 
-    /* Ambient neon atmospheric glow */
-    .glow-radial {
-      background: radial-gradient(circle at 50% -20%, rgba(0, 240, 255, 0.15), transparent 70%);
+    /* Ambient neon halo */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -160px;
+      right: -120px;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(0, 240, 255, 0.08) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
     }
 
-    .neon-border {
-      border: 1px solid rgba(0, 240, 255, 0.25);
-      box-shadow: 0 0 15px rgba(0, 240, 255, 0.1);
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(9, 13, 24, 0.88);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 0.75rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
     }
 
-    .neon-border:focus, .neon-border:hover {
-      border-color: rgba(0, 240, 255, 0.6);
-      box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
     }
 
-    /* Custom smooth scrollbar */
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
+    .brand-icon {
+      width: 2.25rem;
+      height: 2.25rem;
+      border-radius: 0.75rem;
+      background: linear-gradient(135deg, var(--accent-neon), var(--accent-blue));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 16px var(--accent-glow);
     }
-    ::-webkit-scrollbar-track {
-      background: #030712;
+
+    .brand-icon svg {
+      width: 1.25rem;
+      height: 1.25rem;
+      color: #04060a;
     }
-    ::-webkit-scrollbar-thumb {
-      background: #1e293b;
+
+    .brand-text h1 {
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: linear-gradient(90deg, #ffffff, var(--accent-neon));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Profile Switcher Styles */
+    .profile-switch {
+      display: flex;
+      background: rgba(14, 20, 36, 0.8);
+      border: 1px solid var(--border-subtle);
+      border-radius: 0.6rem;
+      padding: 0.15rem;
+      gap: 0.15rem;
+      margin-left: 0.5rem;
+    }
+
+    .profile-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      padding: 0.25rem 0.6rem;
+      border-radius: 0.45rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .profile-btn.active {
+      background: var(--accent-neon);
+      color: #04060a;
+      box-shadow: 0 0 8px rgba(0, 240, 255, 0.3);
+    }
+
+    .nav-tabs {
+      display: flex;
+      background: rgba(14, 20, 36, 0.8);
+      border: 1px solid var(--border-subtle);
+      border-radius: 0.75rem;
+      padding: 0.25rem;
+      gap: 0.25rem;
+    }
+
+    .nav-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      padding: 0.5rem 0.9rem;
+      border-radius: 0.5rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.2s ease;
+    }
+
+    .nav-btn.active {
+      background: rgba(0, 240, 255, 0.15);
+      color: var(--accent-neon);
+      border: 1px solid rgba(0, 240, 255, 0.35);
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.15);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    .icon-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      width: 2.25rem;
+      height: 2.25rem;
+      border-radius: 0.65rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .icon-btn:hover {
+      color: var(--accent-neon);
+      border-color: var(--accent-neon);
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-neon), var(--accent-blue));
+      color: #04060a;
+      font-weight: 700;
+      font-size: 0.8rem;
+      padding: 0.55rem 1rem;
+      border-radius: 0.65rem;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      box-shadow: 0 0 16px var(--accent-glow);
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary:hover {
+      box-shadow: 0 0 24px rgba(0, 240, 255, 0.5);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-main);
+      font-weight: 600;
+      font-size: 0.8rem;
+      padding: 0.55rem 1rem;
+      border-radius: 0.65rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.2s ease;
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--accent-neon);
+    }
+
+    main {
+      flex: 1;
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 1.25rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Engine Status Banner */
+    .banner-engine {
+      background: linear-gradient(90deg, #0d1527, #09101f);
+      border: 1px solid var(--border-subtle);
+      border-radius: 1rem;
+      padding: 0.9rem 1.25rem;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    }
+
+    .engine-pills {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .chip-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.2rem 0.55rem;
       border-radius: 9999px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      font-family: monospace;
+      background: rgba(0, 240, 255, 0.08);
+      border: 1px solid rgba(0, 240, 255, 0.25);
+      color: var(--accent-neon);
     }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #00f0ff;
+
+    .chip-badge.active-green {
+      background: rgba(16, 185, 129, 0.12);
+      border-color: rgba(16, 185, 129, 0.35);
+      color: #34d399;
     }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 1rem;
+      padding: 1.2rem;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.25s ease;
+    }
+
+    .stat-card:hover {
+      border-color: var(--border-active);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 240, 255, 0.08);
+    }
+
+    .stat-card-stripe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: var(--accent-neon);
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-dim);
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .stat-value {
+      font-size: 1.6rem;
+      font-weight: 800;
+      font-family: monospace;
+      color: #ffffff;
+      letter-spacing: -0.02em;
+    }
+
+    .stat-subtext {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      margin-top: 0.3rem;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .section-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .subject-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .subject-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 1.1rem;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      overflow: hidden;
+    }
+
+    .subject-card:hover {
+      border-color: var(--accent-neon);
+      box-shadow: 0 8px 24px rgba(0, 240, 255, 0.12);
+      transform: translateY(-2px);
+    }
+
+    .subject-card.is-active-subject {
+      border-color: var(--accent-neon);
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.25);
+    }
+
+    .subject-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.75rem;
+    }
+
+    .subject-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: 0.5rem;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 0.7rem;
+      font-family: monospace;
+      color: var(--text-secondary);
+    }
+
+    .subject-color-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .subject-name {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 0.25rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .subject-time-summary {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.6rem 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      margin-top: 0.75rem;
+      font-size: 0.75rem;
+    }
+
+    .subject-time-summary div span {
+      display: block;
+      color: var(--text-dim);
+      font-size: 0.65rem;
+      text-transform: uppercase;
+    }
+
+    .subject-time-summary div strong {
+      font-family: monospace;
+      font-size: 0.85rem;
+      color: var(--accent-neon);
+    }
+
+    .subject-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .subject-btn-launch {
+      width: 100%;
+      margin-top: 0.75rem;
+      background: rgba(0, 240, 255, 0.08);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      color: var(--accent-neon);
+      padding: 0.6rem;
+      border-radius: 0.65rem;
+      font-weight: 700;
+      font-size: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .subject-btn-launch:hover {
+      background: var(--accent-neon);
+      color: #04060a;
+      box-shadow: 0 0 16px var(--accent-glow);
+    }
+
+    .timer-container {
+      max-width: 640px;
+      margin: 0 auto;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 1.5rem;
+      padding: 1.75rem 1.25rem;
+      text-align: center;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.6);
+      position: relative;
+    }
+
+    .mode-switch {
+      display: inline-flex;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 0.75rem;
+      padding: 0.25rem;
+      gap: 0.25rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .mode-switch button {
+      background: transparent;
+      border: none;
+      color: var(--text-dim);
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.45rem 0.9rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .mode-switch button.active {
+      background: var(--accent-neon);
+      color: #04060a;
+      font-weight: 700;
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+    }
+
+    .pomo-stage-bar {
+      display: flex;
+      justify-content: center;
+      gap: 0.4rem;
+      margin-bottom: 0.9rem;
+    }
+
+    .pomo-stage-btn {
+      background: rgba(14, 20, 36, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--text-secondary);
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 0.3rem 0.7rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .pomo-stage-btn.active[data-stage="focus"] {
+      background: rgba(0, 240, 255, 0.2);
+      border-color: var(--accent-neon);
+      color: var(--accent-neon);
+    }
+
+    .pomo-stage-btn.active[data-stage="shortBreak"] {
+      background: rgba(52, 211, 153, 0.2);
+      border-color: var(--break-green);
+      color: var(--break-green);
+    }
+
+    .pomo-stage-btn.active[data-stage="longBreak"] {
+      background: rgba(192, 132, 252, 0.2);
+      border-color: var(--break-purple);
+      color: var(--break-purple);
+    }
+
+    .pomo-customizer-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 0.9rem;
+      padding: 0.75rem 1rem;
+      margin: 0.5rem auto 1rem auto;
+      max-width: 520px;
+    }
+
+    .pomo-customizer-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.6rem;
+    }
+
+    .pomo-customizer-title {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-dim);
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .pomo-presets-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.35rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .preset-chip {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--text-secondary);
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.3rem 0.6rem;
+      border-radius: 0.45rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .preset-chip:hover {
+      border-color: var(--accent-neon);
+      color: #fff;
+    }
+
+    .preset-chip.active {
+      background: rgba(0, 240, 255, 0.2);
+      border-color: var(--accent-neon);
+      color: var(--accent-neon);
+      font-weight: 700;
+    }
+
+    .custom-input-stepper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+    }
+
+    .stepper-btn {
+      width: 1.85rem;
+      height: 1.85rem;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-main);
+      border-radius: 0.45rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .stepper-btn:hover {
+      border-color: var(--accent-neon);
+      color: var(--accent-neon);
+    }
+
+    .stepper-input {
+      width: 4.2rem;
+      text-align: center;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--accent-neon);
+      font-family: monospace;
+      font-weight: 700;
+      font-size: 0.85rem;
+      border-radius: 0.45rem;
+      padding: 0.3rem 0.35rem;
+      outline: none;
+    }
+
+    .stepper-input:focus {
+      border-color: var(--accent-neon);
+      box-shadow: 0 0 8px var(--accent-glow);
+    }
+
+    .controls-aux-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      margin: 0.5rem auto 1rem auto;
+      flex-wrap: wrap;
+    }
+
+    .aux-toggle-btn {
+      background: rgba(14, 20, 36, 0.7);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      border-radius: 0.65rem;
+      padding: 0.35rem 0.75rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .aux-toggle-btn.active {
+      color: var(--accent-neon);
+      border-color: var(--accent-neon);
+      background: rgba(0, 240, 255, 0.12);
+    }
+
+    .timer-dial-wrapper {
+      position: relative;
+      width: 270px;
+      height: 270px;
+      margin: 0.75rem auto 1.25rem auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .timer-svg {
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg);
+    }
+
+    .timer-track {
+      fill: none;
+      stroke: rgba(255, 255, 255, 0.05);
+      stroke-width: 5.5;
+    }
+
+    .timer-progress {
+      fill: none;
+      stroke: var(--accent-neon);
+      stroke-width: 5.5;
+      stroke-linecap: round;
+      stroke-dasharray: 283;
+      stroke-dashoffset: 0;
+      transition: stroke-dashoffset 0.4s ease, stroke 0.3s ease;
+      filter: drop-shadow(0 0 8px var(--accent-neon));
+    }
+
+    .timer-content {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .timer-digits {
+      font-size: 3.1rem;
+      font-weight: 800;
+      font-family: monospace;
+      color: #ffffff;
+      text-shadow: 0 0 20px rgba(0, 240, 255, 0.35);
+      line-height: 1.05;
+      margin: 0.25rem 0;
+    }
+
+    .timer-mode-tag {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent-neon);
+    }
+
+    .timer-subject-name {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      max-width: 190px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .timer-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+
+    .btn-ctrl {
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.75rem;
+      font-size: 0.9rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s ease;
+    }
+
+    .btn-ctrl-primary {
+      background: linear-gradient(135deg, var(--accent-neon), var(--accent-blue));
+      color: #04060a;
+      box-shadow: 0 0 16px var(--accent-glow);
+    }
+
+    .btn-ctrl-primary:hover {
+      box-shadow: 0 0 24px rgba(0, 240, 255, 0.6);
+      transform: scale(1.02);
+    }
+
+    .btn-ctrl-pause {
+      background: var(--warning);
+      color: #04060a;
+      box-shadow: 0 0 16px rgba(245, 158, 11, 0.3);
+    }
+
+    .btn-ctrl-stop {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #f87171;
+    }
+
+    .btn-ctrl-stop:hover {
+      background: var(--danger);
+      color: #fff;
+    }
+
+    .calendar-container {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 1.25rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+    }
+
+    .cal-nav-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      padding: 0.4rem 0.8rem;
+      border-radius: 0.5rem;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+
+    .cal-nav-btn:hover {
+      color: var(--accent-neon);
+      border-color: var(--accent-neon);
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 0.4rem;
+    }
+
+    .calendar-day-label {
+      text-align: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      padding-bottom: 0.5rem;
+    }
+
+    .cal-day-cell {
+      aspect-ratio: 1;
+      border-radius: 0.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      background: rgba(14, 20, 36, 0.5);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.2s ease;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      font-family: monospace;
+    }
+
+    .cal-day-cell:hover {
+      border-color: var(--accent-neon);
+      transform: scale(1.05);
+      z-index: 2;
+    }
+
+    .cal-day-cell.is-selected {
+      border-color: var(--accent-neon);
+      box-shadow: 0 0 12px var(--accent-glow);
+    }
+
+    .heat-lvl-0 { background: rgba(14, 20, 36, 0.5); }
+    .heat-lvl-1 { background: rgba(0, 240, 255, 0.15); border-color: rgba(0, 240, 255, 0.25); color: #7dd3fc; }
+    .heat-lvl-2 { background: rgba(0, 240, 255, 0.35); border-color: rgba(0, 240, 255, 0.5); color: #e0f2fe; }
+    .heat-lvl-3 { background: rgba(0, 240, 255, 0.65); border-color: var(--accent-neon); color: #04060a; font-weight: 800; }
+    .heat-lvl-4 { background: #00f0ff; border-color: #ffffff; color: #000; font-weight: 900; box-shadow: 0 0 10px var(--accent-glow); }
+
+    .cal-day-empty {
+      aspect-ratio: 1;
+      visibility: hidden;
+    }
+
+    .day-details-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 1rem;
+      padding: 1.25rem;
+      margin-top: 1.25rem;
+    }
+
+    .analytics-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .breakdown-row {
+      margin-bottom: 1.25rem;
+    }
+
+    .breakdown-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.825rem;
+      margin-bottom: 0.35rem;
+    }
+
+    .progress-bar-bg {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 9999px;
+      height: 8px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      border-radius: 9999px;
+      background: var(--accent-neon);
+      transition: width 0.4s ease;
+      box-shadow: 0 0 8px var(--accent-glow);
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .modal-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 1.25rem;
+      padding: 1.75rem;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+      position: relative;
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-dim);
+      margin-bottom: 0.4rem;
+    }
+
+    .form-input {
+      width: 100%;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 0.65rem;
+      padding: 0.65rem 0.9rem;
+      color: #fff;
+      font-size: 0.85rem;
+      outline: none;
+    }
+
+    .form-input:focus {
+      border-color: var(--accent-neon);
+      box-shadow: 0 0 10px var(--accent-glow);
+    }
+
+    .color-picker-grid {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .color-option {
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: all 0.2s ease;
+    }
+
+    .color-option.selected {
+      border-color: #fff;
+      transform: scale(1.15);
+    }
+
+    .mobile-nav {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(9, 13, 24, 0.95);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-top: 1px solid var(--border-subtle);
+      padding: 0.5rem;
+      justify-content: space-around;
+      z-index: 50;
+    }
+
+    .mobile-nav-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25rem;
+      background: transparent;
+      border: none;
+      color: var(--text-dim);
+      font-size: 0.65rem;
+      font-weight: 600;
+      padding: 0.35rem 0.75rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+    }
+
+    .mobile-nav-btn.active {
+      color: var(--accent-neon);
+    }
+
+    .mobile-nav-btn svg {
+      width: 1.25rem;
+      height: 1.25rem;
+    }
+
+    @media (max-width: 768px) {
+      .nav-tabs { display: none; }
+      .mobile-nav { display: flex; }
+      main { padding-bottom: 5rem; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .timer-dial-wrapper { width: 230px; height: 230px; }
+      .timer-digits { font-size: 2.7rem; }
+    }
+
+    .hidden { display: none !important; }
+    .text-neon { color: var(--accent-neon); }
+    .font-mono { font-family: monospace; }
   </style>
 </head>
-<body class="min-h-screen flex flex-col glow-radial selection:bg-cyan-500/20 selection:text-cyan-300">
+<body>
 
-  <header class="sticky top-0 z-40 border-b border-slate-800/80 bg-brand-black/90 backdrop-blur-xl px-4 lg:px-8 py-3.5 flex items-center justify-between">
-    <div class="flex items-center gap-3">
-      <div class="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 shadow-lg shadow-cyan-500/30">
-        <svg class="w-5 h-5 text-black font-bold" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+  <header>
+    <div class="brand-group">
+      <div class="brand-icon">
+        <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
         </svg>
       </div>
-      <div>
-        <div class="flex items-center gap-2">
-          <span class="text-lg font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-100 to-cyan-400 bg-clip-text text-transparent">
-            AetherFocus
-          </span>
-          <span class="text-[10px] uppercase font-mono tracking-widest px-2 py-0.5 rounded-full bg-cyan-950/80 text-cyan-400 border border-cyan-500/40">
-            Cloud Sync
-          </span>
+      <div class="brand-text">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <h1>AetherFocus</h1>
         </div>
-        <div class="flex items-center gap-2 text-xs text-slate-400">
-          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" id="cloud-status-dot"></span>
-          <span id="cloud-status-text">Connecting to cloud...</span>
-        </div>
+      </div>
+      <!-- Offline Profile Switcher -->
+      <div class="profile-switch" title="Switch User Profile">
+        <button class="profile-btn active" data-profile="M">M</button>
+        <button class="profile-btn" data-profile="H">H</button>
       </div>
     </div>
 
-    <!-- Desktop Nav Links -->
-    <nav class="hidden md:flex items-center gap-1 bg-slate-900/90 p-1.5 rounded-xl border border-slate-800">
-      <button onclick="switchTab('dashboard')" class="tab-btn px-4 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-2 text-cyan-400 bg-cyan-950/40 border border-cyan-500/40 transition" id="tab-btn-dashboard">
+    <!-- Desktop Navigation Tabs -->
+    <nav class="nav-tabs" id="desktop-tabs">
+      <button class="nav-btn active" data-tab="dashboard">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
         Overview
       </button>
-      <button onclick="switchTab('timer')" class="tab-btn px-4 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-2 text-slate-400 hover:text-white transition" id="tab-btn-timer">
-        Focus Timer
+      <button class="nav-btn" data-tab="timer">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Timer
       </button>
-      <button onclick="switchTab('calendar')" class="tab-btn px-4 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-2 text-slate-400 hover:text-white transition" id="tab-btn-calendar">
-        Calendar Heatmap
+      <button class="nav-btn" data-tab="calendar">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+        Calendar
       </button>
-      <button onclick="switchTab('analytics')" class="tab-btn px-4 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-2 text-slate-400 hover:text-white transition" id="tab-btn-analytics">
+      <button class="nav-btn" data-tab="analytics">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
         Analytics
       </button>
     </nav>
 
-    <!-- Top Right User Profile & Controls -->
-    <div class="flex items-center gap-2.5">
-      <!-- Screen Wake Lock Toggle Button -->
-      <button id="wake-lock-toggle" onclick="toggleWakeLock()" class="px-2.5 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs font-mono text-slate-400 hover:text-cyan-400 hover:border-cyan-500/40 transition flex items-center gap-1.5" title="Keep screen awake during study sessions">
-        <span class="w-2 h-2 rounded-full bg-slate-600" id="wake-indicator"></span>
-        <span class="hidden sm:inline" id="wake-text">Keep Screen Awake</span>
-      </button>
-
-      <!-- Audio Mute Toggle -->
-      <button id="sound-toggle" onclick="toggleSound()" class="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-cyan-400 transition" title="Toggle audio chime">
-        <svg class="w-4 h-4" id="sound-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-          <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+    <!-- Top Action Buttons -->
+    <div class="header-actions">
+      <!-- Reset / Clear All Data Button -->
+      <button class="icon-btn" id="btn-open-clear-data" title="Clear / Reset All Study Times" style="color: #f87171; border-color: rgba(239, 68, 68, 0.3);">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/>
         </svg>
       </button>
-
-      <!-- User Account Menu Button -->
-      <button onclick="openAuthModal()" class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-cyan-500/40 transition text-xs font-medium">
-        <div class="w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold text-[10px]" id="user-avatar">
-          ?
-        </div>
-        <span class="hidden md:inline text-slate-300 max-w-[120px] truncate" id="user-display-name">Sign In</span>
+      <!-- Data backup / sync modal button -->
+      <button class="icon-btn" id="btn-open-sync" title="Export / Import Data Backup (Transfer between Phone & Laptop)">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+        </svg>
       </button>
-
-      <button onclick="openSubjectModal()" class="hidden sm:flex items-center gap-1.5 bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-black font-bold text-xs px-3 py-2 rounded-xl shadow-lg shadow-cyan-500/20 transition">
-        + New Subject
+      <!-- Sound toggle -->
+      <button class="icon-btn" id="btn-toggle-sound" title="Toggle Synthesizer Sound">
+        <svg id="sound-icon-on" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+      </button>
+      <!-- Add Subject Button -->
+      <button class="btn-primary" id="btn-add-subject">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <span>Add Subject</span>
       </button>
     </div>
   </header>
 
-  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6 pb-24 md:pb-8">
-
-    <!-- Active Cloud User Banner -->
-    <div id="cloud-info-banner" class="rounded-2xl border border-cyan-900/40 bg-gradient-to-r from-cyan-950/30 via-slate-900/40 to-slate-950 p-3.5 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xl">
-      <div class="flex items-center gap-3">
-        <div class="p-2 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 00-9.78 2.096A4.001 4.001 0 003 15z" />
-          </svg>
-        </div>
-        <div>
-          <div class="text-xs font-semibold text-white flex items-center gap-2">
-            <span>Online Multi-Device Synchronized</span>
-            <span class="text-[10px] px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-300 font-mono" id="active-user-badge">Guest Session</span>
-          </div>
-          <p class="text-[11px] text-slate-400 mt-0.5">
-            Open this page on your laptop and phone with the same login to sync in real-time. Share the link with friends for their own private workspace.
-          </p>
-        </div>
+  <main>
+    <!-- Background Clock & Wake Lock Engine Status Bar -->
+    <div class="banner-engine">
+      <div class="engine-pills">
+        <span class="chip-badge active-green" id="sync-engine-badge">
+          <svg width="10" height="10" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>
+          Timestamp Delta Sync Active
+        </span>
+        <span class="chip-badge" id="wake-lock-badge" style="display: none;">
+          <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+          Display Sleep Prevented
+        </span>
+        <span class="chip-badge" id="notif-badge" style="display: none;">
+          <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          Push Alerts Ready
+        </span>
       </div>
-      <div class="flex items-center gap-2 self-end sm:self-auto">
-        <button onclick="openAuthModal()" class="text-xs text-cyan-400 hover:text-cyan-300 font-semibold px-3 py-1.5 rounded-lg bg-cyan-950/50 border border-cyan-500/30 transition">
-          Switch / Manage Account
-        </button>
-      </div>
+      <span style="font-size: 0.72rem; color: var(--text-dim);">Background throttling immune</span>
     </div>
 
-    <!-- VIEW 1: DASHBOARD -->
-    <section id="view-dashboard" class="space-y-6">
-      <!-- High Level Metrics -->
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <div class="rounded-2xl p-4 bg-brand-card border border-slate-800 relative overflow-hidden">
-          <div class="absolute top-0 left-0 w-1 h-full bg-cyan-400"></div>
-          <div class="text-xs text-slate-400 font-medium">Today's Focus</div>
-          <div class="text-xl sm:text-2xl font-black font-mono text-white mt-1" id="stat-today-time">00:00:00</div>
-          <div class="text-[11px] text-cyan-400 mt-1 font-mono" id="stat-today-hours">0.0 hrs total</div>
+    <!-- TAB 1: OVERVIEW & ALL-IN-ONE DASHBOARD -->
+    <section id="view-dashboard" class="tab-view">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-card-stripe"></div>
+          <div class="stat-label">
+            <span>Today's Total</span>
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div class="stat-value" id="stat-today">00:00:00</div>
+          <div class="stat-subtext" id="stat-today-sub">0 sessions logged today</div>
         </div>
 
-        <div class="rounded-2xl p-4 bg-brand-card border border-slate-800 relative overflow-hidden">
-          <div class="absolute top-0 left-0 w-1 h-full bg-blue-500"></div>
-          <div class="text-xs text-slate-400 font-medium">Past 7 Days</div>
-          <div class="text-xl sm:text-2xl font-black font-mono text-white mt-1" id="stat-week-time">00:00:00</div>
-          <div class="text-[11px] text-blue-400 mt-1 font-mono" id="stat-week-hours">0.0 hrs total</div>
+        <div class="stat-card">
+          <div class="stat-card-stripe" style="background: var(--accent-blue);"></div>
+          <div class="stat-label">
+            <span>Past 7 Days</span>
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+          </div>
+          <div class="stat-value" id="stat-week">0.0 hrs</div>
+          <div class="stat-subtext">Weekly focus volume</div>
         </div>
 
-        <div class="rounded-2xl p-4 bg-brand-card border border-slate-800 relative overflow-hidden">
-          <div class="absolute top-0 left-0 w-1 h-full bg-amber-400"></div>
-          <div class="text-xs text-slate-400 font-medium">Active Streak</div>
-          <div class="text-xl sm:text-2xl font-black font-mono text-amber-300 mt-1" id="stat-streak">0 Days</div>
-          <div class="text-[11px] text-slate-400 mt-1">Daily consistency</div>
+        <div class="stat-card">
+          <div class="stat-card-stripe" style="background: #f59e0b;"></div>
+          <div class="stat-label">
+            <span>Focus Streak</span>
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"/></svg>
+          </div>
+          <div class="stat-value" id="stat-streak" style="color: #fcd34d;">0 Days</div>
+          <div class="stat-subtext">Daily consistency score</div>
         </div>
 
-        <div class="rounded-2xl p-4 bg-brand-card border border-slate-800 relative overflow-hidden">
-          <div class="absolute top-0 left-0 w-1 h-full bg-indigo-500"></div>
-          <div class="text-xs text-slate-400 font-medium">All-Time Investment</div>
-          <div class="text-xl sm:text-2xl font-black font-mono text-white mt-1" id="stat-alltime-hours">0.0 hrs</div>
-          <div class="text-[11px] text-slate-400 mt-1 font-mono" id="stat-sessions-count">0 sessions logged</div>
+        <div class="stat-card">
+          <div class="stat-card-stripe" style="background: #a855f7;"></div>
+          <div class="stat-label">
+            <span>Subjects Tracked</span>
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          </div>
+          <div class="stat-value" id="stat-subjects-count">0</div>
+          <div class="stat-subtext" id="stat-alltime-sub">All-time: 0.0 hrs</div>
         </div>
       </div>
 
-      <!-- Study Topics & Subjects Grid -->
-      <div class="space-y-4">
-        <div class="flex items-center justify-between">
-          <div>
-            <h2 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-              <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-              </svg>
-              My Study Topics
-            </h2>
-            <p class="text-xs text-slate-400">Click any subject to start its study timer immediately.</p>
-          </div>
-          <button onclick="openSubjectModal()" class="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border border-cyan-500/40 text-cyan-300 bg-cyan-950/30 hover:bg-cyan-900/50 transition">
-            + Add Topic
-          </button>
-        </div>
+      <!-- Study Subjects List -->
+      <div class="section-header">
+        <h2 class="section-title">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          Study Topics & Subject Overview
+        </h2>
+        <span style="font-size: 0.75rem; color: var(--text-dim);">Tap subject to launch timer</span>
+      </div>
 
-        <div id="subjects-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <!-- Dynamic subjects populated here -->
-        </div>
+      <div class="subject-grid" id="subjects-container">
+        <!-- Injected via JavaScript -->
       </div>
     </section>
 
-    <!-- VIEW 2: INTERACTIVE FOCUS TIMER -->
-    <section id="view-timer" class="hidden max-w-2xl mx-auto space-y-6">
-      <div class="rounded-3xl bg-brand-card border border-slate-800 p-6 sm:p-8 text-center shadow-2xl relative overflow-hidden">
-        
-        <!-- Mode Switcher -->
-        <div class="inline-flex p-1 rounded-xl bg-slate-900 border border-slate-800 gap-1 mb-5">
-          <button id="timer-mode-stopwatch" onclick="setTimerMode('stopwatch')" class="px-4 py-1.5 rounded-lg text-xs font-semibold text-black bg-cyan-400 transition">
-            Stopwatch
-          </button>
-          <button id="timer-mode-pomodoro" onclick="setTimerMode('pomodoro')" class="px-4 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition">
-            Pomodoro
-          </button>
+    <!-- TAB 2: INTERACTIVE TIMER VIEW -->
+    <section id="view-timer" class="tab-view hidden">
+      <div class="timer-container">
+        <!-- Primary Mode Switcher: Stopwatch vs Pomodoro -->
+        <div class="mode-switch">
+          <button class="active" id="btn-mode-stopwatch">Stopwatch</button>
+          <button id="btn-mode-pomodoro">Pomodoro Focus</button>
         </div>
 
-        <!-- Pomodoro Stages (Focus, Short Break, Long Break) -->
-        <div id="pomodoro-stages-bar" class="hidden flex items-center justify-center gap-2 mb-4">
-          <button onclick="setPomoStage('focus')" id="stage-focus" class="px-3 py-1 rounded-lg text-xs font-semibold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
-            Focus Session
-          </button>
-          <button onclick="setPomoStage('shortBreak')" id="stage-short" class="px-3 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-white">
-            Short Break (5m)
-          </button>
-          <button onclick="setPomoStage('longBreak')" id="stage-long" class="px-3 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-white">
-            Long Break (15m)
-          </button>
+        <!-- Pomodoro Intervals Bar (Focus / Short Break / Long Break) -->
+        <div class="pomo-stage-bar hidden" id="pomo-stage-bar">
+          <button class="pomo-stage-btn active" data-stage="focus">Focus Interval</button>
+          <button class="pomo-stage-btn" data-stage="shortBreak">Short Break (5m)</button>
+          <button class="pomo-stage-btn" data-stage="longBreak">Long Break (15m)</button>
         </div>
 
-        <!-- Pomodoro Quick Presets -->
-        <div id="pomodoro-presets-box" class="hidden mb-6 bg-slate-900/60 p-3 rounded-2xl border border-slate-800/80 max-w-md mx-auto">
-          <div class="text-[11px] text-slate-400 uppercase font-mono mb-2 flex items-center justify-between">
-            <span>Interval Presets</span>
-            <span id="pomo-duration-label" class="text-cyan-400 font-bold">25 Mins</span>
+        <!-- Pomodoro Duration Customizer Box -->
+        <div class="pomo-customizer-box hidden" id="pomo-customizer-box">
+          <div class="pomo-customizer-header">
+            <span class="pomo-customizer-title">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+              Customize Duration
+            </span>
+            <span style="font-size: 0.7rem; color: var(--text-secondary);" id="pomo-selected-label">25 Minutes</span>
           </div>
-          <div class="flex flex-wrap items-center justify-center gap-1.5 mb-3">
-            <button onclick="setPomodoroMinutes(15)" class="pomo-chip px-2.5 py-1 rounded-md text-xs font-mono bg-slate-800 text-slate-300 hover:text-white">15m</button>
-            <button onclick="setPomodoroMinutes(25)" class="pomo-chip px-2.5 py-1 rounded-md text-xs font-mono bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">25m</button>
-            <button onclick="setPomodoroMinutes(45)" class="pomo-chip px-2.5 py-1 rounded-md text-xs font-mono bg-slate-800 text-slate-300 hover:text-white">45m</button>
-            <button onclick="setPomodoroMinutes(50)" class="pomo-chip px-2.5 py-1 rounded-md text-xs font-mono bg-slate-800 text-slate-300 hover:text-white">50m</button>
-            <button onclick="setPomodoroMinutes(60)" class="pomo-chip px-2.5 py-1 rounded-md text-xs font-mono bg-slate-800 text-slate-300 hover:text-white">60m</button>
-            <button onclick="setPomodoroMinutes(90)" class="pomo-chip px-2.5 py-1 rounded-md text-xs font-mono bg-slate-800 text-slate-300 hover:text-white">90m</button>
+
+          <!-- Quick Presets -->
+          <div class="pomo-presets-grid" id="pomo-presets-container">
+            <button class="preset-chip" data-mins="15">15m</button>
+            <button class="preset-chip active" data-mins="25">25m</button>
+            <button class="preset-chip" data-mins="45">45m</button>
+            <button class="preset-chip" data-mins="50">50m</button>
+            <button class="preset-chip" data-mins="60">60m</button>
+            <button class="preset-chip" data-mins="90">90m</button>
           </div>
-          <div class="flex items-center justify-center gap-2 text-xs font-mono">
-            <span class="text-slate-500">Custom:</span>
-            <button onclick="stepPomoMinutes(-5)" class="w-6 h-6 rounded bg-slate-800 text-slate-200">-</button>
-            <input type="number" id="pomo-custom-input" min="1" max="180" value="25" onchange="setPomodoroMinutes(this.value)" class="w-14 bg-slate-950 border border-slate-800 rounded px-2 py-0.5 text-center text-cyan-300 font-mono text-xs">
-            <button onclick="stepPomoMinutes(5)" class="w-6 h-6 rounded bg-slate-800 text-slate-200">+</button>
-            <span class="text-slate-500">mins</span>
+
+          <!-- Custom minute stepper -->
+          <div class="custom-input-stepper">
+            <span style="font-size: 0.72rem; color: var(--text-dim);">Custom:</span>
+            <button class="stepper-btn" id="btn-step-dec">-</button>
+            <input type="number" id="input-pomo-minutes" class="stepper-input" min="1" max="180" value="25">
+            <button class="stepper-btn" id="btn-step-inc">+</button>
+            <span style="font-size: 0.72rem; color: var(--text-dim);">mins</span>
           </div>
         </div>
 
-        <!-- Subject Select -->
-        <div class="max-w-xs mx-auto mb-6">
-          <label class="block text-[11px] font-mono text-slate-400 uppercase mb-1">Active Study Topic</label>
-          <select id="timer-subject-picker" onchange="onSubjectPickerChange(this.value)" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white font-semibold focus:outline-none focus:border-cyan-400">
-            <!-- Dynamic options -->
+        <!-- Screen Wake Lock & Notification Permission Controls -->
+        <div class="controls-aux-bar">
+          <button class="aux-toggle-btn" id="btn-toggle-wakelock" title="Keep screen turned on while studying">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+            <span id="label-wakelock">Keep Screen Awake: Off</span>
+          </button>
+          <button class="aux-toggle-btn" id="btn-toggle-notifs" title="Send push alert when background session completes">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <span id="label-notifs">Push Alerts: Enable</span>
+          </button>
+        </div>
+
+        <!-- Subject selector inside timer -->
+        <div style="margin-bottom: 0.5rem;">
+          <select id="timer-subject-select" class="form-input" style="max-width: 280px; margin: 0 auto; display: block; text-align: center;">
+            <!-- Injected -->
           </select>
         </div>
 
-        <!-- SVG Radial Ring and Digits -->
-        <div class="relative w-64 h-64 sm:w-72 sm:h-72 mx-auto mb-6 flex items-center justify-center">
-          <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-            <circle cx="50" cy="50" r="44" stroke="rgba(255,255,255,0.05)" stroke-width="5" fill="none" />
-            <circle id="timer-dial-ring" cx="50" cy="50" r="44" stroke="#00f0ff" stroke-width="5" stroke-linecap="round" fill="none" stroke-dasharray="276.46" stroke-dashoffset="0" class="transition-all duration-300" style="filter: drop-shadow(0 0 10px rgba(0, 240, 255, 0.4));" />
+        <!-- SVG Radial Ring & Time Output -->
+        <div class="timer-dial-wrapper">
+          <svg class="timer-svg" viewBox="0 0 100 100">
+            <circle class="timer-track" cx="50" cy="50" r="45" />
+            <circle class="timer-progress" id="timer-ring" cx="50" cy="50" r="45" />
           </svg>
-          <div class="absolute inset-0 flex flex-col items-center justify-center">
-            <span id="timer-status-text" class="text-[11px] font-mono uppercase tracking-widest text-cyan-400 mb-1">Ready</span>
-            <div id="timer-digits-display" class="text-4xl sm:text-5xl font-black font-mono text-white tracking-tight drop-shadow-md">00:00:00</div>
-            <div id="timer-active-topic-name" class="text-xs text-slate-400 mt-2 font-medium max-w-[180px] truncate">Select Topic</div>
+          <div class="timer-content">
+            <span class="timer-mode-tag" id="timer-status-badge">Ready</span>
+            <div class="timer-digits" id="timer-display">00:00:00</div>
+            <div class="timer-subject-name" id="timer-selected-title">Machine Learning</div>
           </div>
         </div>
 
-        <!-- Timer Action Controls -->
-        <div class="flex items-center justify-center gap-3 mb-6">
-          <button id="timer-btn-toggle" onclick="toggleTimer()" class="px-8 py-3.5 rounded-2xl bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-black font-extrabold text-sm shadow-xl shadow-cyan-500/25 transition hover:scale-105 active:scale-95">
-            Start Focus
+        <!-- Timer Controls -->
+        <div class="timer-controls">
+          <button class="btn-ctrl btn-ctrl-primary" id="btn-timer-toggle">
+            <svg id="timer-toggle-icon" width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            <span id="timer-toggle-text">Start Focus</span>
           </button>
-          <button id="timer-btn-stop" onclick="stopAndLogTimer()" class="px-5 py-3.5 rounded-2xl bg-slate-900 border border-slate-800 text-red-400 hover:text-red-300 hover:border-red-500/40 text-xs font-bold transition">
-            Stop & Log
-          </button>
-          <button onclick="resetTimerState()" class="p-3.5 rounded-2xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition" title="Reset">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
+          <button class="btn-ctrl btn-ctrl-stop" id="btn-timer-stop">
+            <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+            <span>Stop & Log</span>
           </button>
         </div>
 
         <!-- Session Note -->
-        <div class="max-w-md mx-auto">
-          <input type="text" id="timer-session-note" placeholder="Optional session notes (e.g. Completed Chapter 4 exercises)..." class="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-cyan-400 text-center">
+        <div style="margin-top: 1.25rem;">
+          <input type="text" id="timer-session-note" class="form-input" placeholder="Optional session note (e.g. Solved chapter 4 exercises)..." style="font-size: 0.8rem; text-align: center;">
         </div>
       </div>
     </section>
 
-    <!-- VIEW 3: CALENDAR HEATMAP -->
-    <section id="view-calendar" class="hidden space-y-6">
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Calendar Grid -->
-        <div class="lg:col-span-2 rounded-3xl bg-brand-card border border-slate-800 p-6 shadow-xl">
-          <div class="flex items-center justify-between mb-4">
-            <div>
-              <h2 class="text-base font-bold text-white">Study Calendar Heatmap</h2>
-              <p class="text-xs text-slate-400">Click any day to inspect exact subject breakdown.</p>
-            </div>
-            <div class="flex items-center gap-2">
-              <button onclick="stepCalendarMonth(-1)" class="p-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 hover:text-white">&lt;</button>
-              <span id="calendar-month-title" class="font-mono text-xs font-bold text-cyan-400 min-w-[110px] text-center">Month Year</span>
-              <button onclick="stepCalendarMonth(1)" class="p-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 hover:text-white">&gt;</button>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-7 gap-1 text-center font-mono text-[10px] uppercase text-slate-500 font-bold mb-2">
-            <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
-          </div>
-          <div id="calendar-cells" class="grid grid-cols-7 gap-1.5">
-            <!-- Calendar day cells -->
-          </div>
-
-          <!-- Heatmap Legend -->
-          <div class="flex items-center justify-end gap-2 mt-6 pt-4 border-t border-slate-800/80 text-[11px] text-slate-400">
-            <span>0 hrs</span>
-            <div class="w-3.5 h-3.5 rounded bg-slate-900 border border-slate-800"></div>
-            <div class="w-3.5 h-3.5 rounded bg-cyan-950 border border-cyan-800/40"></div>
-            <div class="w-3.5 h-3.5 rounded bg-cyan-900/60 border border-cyan-600/50"></div>
-            <div class="w-3.5 h-3.5 rounded bg-cyan-500/40 border border-cyan-400"></div>
-            <div class="w-3.5 h-3.5 rounded bg-cyan-400"></div>
-            <span>3+ hrs</span>
-          </div>
-        </div>
-
-        <!-- Selected Day Inspector -->
-        <div class="rounded-3xl bg-brand-card border border-slate-800 p-6 shadow-xl flex flex-col justify-between">
+    <!-- TAB 3: HEATMAP CALENDAR VIEW -->
+    <section id="view-calendar" class="tab-view hidden">
+      <div class="calendar-container">
+        <div class="calendar-header">
           <div>
-            <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
-              <div>
-                <span class="text-[10px] uppercase font-mono text-slate-500">Inspecting Day</span>
-                <h3 id="cal-inspector-date" class="text-sm font-bold text-white font-mono">Select Day</h3>
-              </div>
-              <div class="text-right">
-                <span class="text-[10px] uppercase font-mono text-cyan-400">Total Hours</span>
-                <div id="cal-inspector-total" class="text-base font-black font-mono text-cyan-300">0.0 hrs</div>
-              </div>
-            </div>
-
-            <div class="space-y-3">
-              <span class="text-xs font-semibold text-slate-300">Subject Breakdown</span>
-              <div id="cal-inspector-list" class="space-y-2">
-                <!-- Breakdown rows populated dynamically -->
-              </div>
-            </div>
+            <h2 class="section-title">Interactive Study Heatmap</h2>
+            <p style="font-size: 0.75rem; color: var(--text-dim);">Inspect daily study volume and topic breakdown</p>
           </div>
-          <div id="cal-inspector-notes" class="mt-4 pt-3 border-t border-slate-800/80 text-xs text-slate-400 italic">
-            No study sessions logged for this date.
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <button class="cal-nav-btn" id="cal-prev">&lt;</button>
+            <span id="cal-month-label" class="font-mono text-neon" style="font-size: 0.85rem; font-weight: 700; min-width: 110px; text-align: center;"></span>
+            <button class="cal-nav-btn" id="cal-next">&gt;</button>
+          </div>
+        </div>
+
+        <div class="calendar-grid" id="calendar-grid-cells">
+          <!-- Populated via script -->
+        </div>
+
+        <!-- Legend -->
+        <div style="display: flex; align-items: center; justify-content: flex-end; gap: 0.4rem; margin-top: 1rem; font-size: 0.7rem; color: var(--text-dim);">
+          <span>0h</span>
+          <div style="width: 10px; height: 10px; border-radius: 2px;" class="heat-lvl-0"></div>
+          <div style="width: 10px; height: 10px; border-radius: 2px;" class="heat-lvl-1"></div>
+          <div style="width: 10px; height: 10px; border-radius: 2px;" class="heat-lvl-2"></div>
+          <div style="width: 10px; height: 10px; border-radius: 2px;" class="heat-lvl-3"></div>
+          <div style="width: 10px; height: 10px; border-radius: 2px;" class="heat-lvl-4"></div>
+          <span>3h+</span>
+        </div>
+
+        <div class="day-details-panel" id="calendar-day-details">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+            <h3 id="cal-inspect-date" class="font-mono" style="font-size: 0.9rem; color: #fff;">Selected Date</h3>
+            <span id="cal-inspect-total" class="font-mono text-neon" style="font-size: 1rem; font-weight: 800;">0 hrs</span>
+          </div>
+          <div id="cal-inspect-breakdown" style="font-size: 0.8rem; color: var(--text-secondary);">
+            <!-- Breakdown items -->
           </div>
         </div>
       </div>
     </section>
 
-    <!-- VIEW 4: ANALYTICS -->
-    <section id="view-analytics" class="hidden space-y-6">
-      <div class="rounded-3xl bg-brand-card border border-slate-800 p-6 shadow-xl">
-        <h2 class="text-base font-bold text-white mb-1">Subject Time Distribution</h2>
-        <p class="text-xs text-slate-400 mb-6">Proportional allocation of focus across all topics.</p>
-        <div id="analytics-distribution-bars" class="space-y-4">
-          <!-- Dynamic breakdown bars -->
+    <!-- TAB 4: DETAILED ANALYTICS VIEW -->
+    <section id="view-analytics" class="tab-view hidden">
+      <div class="analytics-section">
+        <h2 class="section-title" style="margin-bottom: 0.5rem;">Subject Time Distribution</h2>
+        <p style="font-size: 0.75rem; color: var(--text-dim); margin-bottom: 1.5rem;">Total accumulated study volume per subject title.</p>
+        <div id="analytics-distribution-list">
+          <!-- Populated -->
         </div>
       </div>
     </section>
-
   </main>
 
-  <!-- MODAL: FIREBASE CLOUD AUTHENTICATION -->
-  <div id="modal-auth" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md hidden">
-    <div class="bg-brand-card border border-slate-800 rounded-3xl w-full max-w-md p-6 shadow-2xl relative">
-      <button onclick="closeAuthModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white">✕</button>
+  <!-- MODAL: ADD / EDIT SUBJECT -->
+  <div class="modal-backdrop" id="modal-subject">
+    <div class="modal-box">
+      <h3 style="font-size: 1.1rem; font-weight: 800; color: #fff; margin-bottom: 0.25rem;" id="modal-subject-title">Add Study Subject</h3>
+      <p style="font-size: 0.75rem; color: var(--text-dim); margin-bottom: 1.25rem;">Create a focused topic with target hours and custom neon hue.</p>
 
-      <div class="flex items-center gap-2 mb-2">
-        <div class="w-8 h-8 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold">☁</div>
-        <h3 class="text-lg font-bold text-white">AetherFocus Cloud Sync</h3>
-      </div>
-      <p class="text-xs text-slate-400 mb-5">
-        Sign in to keep your timers, topics, and calendar updated in real-time between your phone and laptop.
+      <form id="form-subject">
+        <input type="hidden" id="sub-id">
+        <div class="form-group">
+          <label class="form-label">Subject Name</label>
+          <input type="text" id="sub-name" class="form-input" required placeholder="e.g. Distributed Systems Architecture">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;" class="form-group">
+          <div>
+            <label class="form-label">Tag / Domain</label>
+            <input type="text" id="sub-tag" class="form-input" placeholder="e.g. Computer Science">
+          </div>
+          <div>
+            <label class="form-label">Target (Mins/Day)</label>
+            <input type="number" id="sub-goal" class="form-input" value="60" min="5" max="720">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Color Theme</label>
+          <div class="color-picker-grid" id="color-options">
+            <div class="color-option selected" data-color="#00f0ff" style="background: #00f0ff;"></div>
+            <div class="color-option" data-color="#0070f3" style="background: #0070f3;"></div>
+            <div class="color-option" data-color="#6366f1" style="background: #6366f1;"></div>
+            <div class="color-option" data-color="#10b981" style="background: #10b981;"></div>
+            <div class="color-option" data-color="#f59e0b" style="background: #f59e0b;"></div>
+            <div class="color-option" data-color="#ec4899" style="background: #ec4899;"></div>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1.5rem;">
+          <button type="button" class="btn-secondary" id="btn-cancel-subject">Cancel</button>
+          <button type="submit" class="btn-primary">Save Subject</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: OFFLINE BACKUP EXPORT & IMPORT -->
+  <div class="modal-backdrop" id="modal-sync">
+    <div class="modal-box">
+      <h3 style="font-size: 1.1rem; font-weight: 800; color: #fff; margin-bottom: 0.25rem;">Data Portability (100% Offline)</h3>
+      <p style="font-size: 0.75rem; color: var(--text-dim); margin-bottom: 1.25rem;">
+        Export your complete study database as a JSON file to transfer between your laptop and phone, or restore anytime. Applies to the current active profile.
       </p>
 
-      <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-800 mb-4 text-xs space-y-1 font-mono">
-        <div class="flex justify-between">
-          <span class="text-slate-500">Current User ID:</span>
-          <span id="auth-current-uid" class="text-cyan-400 font-bold">Checking...</span>
-        </div>
-        <div class="flex justify-between">
-          <span class="text-slate-500">Sync Status:</span>
-          <span id="auth-current-sync" class="text-emerald-400">Authenticated</span>
-        </div>
+      <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+        <button class="btn-primary" id="btn-export-json" style="justify-content: center; width: 100%;">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+          Export Study Database (JSON)
+        </button>
+
+        <label class="btn-secondary" style="justify-content: center; width: 100%; cursor: pointer;">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+          Import JSON Backup File
+          <input type="file" id="input-import-json" accept=".json" style="display: none;">
+        </label>
       </div>
 
-      <form id="auth-email-form" onsubmit="handleEmailAuth(event)" class="space-y-3 mb-4">
-        <div>
-          <label class="block text-[10px] font-mono text-slate-400 uppercase mb-1">Email Address</label>
-          <input type="email" id="auth-email" required placeholder="name@example.com" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-400">
-        </div>
-        <div>
-          <label class="block text-[10px] font-mono text-slate-400 uppercase mb-1">Password</label>
-          <input type="password" id="auth-password" required minlength="6" placeholder="••••••••" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-400">
-        </div>
-
-        <div class="flex items-center gap-2 pt-1">
-          <button type="submit" name="action" value="signin" class="flex-1 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-bold text-xs transition">
-            Sign In
-          </button>
-          <button type="submit" name="action" value="signup" class="flex-1 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition">
-            Create Account
-          </button>
-        </div>
-      </form>
-
-      <div class="pt-2 border-t border-slate-800 flex items-center justify-between text-xs">
-        <button onclick="handleSignOut()" class="text-red-400 hover:text-red-300 font-semibold">
-          Sign Out
-        </button>
-        <button onclick="closeAuthModal()" class="text-slate-400 hover:text-white">
-          Close
-        </button>
+      <div style="display: flex; justify-content: flex-end; margin-top: 1.5rem;">
+        <button type="button" class="btn-secondary" id="btn-close-sync">Close</button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL: ADD / EDIT SUBJECT -->
-  <div id="modal-subject" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md hidden">
-    <div class="bg-brand-card border border-slate-800 rounded-3xl w-full max-w-md p-6 shadow-2xl relative">
-      <button onclick="closeSubjectModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white">✕</button>
-      <h3 class="text-lg font-bold text-white mb-1" id="subject-modal-title">New Study Subject</h3>
-      <p class="text-xs text-slate-400 mb-5">Create a topic to track duration, goals, and weekly momentum.</p>
-
-      <form id="form-subject" onsubmit="handleSubjectSubmit(event)" class="space-y-4">
-        <input type="hidden" id="form-subject-id">
-        <div>
-          <label class="block text-[10px] font-mono text-slate-400 uppercase mb-1">Subject Name</label>
-          <input type="text" id="form-subject-name" required placeholder="e.g. Distributed Systems & Cloud" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-400">
+  <!-- MODAL: CONFIRM RESET / CLEAR DATA -->
+  <div class="modal-backdrop" id="modal-clear-data">
+    <div class="modal-box" style="border-color: rgba(239, 68, 68, 0.4);">
+      <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+        <div style="width: 2rem; height: 2rem; border-radius: 0.5rem; background: rgba(239, 68, 68, 0.15); display: flex; align-items: center; justify-content: center; color: #f87171;">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
         </div>
+        <h3 style="font-size: 1.1rem; font-weight: 800; color: #fff;">Clear Study Times & Data</h3>
+      </div>
+      <p style="font-size: 0.775rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
+        Choose what you would like to reset for the <strong>current profile</strong>.
+      </p>
 
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-[10px] font-mono text-slate-400 uppercase mb-1">Tag / Category</label>
-            <input type="text" id="form-subject-tag" placeholder="e.g. Engineering" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-400">
-          </div>
-          <div>
-            <label class="block text-[10px] font-mono text-slate-400 uppercase mb-1">Weekly Goal (Hrs)</label>
-            <input type="number" id="form-subject-goal" min="1" max="100" value="7" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-400">
-          </div>
-        </div>
+      <div style="display: flex; flex-direction: column; gap: 0.65rem;">
+        <button class="btn-secondary" id="btn-action-wipe-logs-only" style="justify-content: center; border-color: rgba(245, 158, 11, 0.4); color: #fbbf24;">
+          Clear All Logged Study Times (Keep Subjects)
+        </button>
+        <button class="btn-ctrl-stop" id="btn-action-wipe-all" style="justify-content: center; padding: 0.65rem; border-radius: 0.65rem; font-size: 0.8rem; font-weight: 700; cursor: pointer;">
+          Factory Reset (Wipe All Subjects & Logs)
+        </button>
+      </div>
 
-        <div>
-          <label class="block text-[10px] font-mono text-slate-400 uppercase mb-1">Neon Accent Color</label>
-          <div class="flex items-center gap-2" id="subject-color-picker">
-            <button type="button" data-color="#00f0ff" class="w-7 h-7 rounded-full bg-[#00f0ff] ring-2 ring-white scale-110"></button>
-            <button type="button" data-color="#3b82f6" class="w-7 h-7 rounded-full bg-[#3b82f6]"></button>
-            <button type="button" data-color="#6366f1" class="w-7 h-7 rounded-full bg-[#6366f1]"></button>
-            <button type="button" data-color="#10b981" class="w-7 h-7 rounded-full bg-[#10b981]"></button>
-            <button type="button" data-color="#f59e0b" class="w-7 h-7 rounded-full bg-[#f59e0b]"></button>
-            <button type="button" data-color="#ec4899" class="w-7 h-7 rounded-full bg-[#ec4899]"></button>
-          </div>
-        </div>
-
-        <div class="flex items-center justify-end gap-2 pt-2">
-          <button type="button" onclick="closeSubjectModal()" class="px-4 py-2 rounded-xl text-xs text-slate-400 hover:text-white">Cancel</button>
-          <button type="submit" class="px-5 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-bold text-xs transition">Save Topic</button>
-        </div>
-      </form>
+      <div style="display: flex; justify-content: flex-end; margin-top: 1.25rem;">
+        <button type="button" class="btn-secondary" id="btn-close-clear-data">Cancel</button>
+      </div>
     </div>
   </div>
 
-  <!-- Mobile Bottom Tab Bar -->
-  <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-brand-black/95 backdrop-blur-lg border-t border-slate-800 px-4 py-2 flex items-center justify-around">
-    <button onclick="switchTab('dashboard')" class="mobile-tab-btn flex flex-col items-center gap-1 text-cyan-400" id="mob-tab-dashboard">
-      <span class="text-xs font-semibold">Overview</span>
+  <!-- Mobile Bottom Navigation Bar -->
+  <nav class="mobile-nav" id="mobile-tabs">
+    <button class="mobile-nav-btn active" data-tab="dashboard">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+      <span>Overview</span>
     </button>
-    <button onclick="switchTab('timer')" class="mobile-tab-btn flex flex-col items-center gap-1 text-slate-400" id="mob-tab-timer">
-      <span class="text-xs font-semibold">Timer</span>
+    <button class="mobile-nav-btn" data-tab="timer">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span>Timer</span>
     </button>
-    <button onclick="switchTab('calendar')" class="mobile-tab-btn flex flex-col items-center gap-1 text-slate-400" id="mob-tab-calendar">
-      <span class="text-xs font-semibold">Calendar</span>
+    <button class="mobile-nav-btn" data-tab="calendar">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+      <span>Calendar</span>
     </button>
-    <button onclick="switchTab('analytics')" class="mobile-tab-btn flex flex-col items-center gap-1 text-slate-400" id="mob-tab-analytics">
-      <span class="text-xs font-semibold">Stats</span>
+    <button class="mobile-nav-btn" data-tab="analytics">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+      <span>Stats</span>
     </button>
   </nav>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { 
-      getAuth, 
-      signInAnonymously, 
-      signInWithCustomToken, 
-      signInWithEmailAndPassword, 
-      createUserWithEmailAndPassword, 
-      signOut, 
-      onAuthStateChanged 
-    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { 
-      getFirestore, 
-      doc, 
-      setDoc, 
-      deleteDoc, 
-      onSnapshot, 
-      collection 
-    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-    // Application ID and Firebase Config Initialization
-    const appId = typeof __app_id !== 'undefined' ? __app_id : 'aether-focus-default';
-    const firebaseConfig = typeof __firebase_config !== 'undefined' 
-      ? JSON.parse(__firebase_config) 
-      : {
-          apiKey: "AIzaSyDemoPlaceholderOnly",
-          authDomain: "aetherfocus-study.firebaseapp.com",
-          projectId: "aetherfocus-study",
-          storageBucket: "aetherfocus-study.appspot.com",
-          messagingSenderId: "100000000000",
-          appId: "1:100000000000:web:abcdef123456"
-        };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-
-    // Global in-memory application store
-    window.appState = {
-      user: null,
-      userId: null,
-      subjects: [],
-      studyLogs: [],
-      timerMode: 'stopwatch',
-      pomoStage: 'focus',
-      pomoMinutes: 25,
-      activeSubjectId: null,
-      isRunning: false,
-      startTimestamp: null,
-      accumulatedSeconds: 0,
-      totalElapsedSeconds: 0,
-      soundEnabled: true,
-      wakeLock: null,
-      calendarMonth: new Date(),
-      selectedDayStr: new Date().toISOString().split('T')[0]
-    };
-
-    async function initAuthAndSync() {
-      try {
-        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-          await signInWithCustomToken(auth, __initial_auth_token);
-        } else {
-          await signInAnonymously(auth);
-        }
-      } catch (err) {
-        console.warn("Initial authentication fallback: ", err);
-        try {
-          await signInAnonymously(auth);
-        } catch (e) {
-          console.error("Anonymous authentication error", e);
-        }
-      }
-
-      onAuthStateChanged(auth, (user) => {
-        if (user) {
-          window.appState.user = user;
-          window.appState.userId = user.uid;
-          
-          document.getElementById('cloud-status-dot').className = 'w-2 h-2 rounded-full bg-cyan-400 animate-ping';
-          document.getElementById('cloud-status-text').textContent = user.isAnonymous ? 'Syncing (Guest)' : 'Online Cloud Active';
-          document.getElementById('active-user-badge').textContent = user.email || `User: ${user.uid.substring(0, 8)}...`;
-          document.getElementById('user-avatar').textContent = user.email ? user.email.charAt(0).toUpperCase() : 'G';
-          document.getElementById('user-display-name').textContent = user.email || 'Guest User';
-          document.getElementById('auth-current-uid').textContent = user.uid;
-
-          setupFirestoreListeners(user.uid);
-        } else {
-          window.appState.user = null;
-          window.appState.userId = null;
-          document.getElementById('cloud-status-dot').className = 'w-2 h-2 rounded-full bg-slate-500';
-          document.getElementById('cloud-status-text').textContent = 'Offline / Signed Out';
-          document.getElementById('active-user-badge').textContent = 'Signed Out';
-        }
-      });
-    }
-
-    let unsubSubjects = null;
-    let unsubLogs = null;
-
-    function setupFirestoreListeners(userId) {
-      if (unsubSubjects) unsubSubjects();
-      if (unsubLogs) unsubLogs();
-
-      // RULE 1: STRICT PATH /artifacts/{appId}/users/{userId}/{collectionName}
-      // RULE 2: No complex queries or indexes
-      const subjectsCol = collection(db, 'artifacts', appId, 'users', userId, 'subjects');
-      const logsCol = collection(db, 'artifacts', appId, 'users', userId, 'study_logs');
-
-      unsubSubjects = onSnapshot(subjectsCol, (snapshot) => {
-        const loaded = [];
-        snapshot.forEach(d => loaded.push({ id: d.id, ...d.data() }));
-        
-        if (loaded.length === 0) {
-          // Initialize default starter subjects for a fresh user
-          createDefaultSubjects(userId);
-        } else {
-          window.appState.subjects = loaded;
-          if (!window.appState.activeSubjectId && loaded.length > 0) {
-            window.appState.activeSubjectId = loaded[0].id;
-          }
-          renderAll();
-        }
-      }, (err) => console.error("Subjects snapshot error:", err));
-
-      unsubLogs = onSnapshot(logsCol, (snapshot) => {
-        const loaded = [];
-        snapshot.forEach(d => loaded.push({ id: d.id, ...d.data() }));
-        window.appState.studyLogs = loaded;
-        renderAll();
-      }, (err) => console.error("Study logs snapshot error:", err));
-    }
-
-    async function createDefaultSubjects(userId) {
-      const defaults = [
-        { name: 'Core Computer Science', color: '#00f0ff', tag: 'Engineering', goalHours: 10 },
-        { name: 'Algorithms & Architecture', color: '#3b82f6', tag: 'Systems', goalHours: 8 },
-        { name: 'Language & Literature', color: '#10b981', tag: 'Reading', goalHours: 5 }
-      ];
-
-      for (const item of defaults) {
-        const docRef = doc(collection(db, 'artifacts', appId, 'users', userId, 'subjects'));
-        await setDoc(docRef, item);
-      }
-    }
-
-    window.handleEmailAuth = async function(e) {
-      e.preventDefault();
-      const email = document.getElementById('auth-email').value.trim();
-      const password = document.getElementById('auth-password').value;
-      const submitter = e.submitter.value;
-
-      try {
-        if (submitter === 'signup') {
-          await createUserWithEmailAndPassword(auth, email, password);
-        } else {
-          await signInWithEmailAndPassword(auth, email, password);
-        }
-        window.closeAuthModal();
-      } catch (err) {
-        alert("Authentication note: " + err.message);
-      }
-    };
-
-    window.handleSignOut = async function() {
-      await signOut(auth);
-      await signInAnonymously(auth);
-      window.closeAuthModal();
-    };
-
-    window.saveStudyLogToCloud = async function(logEntry) {
-      if (!window.appState.userId) return;
-      const docRef = doc(collection(db, 'artifacts', appId, 'users', window.appState.userId, 'study_logs'));
-      await setDoc(docRef, logEntry);
-    };
-
-    window.saveSubjectToCloud = async function(subjectData) {
-      if (!window.appState.userId) return;
-      const docRef = subjectData.id 
-        ? doc(db, 'artifacts', appId, 'users', window.appState.userId, 'subjects', subjectData.id)
-        : doc(collection(db, 'artifacts', appId, 'users', window.appState.userId, 'subjects'));
-      
-      const payload = {
-        name: subjectData.name,
-        tag: subjectData.tag,
-        color: subjectData.color,
-        goalHours: Number(subjectData.goalHours) || 5
-      };
-      await setDoc(docRef, payload);
-    };
-
-    window.deleteSubjectFromCloud = async function(subId) {
-      if (!window.appState.userId) return;
-      await deleteDoc(doc(db, 'artifacts', appId, 'users', window.appState.userId, 'subjects', subId));
-    };
-
-    // Kick off authentication initialization
-    initAuthAndSync();
-  </script>
-
   <script>
-    let timerTick = null;
+    const swCode = `
+      const CACHE_NAME = 'aether-focus-v3';
+      self.addEventListener('install', (e) => self.skipWaiting());
+      self.addEventListener('activate', (e) => e.waitUntil(clients.claim()));
+      self.addEventListener('fetch', (e) => {
+        e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
+      });
+    `;
 
-    function playChimeTone() {
-      if (!window.appState.soundEnabled) return;
+    if ('serviceWorker' in navigator) {
       try {
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        if (!AudioCtx) return;
-        const ctx = new AudioCtx();
+        const swBlob = new Blob([swCode], { type: 'application/javascript' });
+        const swUrl = URL.createObjectURL(swBlob);
+        navigator.serviceWorker.register(swUrl)
+          .then(() => console.log('Offline Service Worker Registered'))
+          .catch(err => console.warn('Service Worker note:', err));
+      } catch (e) {
+        console.warn('Inline Service Worker bypass:', e);
+      }
+    }
+
+    const manifestJson = {
+      name: "AetherFocus Study Engine",
+      short_name: "AetherFocus",
+      start_url: window.location.href,
+      display: "standalone",
+      background_color: "#04060a",
+      theme_color: "#04060a",
+      icons: [{
+        src: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%2304060a'/><path d='M55 20L25 55h25v25l30-35H55z' fill='%2300f0ff'/></svg>",
+        sizes: "192x192 512x512",
+        type: "image/svg+xml"
+      }]
+    };
+    const manifestBlob = new Blob([JSON.stringify(manifestJson)], { type: 'application/json' });
+    document.getElementById('pwa-manifest').setAttribute('href', URL.createObjectURL(manifestBlob));
+
+    /* AUDIO SYNTHESIZER & NATIVE NOTIFICATIONS */
+    let soundMuted = false;
+    function playChime(freq = 587.33, freq2 = 880) {
+      if (soundMuted) return;
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        const ctx = new AudioContext();
+        
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
 
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(587.33, ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.18);
+        osc.frequency.setValueAtTime(freq, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(freq2, ctx.currentTime + 0.18);
 
         gain.gain.setValueAtTime(0.25, ctx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.9);
 
         osc.connect(gain);
         gain.connect(ctx.destination);
+
         osc.start();
         osc.stop(ctx.currentTime + 0.9);
       } catch (e) {
-        console.warn("Chime preview prevented", e);
+        console.warn('Audio error', e);
       }
     }
 
-    function toggleTimer() {
-      if (window.appState.isRunning) {
-        pauseTimer();
-      } else {
-        startTimer();
-      }
-    }
-
-    function startTimer() {
-      window.appState.isRunning = true;
-      window.appState.startTimestamp = Date.now();
-
-      document.getElementById('timer-btn-toggle').textContent = 'Pause';
-      document.getElementById('timer-btn-toggle').className = 'px-8 py-3.5 rounded-2xl bg-amber-400 hover:bg-amber-300 text-black font-extrabold text-sm shadow-xl shadow-amber-400/25 transition';
-      document.getElementById('timer-status-text').textContent = 'Session Active';
-
-      clearInterval(timerTick);
-      timerTick = setInterval(recalculateTimerDelta, 500);
-      recalculateTimerDelta();
-    }
-
-    function pauseTimer() {
-      if (!window.appState.isRunning) return;
-      const delta = Math.floor((Date.now() - window.appState.startTimestamp) / 1000);
-      window.appState.accumulatedSeconds += Math.max(0, delta);
-      window.appState.totalElapsedSeconds = window.appState.accumulatedSeconds;
-      window.appState.isRunning = false;
-      window.appState.startTimestamp = null;
-
-      clearInterval(timerTick);
-
-      document.getElementById('timer-btn-toggle').textContent = 'Resume';
-      document.getElementById('timer-btn-toggle').className = 'px-8 py-3.5 rounded-2xl bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-black font-extrabold text-sm shadow-xl shadow-cyan-500/25 transition';
-      document.getElementById('timer-status-text').textContent = 'Paused';
-      updateTimerDisplay();
-    }
-
-    function stopAndLogTimer() {
-      if (window.appState.isRunning) {
-        const delta = Math.floor((Date.now() - window.appState.startTimestamp) / 1000);
-        window.appState.totalElapsedSeconds = window.appState.accumulatedSeconds + Math.max(0, delta);
-      }
-
-      const duration = window.appState.totalElapsedSeconds;
-      if (duration >= 5 && window.appState.activeSubjectId) {
-        const note = document.getElementById('timer-session-note').value.trim();
-        const newLog = {
-          subjectId: window.appState.activeSubjectId,
-          duration: duration,
-          timestamp: new Date().toISOString(),
-          dateString: new Date().toISOString().split('T')[0],
-          notes: note || 'Completed study session'
-        };
-
-        window.saveStudyLogToCloud(newLog);
-        playChimeTone();
-      }
-
-      resetTimerState();
-      document.getElementById('timer-session-note').value = '';
-    }
-
-    function resetTimerState() {
-      clearInterval(timerTick);
-      window.appState.isRunning = false;
-      window.appState.startTimestamp = null;
-      window.appState.accumulatedSeconds = 0;
-      window.appState.totalElapsedSeconds = 0;
-
-      document.getElementById('timer-btn-toggle').textContent = 'Start Focus';
-      document.getElementById('timer-btn-toggle').className = 'px-8 py-3.5 rounded-2xl bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-black font-extrabold text-sm shadow-xl shadow-cyan-500/25 transition';
-      document.getElementById('timer-status-text').textContent = 'Ready';
-      updateTimerDisplay();
-    }
-
-    function recalculateTimerDelta() {
-      if (!window.appState.isRunning || !window.appState.startTimestamp) return;
-
-      const delta = Math.floor((Date.now() - window.appState.startTimestamp) / 1000);
-      window.appState.totalElapsedSeconds = window.appState.accumulatedSeconds + Math.max(0, delta);
-
-      if (window.appState.timerMode === 'pomodoro') {
-        const target = window.appState.pomoMinutes * 60;
-        if (window.appState.totalElapsedSeconds >= target) {
-          handlePomodoroFinished();
-          return;
+    function triggerNativeNotification(title, body) {
+      if ('Notification' in window && Notification.permission === 'granted') {
+        try {
+          new Notification(title, {
+            body: body,
+            icon: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%2304060a'/><path d='M55 20L25 55h25v25l30-35H55z' fill='%2300f0ff'/></svg>"
+          });
+        } catch (err) {
+          console.warn('Notification trigger issue', err);
         }
       }
-
-      updateTimerDisplay();
     }
 
-    function handlePomodoroFinished() {
-      pauseTimer();
-      playChimeTone();
-      stopAndLogTimer();
-      document.getElementById('timer-status-text').textContent = 'Pomodoro Finished!';
-    }
+    let wakeLockSentinel = null;
+    let wakeLockRequestedByUser = false;
+    const btnToggleWakeLock = document.getElementById('btn-toggle-wakelock');
+    const labelWakeLock = document.getElementById('label-wakelock');
+    const wakeLockBadge = document.getElementById('wake-lock-badge');
 
-    function updateTimerDisplay() {
-      const ring = document.getElementById('timer-dial-ring');
-      const display = document.getElementById('timer-digits-display');
-
-      if (window.appState.timerMode === 'pomodoro') {
-        const target = window.appState.pomoMinutes * 60;
-        const remaining = Math.max(0, target - window.appState.totalElapsedSeconds);
-        display.textContent = formatHMS(remaining);
-
-        const fraction = Math.min(window.appState.totalElapsedSeconds / target, 1);
-        ring.style.strokeDashoffset = 276.46 - (fraction * 276.46);
-      } else {
-        display.textContent = formatHMS(window.appState.totalElapsedSeconds);
-        const fraction = (window.appState.totalElapsedSeconds % 3600) / 3600;
-        ring.style.strokeDashoffset = 276.46 - (fraction * 276.46);
-      }
-    }
-
-    // Screen Wake Lock Handler
-    async function toggleWakeLock() {
+    async function requestScreenWakeLock() {
       if ('wakeLock' in navigator) {
-        if (!window.appState.wakeLock) {
-          try {
-            window.appState.wakeLock = await navigator.wakeLock.request('screen');
-            document.getElementById('wake-indicator').className = 'w-2 h-2 rounded-full bg-cyan-400 animate-ping';
-            document.getElementById('wake-text').textContent = 'Awake: ON';
-          } catch (e) {
-            console.warn(e);
-          }
-        } else {
-          window.appState.wakeLock.release();
-          window.appState.wakeLock = null;
-          document.getElementById('wake-indicator').className = 'w-2 h-2 rounded-full bg-slate-600';
-          document.getElementById('wake-text').textContent = 'Keep Screen Awake';
+        try {
+          wakeLockSentinel = await navigator.wakeLock.request('screen');
+          wakeLockSentinel.addEventListener('release', () => {
+            if (!wakeLockRequestedByUser) {
+              updateWakeLockUI(false);
+            }
+          });
+          updateWakeLockUI(true);
+        } catch (err) {
+          console.warn('Wake Lock request error:', err);
+          updateWakeLockUI(false);
         }
       } else {
-        alert("Wake Lock is not supported on this device/browser.");
+        labelWakeLock.textContent = 'Screen Awake: Unsupported';
       }
     }
 
-    function toggleSound() {
-      window.appState.soundEnabled = !window.appState.soundEnabled;
-      document.getElementById('sound-toggle').style.opacity = window.appState.soundEnabled ? '1' : '0.4';
+    function releaseScreenWakeLock() {
+      if (wakeLockSentinel) {
+        wakeLockSentinel.release().then(() => {
+          wakeLockSentinel = null;
+          updateWakeLockUI(false);
+        }).catch(() => {});
+      }
     }
 
-    // Background sleep reconciliation
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') {
-        recalculateTimerDelta();
+    function updateWakeLockUI(isActive) {
+      if (isActive) {
+        btnToggleWakeLock.classList.add('active');
+        labelWakeLock.textContent = 'Screen Awake: ACTIVE';
+        wakeLockBadge.style.display = 'inline-flex';
+      } else {
+        btnToggleWakeLock.classList.remove('active');
+        labelWakeLock.textContent = 'Keep Screen Awake: Off';
+        wakeLockBadge.style.display = 'none';
+      }
+    }
+
+    btnToggleWakeLock.addEventListener('click', () => {
+      wakeLockRequestedByUser = !wakeLockRequestedByUser;
+      if (wakeLockRequestedByUser) {
+        requestScreenWakeLock();
+      } else {
+        releaseScreenWakeLock();
       }
     });
 
-    function formatHMS(totalSeconds) {
-      const h = Math.floor(totalSeconds / 3600);
-      const m = Math.floor((totalSeconds % 3600) / 60);
-      const s = totalSeconds % 60;
+    document.addEventListener('visibilitychange', () => {
+      if (wakeLockRequestedByUser && document.visibilityState === 'visible' && !wakeLockSentinel) {
+        requestScreenWakeLock();
+      }
+    });
+
+    const btnToggleNotifs = document.getElementById('btn-toggle-notifs');
+    const labelNotifs = document.getElementById('label-notifs');
+    const notifBadge = document.getElementById('notif-badge');
+
+    function updateNotificationUI() {
+      if (!('Notification' in window)) {
+        labelNotifs.textContent = 'Push Alerts: Unsupported';
+        return;
+      }
+      if (Notification.permission === 'granted') {
+        btnToggleNotifs.classList.add('active');
+        labelNotifs.textContent = 'Push Alerts: ACTIVE';
+        notifBadge.style.display = 'inline-flex';
+      } else if (Notification.permission === 'denied') {
+        btnToggleNotifs.classList.remove('active');
+        labelNotifs.textContent = 'Push Alerts: Blocked';
+        notifBadge.style.display = 'none';
+      } else {
+        btnToggleNotifs.classList.remove('active');
+        labelNotifs.textContent = 'Push Alerts: Enable';
+        notifBadge.style.display = 'none';
+      }
+    }
+
+    btnToggleNotifs.addEventListener('click', async () => {
+      if ('Notification' in window) {
+        const res = await Notification.requestPermission();
+        updateNotificationUI();
+        if (res === 'granted') {
+          triggerNativeNotification('AetherFocus Alerts Enabled', 'You will now receive alerts when your focus sessions finish in the background.');
+        }
+      }
+    });
+
+    const DEFAULT_SUBJECTS = [
+      { id: 'sub-1', name: 'Advanced Machine Learning', color: '#00f0ff', tag: 'AI/Tech', goalMinutes: 60 },
+      { id: 'sub-2', name: 'Distributed Systems & OS', color: '#0070f3', tag: 'Engineering', goalMinutes: 45 },
+      { id: 'sub-3', name: 'Algorithms & Complexity', color: '#6366f1', tag: 'CS Theory', goalMinutes: 60 },
+      { id: 'sub-4', name: 'Neuroscience Foundations', color: '#10b981', tag: 'Cognition', goalMinutes: 30 }
+    ];
+
+    // Profile State
+    let currentProfile = localStorage.getItem('aether_profile') || 'M';
+
+    // Helper to namespace all localStorage keys to the active profile
+    function sKey(key) {
+      return `${currentProfile}_${key}`;
+    }
+
+    let subjects = [];
+    let studyLogs = [];
+    let savedPomoMinutes = 25;
+
+    function persistData() {
+      localStorage.setItem(sKey('aether_subjects'), JSON.stringify(subjects));
+      localStorage.setItem(sKey('aether_logs'), JSON.stringify(studyLogs));
+      localStorage.setItem(sKey('aether_pomo_minutes'), savedPomoMinutes.toString());
+      updateOverviewStats();
+      renderSubjectsList();
+      renderCalendar();
+      renderAnalytics();
+    }
+
+    function formatTime(seconds) {
+      const h = Math.floor(seconds / 3600);
+      const m = Math.floor((seconds % 3600) / 60);
+      const s = seconds % 60;
       return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
     }
 
-    function renderAll() {
-      renderDashboardStats();
-      renderSubjectsGrid();
-      renderTimerTopicPicker();
-      renderCalendarHeatmap();
-      renderAnalyticsBars();
+    function formatTimeMinSec(seconds) {
+      const m = Math.floor(seconds / 60);
+      const s = seconds % 60;
+      return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
     }
 
-    function renderDashboardStats() {
-      const todayStr = new Date().toISOString().split('T')[0];
-      const sevenDaysAgo = new Date();
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    function formatHours(seconds) {
+      return (seconds / 3600).toFixed(1) + ' hrs';
+    }
 
-      let todaySecs = 0;
-      let weekSecs = 0;
-      let allSecs = 0;
+    function getTodayString() {
+      return new Date().toISOString().split('T')[0];
+    }
 
-      window.appState.studyLogs.forEach(log => {
-        allSecs += log.duration || 0;
-        if (log.dateString === todayStr) todaySecs += log.duration || 0;
-        if (new Date(log.dateString) >= sevenDaysAgo) weekSecs += log.duration || 0;
+    let timerMode = 'stopwatch'; // 'stopwatch' | 'pomodoro'
+    let pomoStage = 'focus';     // 'focus' | 'shortBreak' | 'longBreak'
+    let timerTargetSeconds = savedPomoMinutes * 60;
+    let activeSubjectId = null;
+
+    // High Precision Delta State
+    let isRunning = false;
+    let startTimestamp = null;       // Date.now() when started/resumed
+    let accumulatedSeconds = 0;      // Seconds logged in prior paused intervals
+    let totalElapsedSeconds = 0;     // Computed = accumulatedSeconds + delta
+    let timerTickInterval = null;
+
+    const timerDisplay = document.getElementById('timer-display');
+    const timerStatusBadge = document.getElementById('timer-status-badge');
+    const timerSelectedTitle = document.getElementById('timer-selected-title');
+    const timerToggleBtn = document.getElementById('btn-timer-toggle');
+    const timerToggleText = document.getElementById('timer-toggle-text');
+    const timerRing = document.getElementById('timer-ring');
+    const timerSubjectSelect = document.getElementById('timer-subject-select');
+    const sessionNoteInput = document.getElementById('timer-session-note');
+
+    const pomoCustomizerBox = document.getElementById('pomo-customizer-box');
+    const pomoStageBar = document.getElementById('pomo-stage-bar');
+    const pomoSelectedLabel = document.getElementById('pomo-selected-label');
+    const inputPomoMinutes = document.getElementById('input-pomo-minutes');
+    const btnStepDec = document.getElementById('btn-step-dec');
+    const btnStepInc = document.getElementById('btn-step-inc');
+
+    function saveActiveSessionState() {
+      const state = {
+        isRunning,
+        timerMode,
+        pomoStage,
+        startTimestamp,
+        accumulatedSeconds,
+        timerTargetSeconds,
+        activeSubjectId,
+        savedPomoMinutes
+      };
+      localStorage.setItem(sKey('aether_active_session'), JSON.stringify(state));
+    }
+
+    function clearActiveSessionState() {
+      localStorage.removeItem(sKey('aether_active_session'));
+    }
+
+    function restoreActiveSessionState() {
+      const raw = localStorage.getItem(sKey('aether_active_session'));
+      if (!raw) {
+        // If clean state, reset completely for safety
+        resetTimerState();
+        return;
+      }
+
+      try {
+        const state = JSON.parse(raw);
+        timerMode = state.timerMode || 'stopwatch';
+        pomoStage = state.pomoStage || 'focus';
+        timerTargetSeconds = state.timerTargetSeconds || (savedPomoMinutes * 60);
+        activeSubjectId = state.activeSubjectId || (subjects.length > 0 ? subjects[0].id : null);
+        accumulatedSeconds = state.accumulatedSeconds || 0;
+        isRunning = state.isRunning || false;
+        startTimestamp = state.startTimestamp || null;
+
+        // Sync Mode UI
+        if (timerMode === 'pomodoro') {
+          document.getElementById('btn-mode-pomodoro').classList.add('active');
+          document.getElementById('btn-mode-stopwatch').classList.remove('active');
+          pomoCustomizerBox.classList.remove('hidden');
+          pomoStageBar.classList.remove('hidden');
+          document.querySelectorAll('.pomo-stage-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.getAttribute('data-stage') === pomoStage);
+          });
+        } else {
+          document.getElementById('btn-mode-stopwatch').classList.add('active');
+          document.getElementById('btn-mode-pomodoro').classList.remove('active');
+          pomoCustomizerBox.classList.add('hidden');
+          pomoStageBar.classList.add('hidden');
+        }
+
+        populateTimerSubjectSelect();
+
+        // If it was running when user left or refreshed, calculate exact elapsed time!
+        if (isRunning && startTimestamp) {
+          const delta = Math.floor((Date.now() - startTimestamp) / 1000);
+          totalElapsedSeconds = accumulatedSeconds + Math.max(0, delta);
+
+          if (timerMode === 'pomodoro' && totalElapsedSeconds >= timerTargetSeconds) {
+            handlePomodoroCompletedInAbsence();
+          } else {
+            resumeFromPersistedTimestamp();
+          }
+        } else {
+          totalElapsedSeconds = accumulatedSeconds;
+          updateTimerDial();
+          updateDynamicTitle();
+        }
+      } catch (err) {
+        console.warn('Could not restore session', err);
+      }
+    }
+
+    function loadProfileData() {
+      subjects = JSON.parse(localStorage.getItem(sKey('aether_subjects')) || 'null') || DEFAULT_SUBJECTS;
+      studyLogs = JSON.parse(localStorage.getItem(sKey('aether_logs')) || 'null') || [];
+      
+      savedPomoMinutes = parseInt(localStorage.getItem(sKey('aether_pomo_minutes')) || '25', 10);
+      if (isNaN(savedPomoMinutes) || savedPomoMinutes < 1) savedPomoMinutes = 25;
+      
+      if (!activeSubjectId || !subjects.find(s => s.id === activeSubjectId)) {
+        activeSubjectId = subjects.length > 0 ? subjects[0].id : null;
+      }
+
+      // Restore session state for this user
+      restoreActiveSessionState();
+
+      // UI Re-render
+      updatePomoDuration(savedPomoMinutes);
+      populateTimerSubjectSelect();
+      updateOverviewStats();
+      renderSubjectsList();
+      renderCalendar();
+      renderAnalytics();
+      
+      // Sync Profile Buttons
+      document.querySelectorAll('.profile-btn').forEach(b => {
+        b.classList.toggle('active', b.getAttribute('data-profile') === currentProfile);
+      });
+    }
+
+    document.querySelectorAll('.profile-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const newProfile = btn.getAttribute('data-profile');
+        if (newProfile === currentProfile) return;
+
+        // Vital: Always pause active timer before swapping to save the delta to old profile
+        if (isRunning) pauseTimer();
+        
+        currentProfile = newProfile;
+        localStorage.setItem('aether_profile', currentProfile);
+        
+        // Full reload of data context
+        loadProfileData();
+      });
+    });
+
+    function syncTimeDelta() {
+      if (!isRunning || !startTimestamp) return;
+
+      const delta = Math.floor((Date.now() - startTimestamp) / 1000);
+      totalElapsedSeconds = accumulatedSeconds + Math.max(0, delta);
+
+      // Pomodoro complete check
+      if (timerMode === 'pomodoro' && totalElapsedSeconds >= timerTargetSeconds) {
+        handleTimerCompletion();
+        return;
+      }
+
+      updateTimerDial();
+      updateDynamicTitle();
+    }
+
+    function updateDynamicTitle() {
+      const activeSub = subjects.find(s => s.id === activeSubjectId);
+      const subTitle = activeSub ? activeSub.name : 'Focus';
+
+      if (!isRunning) {
+        document.title = 'AetherFocus - Precision AI Study Engine';
+        return;
+      }
+
+      if (timerMode === 'pomodoro') {
+        const remaining = Math.max(0, timerTargetSeconds - totalElapsedSeconds);
+        document.title = `[${formatTimeMinSec(remaining)}] ${subTitle} - AetherFocus`;
+      } else {
+        document.title = `[${formatTime(totalElapsedSeconds)}] ${subTitle} - AetherFocus`;
+      }
+    }
+
+    function updateTimerDial() {
+      if (timerMode === 'pomodoro') {
+        const remaining = Math.max(0, timerTargetSeconds - totalElapsedSeconds);
+        timerDisplay.textContent = formatTime(remaining);
+        const percent = Math.min(totalElapsedSeconds / timerTargetSeconds, 1);
+        const offset = 283 - (percent * 283);
+        timerRing.style.strokeDashoffset = offset;
+      } else {
+        timerDisplay.textContent = formatTime(totalElapsedSeconds);
+        const percent = (totalElapsedSeconds % 3600) / 3600;
+        const offset = 283 - (percent * 283);
+        timerRing.style.strokeDashoffset = offset;
+      }
+    }
+
+    function startOrResumeTimer() {
+      if (isRunning) return;
+
+      isRunning = true;
+      startTimestamp = Date.now();
+      saveActiveSessionState();
+
+      timerStatusBadge.textContent = (timerMode === 'pomodoro' && pomoStage !== 'focus')
+        ? 'Resting...'
+        : 'Session Active';
+      timerToggleText.textContent = 'Pause';
+      timerToggleBtn.classList.remove('btn-ctrl-primary');
+      timerToggleBtn.classList.add('btn-ctrl-pause');
+
+      if (wakeLockRequestedByUser) {
+        requestScreenWakeLock();
+      }
+
+      clearInterval(timerTickInterval);
+      timerTickInterval = setInterval(syncTimeDelta, 500);
+      syncTimeDelta();
+    }
+
+    function resumeFromPersistedTimestamp() {
+      isRunning = true;
+      timerStatusBadge.textContent = 'Session Active';
+      timerToggleText.textContent = 'Pause';
+      timerToggleBtn.classList.remove('btn-ctrl-primary');
+      timerToggleBtn.classList.add('btn-ctrl-pause');
+
+      clearInterval(timerTickInterval);
+      timerTickInterval = setInterval(syncTimeDelta, 500);
+      syncTimeDelta();
+    }
+
+    function pauseTimer() {
+      if (!isRunning) return;
+
+      const delta = Math.floor((Date.now() - startTimestamp) / 1000);
+      accumulatedSeconds += Math.max(0, delta);
+      totalElapsedSeconds = accumulatedSeconds;
+      startTimestamp = null;
+      isRunning = false;
+
+      clearInterval(timerTickInterval);
+      saveActiveSessionState();
+
+      timerStatusBadge.textContent = 'Paused';
+      timerToggleText.textContent = 'Resume';
+      timerToggleBtn.classList.remove('btn-ctrl-pause');
+      timerToggleBtn.classList.add('btn-ctrl-primary');
+      updateTimerDial();
+      updateDynamicTitle();
+    }
+
+    function handleTimerCompletion() {
+      pauseTimer();
+      playChime(659.25, 880);
+
+      const activeSub = subjects.find(s => s.id === activeSubjectId);
+      const subName = activeSub ? activeSub.name : 'Focus Session';
+
+      triggerNativeNotification(
+        pomoStage === 'focus' ? "Time's Up! Focus Complete" : "Break Over!",
+        pomoStage === 'focus' 
+          ? `Great work! Your session on "${subName}" has been logged.` 
+          : "Ready to jump back into focus?"
+      );
+
+      timerStatusBadge.textContent = pomoStage === 'focus' ? 'Session Complete!' : 'Break Finished!';
+
+      if (pomoStage === 'focus') {
+        stopAndLogTimer();
+      }
+    }
+
+    function handlePomodoroCompletedInAbsence() {
+      const activeSub = subjects.find(s => s.id === activeSubjectId);
+      const subName = activeSub ? activeSub.name : 'Focus Session';
+
+      if (pomoStage === 'focus' && timerTargetSeconds >= 10) {
+        const log = {
+          id: 'log-' + Date.now(),
+          subjectId: activeSubjectId,
+          duration: timerTargetSeconds,
+          timestamp: new Date().toISOString(),
+          dateString: getTodayString(),
+          note: 'Completed Pomodoro session (reconciled after sleep/background).'
+        };
+        studyLogs.unshift(log);
+        persistData();
+      }
+
+      resetTimerState();
+      timerStatusBadge.textContent = 'Completed (While Away)';
+      triggerNativeNotification('Session Finished While Away', `Your study block for "${subName}" was logged.`);
+    }
+
+    function stopAndLogTimer() {
+      if (isRunning) {
+        const delta = Math.floor((Date.now() - startTimestamp) / 1000);
+        totalElapsedSeconds = accumulatedSeconds + Math.max(0, delta);
+      }
+
+      const durationToLog = (timerMode === 'pomodoro')
+        ? Math.min(totalElapsedSeconds, timerTargetSeconds)
+        : totalElapsedSeconds;
+
+      if (durationToLog >= 5 && (timerMode === 'stopwatch' || pomoStage === 'focus')) {
+        const log = {
+          id: 'log-' + Date.now(),
+          subjectId: activeSubjectId,
+          duration: durationToLog,
+          timestamp: new Date().toISOString(),
+          dateString: getTodayString(),
+          note: sessionNoteInput.value.trim() || 'Focused study session completed.'
+        };
+
+        studyLogs.unshift(log);
+        persistData();
+        playChime(523.25, 783.99);
+      }
+
+      resetTimerState();
+      sessionNoteInput.value = '';
+    }
+
+    function resetTimerState() {
+      clearInterval(timerTickInterval);
+      isRunning = false;
+      startTimestamp = null;
+      accumulatedSeconds = 0;
+      totalElapsedSeconds = 0;
+
+      clearActiveSessionState();
+
+      timerStatusBadge.textContent = 'Ready';
+      timerToggleText.textContent = 'Start Focus';
+      timerToggleBtn.classList.remove('btn-ctrl-pause');
+      timerToggleBtn.classList.add('btn-ctrl-primary');
+      updateTimerDial();
+      updateDynamicTitle();
+    }
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        syncTimeDelta();
+      }
+    });
+    window.addEventListener('focus', syncTimeDelta);
+    window.addEventListener('pageshow', syncTimeDelta);
+
+    timerToggleBtn.addEventListener('click', () => {
+      if (isRunning) pauseTimer();
+      else startOrResumeTimer();
+    });
+
+    document.getElementById('btn-timer-stop').addEventListener('click', stopAndLogTimer);
+
+    function updatePomoDuration(minutes) {
+      const mins = Math.max(1, Math.min(180, parseInt(minutes, 10) || 25));
+      savedPomoMinutes = mins;
+      localStorage.setItem(sKey('aether_pomo_minutes'), mins.toString());
+
+      inputPomoMinutes.value = mins;
+      pomoSelectedLabel.textContent = `${mins} Minutes`;
+
+      document.querySelectorAll('#pomo-presets-container .preset-chip').forEach(chip => {
+        if (parseInt(chip.getAttribute('data-mins'), 10) === mins) {
+          chip.classList.add('active');
+        } else {
+          chip.classList.remove('active');
+        }
       });
 
-      document.getElementById('stat-today-time').textContent = formatHMS(todaySecs);
-      document.getElementById('stat-today-hours').textContent = `${(todaySecs / 3600).toFixed(1)} hrs today`;
+      if (timerMode === 'pomodoro' && pomoStage === 'focus') {
+        timerTargetSeconds = mins * 60;
+        if (!isRunning) {
+          resetTimerState();
+        } else {
+          saveActiveSessionState();
+          updateTimerDial();
+        }
+      }
+    }
 
-      document.getElementById('stat-week-time').textContent = formatHMS(weekSecs);
-      document.getElementById('stat-week-hours').textContent = `${(weekSecs / 3600).toFixed(1)} hrs this week`;
+    function setPomoStage(stage) {
+      pomoStage = stage;
+      document.querySelectorAll('.pomo-stage-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-stage') === stage);
+      });
 
-      document.getElementById('stat-alltime-hours').textContent = `${(allSecs / 3600).toFixed(1)} hrs`;
-      document.getElementById('stat-sessions-count').textContent = `${window.appState.studyLogs.length} total sessions`;
+      if (stage === 'focus') {
+        timerTargetSeconds = savedPomoMinutes * 60;
+        timerStatusBadge.textContent = 'Focus Session';
+        syncActiveSubjectUI();
+      } else if (stage === 'shortBreak') {
+        timerTargetSeconds = 5 * 60;
+        timerStatusBadge.textContent = 'Short Break (5m)';
+        timerRing.style.stroke = 'var(--break-green)';
+      } else if (stage === 'longBreak') {
+        timerTargetSeconds = 15 * 60;
+        timerStatusBadge.textContent = 'Long Break (15m)';
+        timerRing.style.stroke = 'var(--break-purple)';
+      }
 
-      // Calculate streaks
-      const days = new Set(window.appState.studyLogs.map(l => l.dateString));
+      resetTimerState();
+    }
+
+    document.querySelectorAll('#pomo-presets-container .preset-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const mins = parseInt(chip.getAttribute('data-mins'), 10);
+        updatePomoDuration(mins);
+      });
+    });
+
+    btnStepDec.addEventListener('click', () => updatePomoDuration(savedPomoMinutes - 5));
+    btnStepInc.addEventListener('click', () => updatePomoDuration(savedPomoMinutes + 5));
+    inputPomoMinutes.addEventListener('change', (e) => updatePomoDuration(e.target.value));
+
+    document.querySelectorAll('.pomo-stage-btn').forEach(btn => {
+      btn.addEventListener('click', () => setPomoStage(btn.getAttribute('data-stage')));
+    });
+
+    document.getElementById('btn-mode-stopwatch').addEventListener('click', function() {
+      this.classList.add('active');
+      document.getElementById('btn-mode-pomodoro').classList.remove('active');
+      pomoCustomizerBox.classList.add('hidden');
+      pomoStageBar.classList.add('hidden');
+      timerMode = 'stopwatch';
+      syncActiveSubjectUI();
+      resetTimerState();
+    });
+
+    document.getElementById('btn-mode-pomodoro').addEventListener('click', function() {
+      this.classList.add('active');
+      document.getElementById('btn-mode-stopwatch').classList.remove('active');
+      pomoCustomizerBox.classList.remove('hidden');
+      pomoStageBar.classList.remove('hidden');
+      timerMode = 'pomodoro';
+      setPomoStage('focus');
+      resetTimerState();
+    });
+
+    function populateTimerSubjectSelect() {
+      timerSubjectSelect.innerHTML = '';
+      subjects.forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s.id;
+        opt.textContent = `${s.name} (${s.tag || 'General'})`;
+        if (s.id === activeSubjectId) opt.selected = true;
+        timerSubjectSelect.appendChild(opt);
+      });
+      syncActiveSubjectUI();
+    }
+
+    function syncActiveSubjectUI() {
+      const sub = subjects.find(s => s.id === activeSubjectId) || subjects[0];
+      if (sub) {
+        timerSelectedTitle.textContent = sub.name;
+        if (timerMode === 'pomodoro') {
+          if (pomoStage === 'shortBreak') timerRing.style.stroke = 'var(--break-green)';
+          else if (pomoStage === 'longBreak') timerRing.style.stroke = 'var(--break-purple)';
+          else timerRing.style.stroke = sub.color;
+        } else {
+          timerRing.style.stroke = sub.color;
+        }
+      }
+    }
+
+    timerSubjectSelect.addEventListener('change', (e) => {
+      activeSubjectId = e.target.value;
+      syncActiveSubjectUI();
+      saveActiveSessionState();
+    });
+
+    function updateOverviewStats() {
+      const today = getTodayString();
+      const pastWeek = new Date();
+      pastWeek.setDate(pastWeek.getDate() - 7);
+
+      let todaySecs = 0;
+      let todayCount = 0;
+      let weekSecs = 0;
+      let allTimeSecs = 0;
+
+      studyLogs.forEach(log => {
+        allTimeSecs += log.duration;
+        if (log.dateString === today) {
+          todaySecs += log.duration;
+          todayCount++;
+        }
+        if (new Date(log.dateString) >= pastWeek) {
+          weekSecs += log.duration;
+        }
+      });
+
+      document.getElementById('stat-today').textContent = formatTime(todaySecs);
+      document.getElementById('stat-today-sub').textContent = `${todayCount} sessions logged today`;
+      document.getElementById('stat-week').textContent = formatHours(weekSecs);
+      document.getElementById('stat-subjects-count').textContent = subjects.length;
+      document.getElementById('stat-alltime-sub').textContent = `All-time: ${formatHours(allTimeSecs)}`;
+
+      // Calculate streak
+      const activeDays = new Set(studyLogs.map(l => l.dateString));
       let streak = 0;
-      let curr = new Date();
+      let check = new Date();
       while (true) {
-        const dStr = curr.toISOString().split('T')[0];
-        if (days.has(dStr)) {
+        const dStr = check.toISOString().split('T')[0];
+        if (activeDays.has(dStr)) {
           streak++;
-          curr.setDate(curr.getDate() - 1);
+          check.setDate(check.getDate() - 1);
         } else {
           if (streak === 0) {
-            curr.setDate(curr.getDate() - 1);
-            if (days.has(curr.toISOString().split('T')[0])) {
+            check.setDate(check.getDate() - 1);
+            if (activeDays.has(check.toISOString().split('T')[0])) {
               streak++;
-              curr.setDate(curr.getDate() - 1);
+              check.setDate(check.getDate() - 1);
               continue;
             }
           }
@@ -959,320 +2237,399 @@
       document.getElementById('stat-streak').textContent = `${streak} Days`;
     }
 
-    function renderSubjectsGrid() {
+    function renderSubjectsList() {
       const container = document.getElementById('subjects-container');
       container.innerHTML = '';
+      const today = getTodayString();
 
-      if (window.appState.subjects.length === 0) {
-        container.innerHTML = `
-          <div class="col-span-full text-center py-12 border border-dashed border-slate-800 rounded-3xl p-6">
-            <p class="text-slate-400 text-xs mb-3">No study subjects registered yet.</p>
-            <button onclick="openSubjectModal()" class="px-4 py-2 rounded-xl bg-cyan-500 text-black font-bold text-xs">Create First Topic</button>
-          </div>
-        `;
-        return;
-      }
-
-      window.appState.subjects.forEach(sub => {
-        const logs = window.appState.studyLogs.filter(l => l.subjectId === sub.id);
-        const totalDuration = logs.reduce((acc, c) => acc + (c.duration || 0), 0);
+      subjects.forEach(sub => {
+        const subLogs = studyLogs.filter(l => l.subjectId === sub.id);
+        const totalSecs = subLogs.reduce((acc, curr) => acc + curr.duration, 0);
+        const todaySecs = subLogs.filter(l => l.dateString === today).reduce((acc, curr) => acc + curr.duration, 0);
+        const isCurrentActive = (activeSubjectId === sub.id && isRunning);
 
         const card = document.createElement('div');
-        card.className = 'group rounded-2xl bg-brand-card border border-slate-800 p-5 hover:border-cyan-500/40 transition relative overflow-hidden flex flex-col justify-between';
+        card.className = `subject-card ${isCurrentActive ? 'is-active-subject' : ''}`;
         card.innerHTML = `
           <div>
-            <div class="flex items-center justify-between gap-2 mb-3">
-              <span class="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-400 flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full" style="background-color: ${sub.color || '#00f0ff'}"></span>
+            <div class="subject-head">
+              <span class="subject-pill">
+                <span class="subject-color-dot" style="background: ${sub.color};"></span>
                 ${sub.tag || 'General'}
               </span>
-              <div class="flex items-center gap-1">
-                <button onclick="editSubject('${sub.id}')" class="p-1 text-slate-400 hover:text-white">✎</button>
-                <button onclick="deleteSubject('${sub.id}')" class="p-1 text-slate-400 hover:text-red-400">✕</button>
+              <div class="subject-actions">
+                <button class="icon-btn edit-sub" style="width:1.75rem; height:1.75rem;" title="Edit">
+                  <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </button>
+                <button class="icon-btn del-sub" style="width:1.75rem; height:1.75rem;" title="Delete">
+                  <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                </button>
               </div>
             </div>
-            <h3 class="text-base font-bold text-white mb-2 line-clamp-1">${sub.name}</h3>
-            <div class="flex items-center justify-between text-xs font-mono pt-2 border-t border-slate-800/80">
-              <span class="text-slate-500">Studied:</span>
-              <span class="text-cyan-400 font-bold">${(totalDuration / 3600).toFixed(1)} hrs</span>
+            <h3 class="subject-name">${sub.name}</h3>
+            <div class="subject-time-summary">
+              <div>
+                <span>Today</span>
+                <strong>${formatTime(todaySecs)}</strong>
+              </div>
+              <div>
+                <span>Total</span>
+                <strong style="color:#f8fafc;">${formatHours(totalSecs)}</strong>
+              </div>
             </div>
           </div>
-          <button onclick="launchSubjectTimer('${sub.id}')" class="w-full mt-4 py-2 rounded-xl bg-slate-900 border border-slate-800 group-hover:bg-cyan-500 group-hover:text-black text-cyan-300 font-bold text-xs transition flex items-center justify-center gap-1.5">
-            Launch Timer →
+          <button class="subject-btn-launch launch-timer">
+            <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            ${isCurrentActive ? 'Timer Active' : 'Launch Study Timer'}
           </button>
         `;
+
+        card.querySelector('.launch-timer').addEventListener('click', (e) => {
+          e.stopPropagation();
+          activeSubjectId = sub.id;
+          populateTimerSubjectSelect();
+          switchTab('timer');
+          startOrResumeTimer();
+        });
+
+        card.querySelector('.edit-sub').addEventListener('click', (e) => {
+          e.stopPropagation();
+          openSubjectModal(sub);
+        });
+
+        card.querySelector('.del-sub').addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (confirm(`Delete "${sub.name}" and its logs?`)) {
+            subjects = subjects.filter(s => s.id !== sub.id);
+            studyLogs = studyLogs.filter(l => l.subjectId !== sub.id);
+            if (activeSubjectId === sub.id) activeSubjectId = subjects[0]?.id || null;
+            persistData();
+            populateTimerSubjectSelect();
+          }
+        });
+
+        card.addEventListener('click', () => {
+          activeSubjectId = sub.id;
+          populateTimerSubjectSelect();
+          switchTab('timer');
+        });
+
         container.appendChild(card);
       });
     }
 
-    function renderTimerTopicPicker() {
-      const picker = document.getElementById('timer-subject-picker');
-      picker.innerHTML = '';
-      window.appState.subjects.forEach(s => {
-        const opt = document.createElement('option');
-        opt.value = s.id;
-        opt.textContent = `${s.name} (${s.tag || 'General'})`;
-        if (s.id === window.appState.activeSubjectId) opt.selected = true;
-        picker.appendChild(opt);
+    let currentCalDate = new Date();
+    let selectedCalDayStr = getTodayString();
+
+    function renderCalendar() {
+      const year = currentCalDate.getFullYear();
+      const month = currentCalDate.getMonth();
+      const monthLabel = currentCalDate.toLocaleString('default', { month: 'long', year: 'numeric' });
+      document.getElementById('cal-month-label').textContent = monthLabel;
+
+      const firstDayIndex = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const grid = document.getElementById('calendar-grid-cells');
+      grid.innerHTML = '';
+
+      const dayLetters = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+      dayLetters.forEach(d => {
+        const l = document.createElement('div');
+        l.className = 'calendar-day-label';
+        l.textContent = d;
+        grid.appendChild(l);
       });
 
-      const activeSub = window.appState.subjects.find(s => s.id === window.appState.activeSubjectId);
-      document.getElementById('timer-active-topic-name').textContent = activeSub ? activeSub.name : 'Select Topic';
-      if (activeSub) {
-        document.getElementById('timer-dial-ring').style.stroke = activeSub.color || '#00f0ff';
-      }
-    }
-
-    window.onSubjectPickerChange = function(subId) {
-      window.appState.activeSubjectId = subId;
-      renderTimerTopicPicker();
-    };
-
-    window.launchSubjectTimer = function(subId) {
-      window.appState.activeSubjectId = subId;
-      renderTimerTopicPicker();
-      switchTab('timer');
-      startTimer();
-    };
-
-    function renderCalendarHeatmap() {
-      const d = window.appState.calendarMonth;
-      const year = d.getFullYear();
-      const month = d.getMonth();
-      const firstDay = new Date(year, month, 1).getDay();
-      const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-      document.getElementById('calendar-month-title').textContent = d.toLocaleString('default', { month: 'short', year: 'numeric' });
-      const container = document.getElementById('calendar-cells');
-      container.innerHTML = '';
-
-      for (let i = 0; i < firstDay; i++) {
-        container.appendChild(document.createElement('div'));
+      for (let i = 0; i < firstDayIndex; i++) {
+        const blank = document.createElement('div');
+        blank.className = 'cal-day-empty';
+        grid.appendChild(blank);
       }
 
       for (let day = 1; day <= daysInMonth; day++) {
-        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-        const dayLogs = window.appState.studyLogs.filter(l => l.dateString === dateStr);
-        const daySecs = dayLogs.reduce((acc, c) => acc + (c.duration || 0), 0);
-        const hours = daySecs / 3600;
+        const dayStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const dayLogs = studyLogs.filter(l => l.dateString === dayStr);
+        const daySeconds = dayLogs.reduce((acc, curr) => acc + curr.duration, 0);
+        const dayHours = daySeconds / 3600;
 
-        let bgClass = 'bg-slate-900 border-slate-800/80 text-slate-400';
-        if (hours > 0 && hours < 1) bgClass = 'bg-cyan-950 border-cyan-800/60 text-cyan-300';
-        else if (hours >= 1 && hours < 2.5) bgClass = 'bg-cyan-900/60 border-cyan-600/60 text-cyan-200';
-        else if (hours >= 2.5) bgClass = 'bg-cyan-500/40 border-cyan-400 text-white font-bold';
+        let heatClass = 'heat-lvl-0';
+        if (daySeconds > 0) {
+          if (dayHours < 0.75) heatClass = 'heat-lvl-1';
+          else if (dayHours < 1.75) heatClass = 'heat-lvl-2';
+          else if (dayHours < 3.0) heatClass = 'heat-lvl-3';
+          else heatClass = 'heat-lvl-4';
+        }
 
-        const cell = document.createElement('button');
-        cell.className = `h-10 sm:h-12 rounded-xl border flex flex-col items-center justify-center font-mono text-xs transition hover:scale-105 ${bgClass} ${window.appState.selectedDayStr === dateStr ? 'ring-2 ring-cyan-400' : ''}`;
-        cell.innerHTML = `<span>${day}</span>`;
-        cell.onclick = () => {
-          window.appState.selectedDayStr = dateStr;
-          renderCalendarHeatmap();
-        };
-        container.appendChild(cell);
+        const cell = document.createElement('div');
+        cell.className = `cal-day-cell ${heatClass} ${selectedCalDayStr === dayStr ? 'is-selected' : ''}`;
+        cell.textContent = day;
+        cell.title = `${dayStr}: ${formatHours(daySeconds)}`;
+
+        cell.addEventListener('click', () => {
+          selectedCalDayStr = dayStr;
+          renderCalendar();
+          inspectCalendarDate(dayStr);
+        });
+
+        grid.appendChild(cell);
       }
 
-      inspectCalendarDate(window.appState.selectedDayStr);
+      inspectCalendarDate(selectedCalDayStr);
     }
 
     function inspectCalendarDate(dateStr) {
-      document.getElementById('cal-inspector-date').textContent = dateStr;
-      const logs = window.appState.studyLogs.filter(l => l.dateString === dateStr);
-      const totalSecs = logs.reduce((acc, c) => acc + (c.duration || 0), 0);
-      document.getElementById('cal-inspector-total').textContent = `${(totalSecs / 3600).toFixed(1)} hrs`;
+      document.getElementById('cal-inspect-date').textContent = new Date(dateStr + 'T00:00:00').toLocaleDateString(undefined, {
+        weekday: 'short', month: 'short', day: 'numeric', year: 'numeric'
+      });
 
-      const list = document.getElementById('cal-inspector-list');
-      list.innerHTML = '';
+      const dayLogs = studyLogs.filter(l => l.dateString === dateStr);
+      const totalSecs = dayLogs.reduce((acc, curr) => acc + curr.duration, 0);
+      document.getElementById('cal-inspect-total').textContent = formatHours(totalSecs);
 
-      if (logs.length === 0) {
-        list.innerHTML = '<div class="text-xs text-slate-500 italic">No study sessions on this date.</div>';
-        document.getElementById('cal-inspector-notes').textContent = 'No notes recorded.';
+      const breakdownContainer = document.getElementById('cal-inspect-breakdown');
+      breakdownContainer.innerHTML = '';
+
+      if (dayLogs.length === 0) {
+        breakdownContainer.innerHTML = '<p style="font-style: italic; color: var(--text-dim);">No study sessions recorded on this day.</p>';
         return;
       }
 
       const grouped = {};
-      logs.forEach(l => {
+      dayLogs.forEach(l => {
         grouped[l.subjectId] = (grouped[l.subjectId] || 0) + l.duration;
       });
 
       Object.entries(grouped).forEach(([subId, secs]) => {
-        const sub = window.appState.subjects.find(s => s.id === subId);
-        const item = document.createElement('div');
-        item.className = 'flex items-center justify-between p-2 rounded-xl bg-slate-900 border border-slate-800 text-xs';
-        item.innerHTML = `
-          <div class="flex items-center gap-2">
-            <span class="w-2 h-2 rounded-full" style="background-color: ${sub ? sub.color : '#00f0ff'}"></span>
-            <span class="text-white font-semibold">${sub ? sub.name : 'Unknown Topic'}</span>
+        const sub = subjects.find(s => s.id === subId);
+        const row = document.createElement('div');
+        row.style.display = 'flex';
+        row.style.justifyContent = 'space-between';
+        row.style.alignItems = 'center';
+        row.style.padding = '0.35rem 0';
+        row.innerHTML = `
+          <div style="display: flex; align-items: center; gap: 0.4rem;">
+            <span style="width:8px; height:8px; border-radius:50%; background: ${sub ? sub.color : '#64748b'};"></span>
+            <span style="color: #fff; font-weight: 600;">${sub ? sub.name : 'Archived Topic'}</span>
           </div>
-          <span class="font-mono text-cyan-400 font-bold">${formatHMS(secs)}</span>
+          <span class="font-mono text-neon">${formatTime(secs)}</span>
         `;
-        list.appendChild(item);
+        breakdownContainer.appendChild(row);
       });
-
-      document.getElementById('cal-inspector-notes').textContent = logs.map(l => `• ${l.notes}`).join(' ');
     }
 
-    function renderAnalyticsBars() {
-      const container = document.getElementById('analytics-distribution-bars');
+    document.getElementById('cal-prev').addEventListener('click', () => {
+      currentCalDate.setMonth(currentCalDate.getMonth() - 1);
+      renderCalendar();
+    });
+
+    document.getElementById('cal-next').addEventListener('click', () => {
+      currentCalDate.setMonth(currentCalDate.getMonth() + 1);
+      renderCalendar();
+    });
+
+    function renderAnalytics() {
+      const container = document.getElementById('analytics-distribution-list');
       container.innerHTML = '';
 
-      const totalSecs = window.appState.studyLogs.reduce((acc, c) => acc + (c.duration || 0), 0) || 1;
+      const totalAllTime = studyLogs.reduce((acc, curr) => acc + curr.duration, 0) || 1;
 
-      window.appState.subjects.forEach(sub => {
-        const logs = window.appState.studyLogs.filter(l => l.subjectId === sub.id);
-        const subSecs = logs.reduce((acc, c) => acc + (c.duration || 0), 0);
-        const pct = ((subSecs / totalSecs) * 100).toFixed(1);
+      subjects.forEach(sub => {
+        const subLogs = studyLogs.filter(l => l.subjectId === sub.id);
+        const subSecs = subLogs.reduce((acc, curr) => acc + curr.duration, 0);
+        const pct = ((subSecs / totalAllTime) * 100).toFixed(1);
 
         const row = document.createElement('div');
-        row.className = 'space-y-1.5';
+        row.className = 'breakdown-row';
         row.innerHTML = `
-          <div class="flex items-center justify-between text-xs">
-            <div class="flex items-center gap-2">
-              <span class="w-2.5 h-2.5 rounded-full" style="background-color: ${sub.color || '#00f0ff'}"></span>
-              <span class="text-white font-semibold">${sub.name}</span>
+          <div class="breakdown-info">
+            <div style="display:flex; align-items:center; gap: 0.4rem;">
+              <span style="width:8px; height:8px; border-radius:50%; background:${sub.color};"></span>
+              <span style="font-weight:600; color:#fff;">${sub.name}</span>
             </div>
-            <div class="flex items-center gap-3 font-mono">
-              <span class="text-slate-400">${(subSecs / 3600).toFixed(1)} hrs</span>
-              <span class="text-cyan-400 font-bold">${pct}%</span>
+            <div>
+              <span class="font-mono" style="color:var(--text-secondary); margin-right: 0.5rem;">${formatHours(subSecs)}</span>
+              <span class="font-mono text-neon" style="font-weight:700;">${pct}%</span>
             </div>
           </div>
-          <div class="w-full bg-slate-900 rounded-full h-2 overflow-hidden border border-slate-800">
-            <div class="h-full rounded-full transition-all duration-500" style="width: ${pct}%; background-color: ${sub.color || '#00f0ff'}"></div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" style="width: ${pct}%; background: ${sub.color};"></div>
           </div>
         `;
         container.appendChild(row);
       });
     }
 
-    window.switchTab = function(tabId) {
-      ['dashboard', 'timer', 'calendar', 'analytics'].forEach(t => {
-        const view = document.getElementById(`view-${t}`);
-        const desktopBtn = document.getElementById(`tab-btn-${t}`);
-        const mobBtn = document.getElementById(`mob-tab-${t}`);
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-view').forEach(view => view.classList.add('hidden'));
+      const activeView = document.getElementById(`view-${tabId}`);
+      if (activeView) activeView.classList.remove('hidden');
 
-        if (t === tabId) {
-          view.classList.remove('hidden');
-          desktopBtn.className = 'tab-btn px-4 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-2 text-cyan-400 bg-cyan-950/40 border border-cyan-500/40 transition';
-          if (mobBtn) mobBtn.className = 'mobile-tab-btn flex flex-col items-center gap-1 text-cyan-400';
+      document.querySelectorAll('#desktop-tabs .nav-btn, #mobile-tabs .mobile-nav-btn').forEach(btn => {
+        if (btn.getAttribute('data-tab') === tabId) {
+          btn.classList.add('active');
         } else {
-          view.classList.add('hidden');
-          desktopBtn.className = 'tab-btn px-4 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-2 text-slate-400 hover:text-white transition';
-          if (mobBtn) mobBtn.className = 'mobile-tab-btn flex flex-col items-center gap-1 text-slate-400';
+          btn.classList.remove('active');
         }
       });
-    };
 
-    window.setTimerMode = function(mode) {
-      window.appState.timerMode = mode;
-      resetTimerState();
+      if (tabId === 'calendar') renderCalendar();
+      if (tabId === 'analytics') renderAnalytics();
+      if (tabId === 'timer') syncActiveSubjectUI();
+    }
 
-      if (mode === 'pomodoro') {
-        document.getElementById('timer-mode-pomodoro').className = 'px-4 py-1.5 rounded-lg text-xs font-semibold text-black bg-cyan-400 transition';
-        document.getElementById('timer-mode-stopwatch').className = 'px-4 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition';
-        document.getElementById('pomodoro-presets-box').classList.remove('hidden');
-        document.getElementById('pomodoro-stages-bar').classList.remove('hidden');
-      } else {
-        document.getElementById('timer-mode-stopwatch').className = 'px-4 py-1.5 rounded-lg text-xs font-semibold text-black bg-cyan-400 transition';
-        document.getElementById('timer-mode-pomodoro').className = 'px-4 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition';
-        document.getElementById('pomodoro-presets-box').classList.add('hidden');
-        document.getElementById('pomodoro-stages-bar').classList.add('hidden');
-      }
-    };
+    document.querySelectorAll('#desktop-tabs .nav-btn, #mobile-tabs .mobile-nav-btn').forEach(btn => {
+      btn.addEventListener('click', () => switchTab(btn.getAttribute('data-tab')));
+    });
 
-    window.setPomodoroMinutes = function(mins) {
-      const val = Math.max(1, Math.min(180, Number(mins) || 25));
-      window.appState.pomoMinutes = val;
-      document.getElementById('pomo-duration-label').textContent = `${val} Mins`;
-      document.getElementById('pomo-custom-input').value = val;
-      resetTimerState();
-    };
+    const subjectModal = document.getElementById('modal-subject');
+    const formSubject = document.getElementById('form-subject');
+    let selectedColor = '#00f0ff';
 
-    window.stepPomoMinutes = function(step) {
-      window.setPomodoroMinutes(window.appState.pomoMinutes + step);
-    };
+    function openSubjectModal(editSub = null) {
+      document.getElementById('sub-id').value = editSub ? editSub.id : '';
+      document.getElementById('sub-name').value = editSub ? editSub.name : '';
+      document.getElementById('sub-tag').value = editSub ? editSub.tag : '';
+      document.getElementById('sub-goal').value = editSub ? editSub.goalMinutes : 60;
+      document.getElementById('modal-subject-title').textContent = editSub ? 'Edit Study Subject' : 'Add Study Subject';
 
-    window.setPomoStage = function(stage) {
-      window.appState.pomoStage = stage;
-      ['focus', 'short', 'long'].forEach(s => {
-        const btn = document.getElementById(`stage-${s}`);
-        btn.className = 'px-3 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-white';
+      selectedColor = editSub ? editSub.color : '#00f0ff';
+      document.querySelectorAll('.color-option').forEach(opt => {
+        opt.classList.toggle('selected', opt.getAttribute('data-color') === selectedColor);
       });
 
-      if (stage === 'focus') {
-        window.setPomodoroMinutes(25);
-        document.getElementById('stage-focus').className = 'px-3 py-1 rounded-lg text-xs font-semibold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40';
-      } else if (stage === 'shortBreak') {
-        window.setPomodoroMinutes(5);
-        document.getElementById('stage-short').className = 'px-3 py-1 rounded-lg text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
-      } else {
-        window.setPomodoroMinutes(15);
-        document.getElementById('stage-long').className = 'px-3 py-1 rounded-lg text-xs font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-500/40';
-      }
-    };
+      subjectModal.classList.add('open');
+    }
 
-    window.stepCalendarMonth = function(dir) {
-      window.appState.calendarMonth.setMonth(window.appState.calendarMonth.getMonth() + dir);
-      renderCalendarHeatmap();
-    };
+    document.getElementById('btn-add-subject').addEventListener('click', () => openSubjectModal());
+    document.getElementById('btn-cancel-subject').addEventListener('click', () => subjectModal.classList.remove('open'));
 
-    window.openAuthModal = function() {
-      document.getElementById('modal-auth').classList.remove('hidden');
-    };
-    window.closeAuthModal = function() {
-      document.getElementById('modal-auth').classList.add('hidden');
-    };
+    document.querySelectorAll('.color-option').forEach(opt => {
+      opt.addEventListener('click', () => {
+        document.querySelectorAll('.color-option').forEach(o => o.classList.remove('selected'));
+        opt.classList.add('selected');
+        selectedColor = opt.getAttribute('data-color');
+      });
+    });
 
-    window.openSubjectModal = function() {
-      document.getElementById('form-subject-id').value = '';
-      document.getElementById('form-subject-name').value = '';
-      document.getElementById('form-subject-tag').value = '';
-      document.getElementById('form-subject-goal').value = '7';
-      document.getElementById('subject-modal-title').textContent = 'New Study Subject';
-      document.getElementById('modal-subject').classList.remove('hidden');
-    };
-
-    window.closeSubjectModal = function() {
-      document.getElementById('modal-subject').classList.add('hidden');
-    };
-
-    window.editSubject = function(subId) {
-      const sub = window.appState.subjects.find(s => s.id === subId);
-      if (!sub) return;
-      document.getElementById('form-subject-id').value = sub.id;
-      document.getElementById('form-subject-name').value = sub.name;
-      document.getElementById('form-subject-tag').value = sub.tag || '';
-      document.getElementById('form-subject-goal').value = sub.goalHours || 7;
-      document.getElementById('subject-modal-title').textContent = 'Edit Study Subject';
-      document.getElementById('modal-subject').classList.remove('hidden');
-    };
-
-    window.deleteSubject = function(subId) {
-      if (confirm('Delete this study subject?')) {
-        window.deleteSubjectFromCloud(subId);
-      }
-    };
-
-    window.handleSubjectSubmit = function(e) {
+    formSubject.addEventListener('submit', (e) => {
       e.preventDefault();
-      const id = document.getElementById('form-subject-id').value;
-      const name = document.getElementById('form-subject-name').value.trim();
-      const tag = document.getElementById('form-subject-tag').value.trim();
-      const goalHours = document.getElementById('form-subject-goal').value;
+      const id = document.getElementById('sub-id').value;
+      const name = document.getElementById('sub-name').value.trim();
+      const tag = document.getElementById('sub-tag').value.trim() || 'Core';
+      const goalMinutes = parseInt(document.getElementById('sub-goal').value, 10) || 60;
 
-      const activeColorBtn = document.querySelector('#subject-color-picker button.scale-110');
-      const color = activeColorBtn ? activeColorBtn.getAttribute('data-color') : '#00f0ff';
+      if (!name) return;
 
-      window.saveSubjectToCloud({ id, name, tag, goalHours, color });
-      window.closeSubjectModal();
-    };
+      if (id) {
+        subjects = subjects.map(s => s.id === id ? { ...s, name, tag, goalMinutes, color: selectedColor } : s);
+      } else {
+        const newSub = {
+          id: 'sub-' + Date.now(),
+          name,
+          tag,
+          goalMinutes,
+          color: selectedColor
+        };
+        subjects.push(newSub);
+        if (!activeSubjectId) activeSubjectId = newSub.id;
+      }
 
-    // Color selector in subject modal
-    document.querySelectorAll('#subject-color-picker button').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('#subject-color-picker button').forEach(b => {
-          b.className = 'w-7 h-7 rounded-full';
-        });
-        btn.className = 'w-7 h-7 rounded-full ring-2 ring-white scale-110';
-      });
+      persistData();
+      populateTimerSubjectSelect();
+      subjectModal.classList.remove('open');
+    });
+
+    const syncModal = document.getElementById('modal-sync');
+    document.getElementById('btn-open-sync').addEventListener('click', () => syncModal.classList.add('open'));
+    document.getElementById('btn-close-sync').addEventListener('click', () => syncModal.classList.remove('open'));
+
+    const clearDataModal = document.getElementById('modal-clear-data');
+    document.getElementById('btn-open-clear-data').addEventListener('click', () => clearDataModal.classList.add('open'));
+    document.getElementById('btn-close-clear-data').addEventListener('click', () => clearDataModal.classList.remove('open'));
+
+    document.getElementById('btn-action-wipe-logs-only').addEventListener('click', () => {
+      studyLogs = [];
+      resetTimerState();
+      persistData();
+      clearDataModal.classList.remove('open');
+      playChime(440, 587.33);
+    });
+
+    document.getElementById('btn-action-wipe-all').addEventListener('click', () => {
+      localStorage.removeItem(sKey('aether_subjects'));
+      localStorage.removeItem(sKey('aether_logs'));
+      localStorage.removeItem(sKey('aether_pomo_minutes'));
+      clearActiveSessionState();
+
+      subjects = [
+        { id: 'sub-1', name: 'Mathematics & Logic', color: '#00f0ff', tag: 'Core', goalMinutes: 60 },
+        { id: 'sub-2', name: 'Computer Science', color: '#0070f3', tag: 'Tech', goalMinutes: 45 },
+        { id: 'sub-3', name: 'Languages & Reading', color: '#10b981', tag: 'General', goalMinutes: 30 }
+      ];
+      studyLogs = [];
+      activeSubjectId = subjects[0].id;
+      savedPomoMinutes = 25;
+      
+      updatePomoDuration(25);
+      resetTimerState();
+      persistData();
+      populateTimerSubjectSelect();
+      clearDataModal.classList.remove('open');
+      playChime(440, 330);
+    });
+
+    document.getElementById('btn-export-json').addEventListener('click', () => {
+      const backupData = {
+        exportDate: new Date().toISOString(),
+        version: "3.1",
+        profile: currentProfile,
+        pomoMinutes: savedPomoMinutes,
+        subjects: subjects,
+        studyLogs: studyLogs
+      };
+
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `aetherfocus_${currentProfile}_backup_${getTodayString()}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    });
+
+    document.getElementById('input-import-json').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const imported = JSON.parse(event.target.result);
+          if (Array.isArray(imported.subjects) && Array.isArray(imported.studyLogs)) {
+            subjects = imported.subjects;
+            studyLogs = imported.studyLogs;
+            if (imported.pomoMinutes) updatePomoDuration(imported.pomoMinutes);
+            persistData();
+            populateTimerSubjectSelect();
+            syncModal.classList.remove('open');
+            playChime(659.25, 880);
+          }
+        } catch (err) {
+          console.error('Error parsing JSON backup file', err);
+        }
+      };
+      reader.readAsText(file);
+    });
+
+    document.getElementById('btn-toggle-sound').addEventListener('click', () => {
+      soundMuted = !soundMuted;
+      document.getElementById('btn-toggle-sound').style.opacity = soundMuted ? '0.4' : '1';
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      // Boot up the profile system on DOM load
+      loadProfileData();
+      updateNotificationUI();
     });
   </script>
 </body>
