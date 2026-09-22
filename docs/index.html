@@ -748,7 +748,8 @@
       localStorage.setItem(sKey('aether_pomo_minutes'), savedPomoMinutes.toString());
       localStorage.setItem(sKey('aether_checklists'), JSON.stringify(checklists));
       localStorage.setItem(sKey('aether_pipelines'), JSON.stringify(pipelines));
-      updateOverviewStats(); renderSubjectsList(); renderCalendar(); renderAnalytics(); renderPipelinesDashboard();
+      updateOverviewStats(); renderSubjectsList(); renderCalendar(); renderAnalytics(); 
+      if (!activePipelineId) { renderPipelinesDashboard(); }
     }
 
     function loadProfileData() {
