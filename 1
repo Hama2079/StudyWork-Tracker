@@ -1,0 +1,326 @@
+<div class="app-container">
+  <!-- DASHBOARD VIEW: Shows all plans -->
+  <div id="dashboard-view" class="view active">
+    <h2>My Plans & Pipelines</h2>
+    <div class="plan-grid">
+      <!-- Plan Card 1 -->
+      <div class="plan-card" onclick="openPipeline('STM32 Instrumentation Thesis', '#4a90e2')">
+        <div class="plan-header">
+          <div class="plan-color" style="background: #4a90e2;"></div>
+          <h3>STM32 Instrumentation Thesis</h3>
+        </div>
+        <p class="plan-meta">4 Active Sections • Updated Today</p>
+      </div>
+
+      <!-- Plan Card 2 -->
+      <div class="plan-card" onclick="openPipeline('Salon Dashboard Updates', '#e056fd')">
+        <div class="plan-header">
+          <div class="plan-color" style="background: #e056fd;"></div>
+          <h3>Salon Dashboard Updates</h3>
+        </div>
+        <p class="plan-meta">3 Active Sections • Updated Yesterday</p>
+      </div>
+
+      <!-- Plan Card 3 -->
+      <div class="plan-card" onclick="openPipeline('Custom Altium PCB Design', '#f39c12')">
+        <div class="plan-header">
+          <div class="plan-color" style="background: #f39c12;"></div>
+          <h3>Custom Altium PCB Design</h3>
+        </div>
+        <p class="plan-meta">5 Active Sections • Updated 2 days ago</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- PIPELINE VIEW: Inside a specific plan -->
+  <div id="pipeline-view" class="view">
+    <div class="pipeline-header">
+      <button class="back-btn" onclick="showDashboard()">← Back to Plans</button>
+      <h2 id="current-plan-title">Plan Title</h2>
+    </div>
+
+    <div class="pipeline-board" id="pipeline-board">
+      <!-- Default Sections -->
+      <div class="pipeline-section">
+        <div class="section-header" style="border-top-color: #e74c3c;">
+          <h4>To Do</h4>
+          <span class="task-count">2</span>
+        </div>
+        <div class="task-card">Literature Review</div>
+        <div class="task-card">Order Components</div>
+      </div>
+
+      <div class="pipeline-section">
+        <div class="section-header" style="border-top-color: #f1c40f;">
+          <h4>In Progress</h4>
+          <span class="task-count">1</span>
+        </div>
+        <div class="task-card">Draft Schematic</div>
+      </div>
+
+      <!-- Add New Section Trigger -->
+      <div class="add-section-wrapper" id="add-section-wrapper">
+        <button class="add-section-btn" onclick="toggleAddSectionForm()">+ Add Section</button>
+        
+        <div class="add-section-form" id="add-section-form">
+          <input type="text" id="new-section-name" placeholder="Section Name (e.g., Testing)">
+          <div class="color-picker-wrap">
+            <label>Color:</label>
+            <input type="color" id="new-section-color" value="#2ecc71">
+          </div>
+          <div class="form-actions">
+            <button class="cancel-btn" onclick="toggleAddSectionForm()">Cancel</button>
+            <button class="save-btn" onclick="addNewSection()">Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  :root {
+    --bg-color: #f8f9fa;
+    --card-bg: #ffffff;
+    --text-main: #2d3436;
+    --text-muted: #636e72;
+    --border-color: #dfe6e9;
+    --shadow: 0 4px 6px rgba(0,0,0,0.05);
+    --shadow-hover: 0 8px 15px rgba(0,0,0,0.1);
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg-color);
+    margin: 0;
+    padding: 20px;
+    color: var(--text-main);
+  }
+
+  /* View Management */
+  .view { display: none; animation: fadeIn 0.3s ease; }
+  .view.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* Dashboard Grid */
+  .plan-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+  }
+
+  .plan-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 20px;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    transition: all 0.2s ease;
+  }
+  .plan-card:hover {
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-2px);
+  }
+  
+  .plan-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+  .plan-color {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+  }
+  .plan-header h3 { margin: 0; font-size: 1.1rem; }
+  .plan-meta { margin: 0; font-size: 0.85rem; color: var(--text-muted); }
+
+  /* Pipeline View */
+  .pipeline-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 30px;
+  }
+  .back-btn {
+    background: none;
+    border: 1px solid var(--border-color);
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.2s;
+  }
+  .back-btn:hover { background: #eee; }
+
+  .pipeline-board {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    padding-bottom: 20px;
+    align-items: flex-start;
+  }
+
+  /* Pipeline Sections */
+  .pipeline-section {
+    background: var(--card-bg);
+    min-width: 280px;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 4px solid;
+    padding-top: 10px;
+    margin-top: -15px; /* Pull up to touch the border */
+    margin-bottom: 10px;
+  }
+  .section-header h4 { margin: 0; font-size: 1rem; }
+  .task-count {
+    background: var(--bg-color);
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+
+  .task-card {
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    padding: 12px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    cursor: grab;
+  }
+  .task-card:hover { border-color: #b2bec3; }
+
+  /* Add Section Form */
+  .add-section-wrapper {
+    min-width: 280px;
+  }
+  .add-section-btn {
+    width: 100%;
+    padding: 15px;
+    background: transparent;
+    border: 2px dashed var(--border-color);
+    border-radius: 8px;
+    color: var(--text-muted);
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  .add-section-btn:hover { background: var(--card-bg); border-color: #b2bec3; }
+
+  .add-section-form {
+    display: none; /* Hidden by default */
+    background: var(--card-bg);
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    flex-direction: column;
+    gap: 12px;
+  }
+  .add-section-form.active { display: flex; }
+  .add-section-form input[type="text"] {
+    padding: 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .color-picker-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.9rem;
+  }
+  .color-picker-wrap input[type="color"] {
+    border: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .form-actions { display: flex; gap: 10px; }
+  .form-actions button {
+    flex: 1;
+    padding: 8px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+  }
+  .save-btn { background: #2d3436; color: white; }
+  .cancel-btn { background: #dfe6e9; color: var(--text-main); }
+</style>
+
+<script>
+  // 1. Navigation Logic
+  function openPipeline(planName, color) {
+    document.getElementById('dashboard-view').classList.remove('active');
+    document.getElementById('pipeline-view').classList.add('active');
+    
+    // Set the title dynamically
+    const titleEl = document.getElementById('current-plan-title');
+    titleEl.textContent = planName;
+    titleEl.style.color = color; // Match the title color to the plan card
+  }
+
+  function showDashboard() {
+    document.getElementById('pipeline-view').classList.remove('active');
+    document.getElementById('dashboard-view').classList.add('active');
+  }
+
+  // 2. Add Section Logic
+  function toggleAddSectionForm() {
+    const form = document.getElementById('add-section-form');
+    const btn = document.querySelector('.add-section-btn');
+    
+    if (form.classList.contains('active')) {
+      form.classList.remove('active');
+      btn.style.display = 'block';
+    } else {
+      form.classList.add('active');
+      btn.style.display = 'none';
+      document.getElementById('new-section-name').focus();
+    }
+  }
+
+  function addNewSection() {
+    const nameInput = document.getElementById('new-section-name');
+    const colorInput = document.getElementById('new-section-color');
+    const name = nameInput.value.trim();
+    const color = colorInput.value;
+
+    if (!name) return alert('Please enter a section name');
+
+    // Create new section HTML element
+    const newSection = document.createElement('div');
+    newSection.className = 'pipeline-section';
+    newSection.innerHTML = `
+      <div class="section-header" style="border-top-color: ${color};">
+        <h4>${name}</h4>
+        <span class="task-count">0</span>
+      </div>
+      <!-- Empty state, ready for tasks -->
+    `;
+
+    // Insert before the "Add Section" wrapper
+    const board = document.getElementById('pipeline-board');
+    const wrapper = document.getElementById('add-section-wrapper');
+    board.insertBefore(newSection, wrapper);
+
+    // Reset and close form
+    nameInput.value = '';
+    toggleAddSectionForm();
+  }
+</script>
