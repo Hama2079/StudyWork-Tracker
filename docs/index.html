@@ -7,11 +7,7 @@
   <meta name="theme-color" content="#05070c">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="AetherFocus">
-  <meta name="description" content="Offline-first high-precision study timer, daily checklists, and project pipelines.">
-
-  <link rel="manifest" id="pwa-manifest">
-
+  
   <style>
     :root {
       --bg-primary: #04060a;
@@ -45,9 +41,11 @@
     .brand-icon svg { width: 1.25rem; height: 1.25rem; color: #04060a; }
     .brand-text h1 { font-size: 1.15rem; font-weight: 800; letter-spacing: -0.02em; background: linear-gradient(90deg, #ffffff, var(--accent-neon)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
-    .profile-switch { display: flex; background: rgba(14, 20, 36, 0.8); border: 1px solid var(--border-subtle); border-radius: 0.6rem; padding: 0.15rem; gap: 0.15rem; margin-left: 0.5rem; }
+    .profile-switch { display: flex; align-items: center; background: rgba(14, 20, 36, 0.8); border: 1px solid var(--border-subtle); border-radius: 0.6rem; padding: 0.15rem; gap: 0.15rem; margin-left: 0.5rem; }
     .profile-btn { background: transparent; border: none; color: var(--text-secondary); padding: 0.25rem 0.6rem; border-radius: 0.45rem; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease; }
     .profile-btn.active { background: var(--accent-neon); color: #04060a; box-shadow: 0 0 8px rgba(0, 240, 255, 0.3); }
+    .profile-manage-btn { background: transparent; border: none; color: var(--text-dim); cursor: pointer; padding: 0.25rem; border-radius: 0.4rem; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+    .profile-manage-btn:hover { color: #fff; background: rgba(255,255,255,0.1); }
 
     .nav-tabs { display: flex; background: rgba(14, 20, 36, 0.8); border: 1px solid var(--border-subtle); border-radius: 0.75rem; padding: 0.25rem; gap: 0.25rem; }
     .nav-btn { background: transparent; border: none; color: var(--text-secondary); padding: 0.5rem 0.9rem; border-radius: 0.5rem; font-size: 0.8rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.4rem; transition: all 0.2s ease; }
@@ -181,19 +179,16 @@
     .pipeline-color-bar { position: absolute; top: 0; left: 0; width: 100%; height: 6px; }
     .pipeline-card-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; margin-top: 0.5rem; }
     
-    /* Active Pipeline Canvas styling mimicking GitHub Actions Editor */
     .pipeline-editor-wrapper { display: flex; flex-direction: column; flex: 1; min-height: 70vh; background: #0d1117; border-radius: 1rem; overflow: hidden; position: relative; border: 1px solid #30363d; }
     .pipeline-editor-toolbar { background: #161b22; padding: 0.75rem 1.25rem; border-bottom: 1px solid #30363d; display: flex; align-items: center; justify-content: space-between; z-index: 30; }
     .pipeline-canvas { flex: 1; position: relative; overflow: hidden; background-color: #0d1117; cursor: crosshair; }
     
-    /* SVG Layer for Bezier Curves */
     .pipeline-svg-layer { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
-    .pipeline-edge { fill: none; stroke: #8b949e; stroke-width: 2.5px; transition: stroke 0.2s; pointer-events: auto; cursor: pointer; }
-    .pipeline-edge:hover { stroke: #f85149; stroke-width: 3.5px; } /* Hover red to delete */
+    .pipeline-edge { fill: none; stroke: #8b949e; stroke-width: 2.5px; transition: stroke 0.2s; pointer-events: stroke; cursor: pointer; }
+    .pipeline-edge:hover { stroke: #f85149; stroke-width: 4px; }
     .pipeline-edge-drawing { fill: none; stroke: #8b949e; stroke-width: 2.5px; stroke-dasharray: 4; }
 
-    /* Node Styling (GH Action look) */
-    .gh-node { position: absolute; background: #1c2128; border: 1px solid #30363d; border-radius: 6px; padding: 12px 16px; min-width: 220px; display: flex; flex-direction: column; gap: 8px; cursor: grab; z-index: 20; box-shadow: 0 4px 12px rgba(0,0,0,0.5); user-select: none; transition: box-shadow 0.2s, border-color 0.2s; }
+    .gh-node { position: absolute; background: #1c2128; border: 1px solid #30363d; border-radius: 6px; padding: 12px 16px; min-width: 220px; display: flex; flex-direction: column; gap: 8px; cursor: grab; z-index: 20; box-shadow: 0 4px 12px rgba(0,0,0,0.5); user-select: none; transition: box-shadow 0.2s, border-color 0.2s; pointer-events: auto; }
     .gh-node:hover { border-color: #8b949e; }
     .gh-node:active { cursor: grabbing; box-shadow: 0 8px 24px rgba(0,0,0,0.8); z-index: 25; }
     
@@ -207,8 +202,7 @@
     .gh-node-delete { position: absolute; top: -8px; right: -8px; background: #f85149; color: #fff; border-radius: 50%; width: 18px; height: 18px; display: none; align-items: center; justify-content: center; font-size: 10px; cursor: pointer; border: none; z-index: 30; }
     .gh-node:hover .gh-node-delete { display: flex; }
 
-    /* Connecting Ports */
-    .gh-port { position: absolute; width: 12px; height: 12px; background: #30363d; border: 2px solid #1c2128; border-radius: 50%; top: 50%; transform: translateY(-50%); z-index: 22; cursor: crosshair; transition: background 0.2s; }
+    .gh-port { position: absolute; width: 12px; height: 12px; background: #30363d; border: 2px solid #1c2128; border-radius: 50%; top: 50%; transform: translateY(-50%); z-index: 22; cursor: crosshair; transition: background 0.2s; pointer-events: auto; }
     .gh-port:hover { background: #58a6ff; transform: translateY(-50%) scale(1.3); }
     .gh-port-in { left: -6px; }
     .gh-port-out { right: -6px; }
@@ -230,6 +224,10 @@
     .mobile-nav-btn { display: flex; flex-direction: column; align-items: center; gap: 0.25rem; background: transparent; border: none; color: var(--text-dim); font-size: 0.65rem; font-weight: 600; padding: 0.35rem 0.75rem; border-radius: 0.5rem; cursor: pointer; }
     .mobile-nav-btn.active { color: var(--accent-neon); }
     .mobile-nav-btn svg { width: 1.25rem; height: 1.25rem; }
+    
+    .profile-list-item { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 0.5rem; margin-bottom: 0.5rem; }
+    .profile-list-item input { background: transparent; border: none; color: #fff; outline: none; font-size: 0.9rem; font-weight: 600; }
+    .profile-list-item input:focus { border-bottom: 1px solid var(--accent-neon); }
 
     @media (max-width: 768px) {
       .nav-tabs { display: none; }
@@ -253,9 +251,11 @@
       <div class="brand-text">
         <h1>AetherFocus</h1>
       </div>
-      <div class="profile-switch" title="Switch User Profile">
-        <button class="profile-btn active" data-profile="M">M</button>
-        <button class="profile-btn" data-profile="H">H</button>
+      <div class="profile-switch" title="Manage Profiles">
+        <div id="profile-buttons-container" style="display: flex; gap: 0.15rem;"></div>
+        <button class="profile-manage-btn" onclick="openProfileManager()">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        </button>
       </div>
     </div>
 
@@ -527,15 +527,30 @@
       <h3 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 1.25rem;">Clear Data</h3>
       <div style="display: flex; flex-direction: column; gap: 0.65rem;">
         <button class="btn-secondary" id="btn-action-wipe-logs-only" style="justify-content: center; color: #fbbf24;">Clear Logs Only</button>
-        <button class="btn-ctrl-stop" id="btn-action-wipe-all" style="justify-content: center; padding: 0.65rem; border-radius: 0.65rem; font-weight: 700; cursor: pointer;">Factory Reset</button>
+        <button class="btn-ctrl-stop" id="btn-action-wipe-all" style="justify-content: center; padding: 0.65rem; border-radius: 0.65rem; font-weight: 700; cursor: pointer;">Factory Reset Profile</button>
       </div>
       <div style="display: flex; justify-content: flex-end; margin-top: 1.25rem;"><button type="button" class="btn-secondary" onclick="closeModal('modal-clear-data')">Cancel</button></div>
     </div>
   </div>
 
+  <!-- Profile Management Modal -->
+  <div class="modal-backdrop" id="modal-manage-profiles">
+    <div class="modal-box">
+      <h3 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 1rem;">Manage Profiles</h3>
+      <div id="profile-list-container" style="max-height: 200px; overflow-y: auto; margin-bottom: 1rem;"></div>
+      <div style="display: flex; gap: 0.5rem;">
+        <input type="text" id="new-profile-input" class="form-input" placeholder="New profile name (e.g. Work)">
+        <button class="btn-primary" onclick="addProfile()">Add</button>
+      </div>
+      <div style="display: flex; justify-content: flex-end; margin-top: 1.5rem;">
+        <button type="button" class="btn-secondary" onclick="closeModal('modal-manage-profiles')">Close</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Custom Prompt/Confirm Modal (Replaces native alerts) -->
   <div class="modal-backdrop" id="modal-custom-action">
-    <div class="modal-box">
+    <div class="modal-box" style="z-index: 105;">
       <h3 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 0.75rem;" id="modal-action-title">Confirm</h3>
       <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.25rem;" id="modal-action-desc"></p>
       <input type="text" id="modal-action-input" class="form-input hidden" style="margin-bottom: 1.25rem;">
@@ -602,7 +617,10 @@
     document.getElementById('btn-toggle-wakelock').addEventListener('click', () => { wakeLockRequestedByUser = !wakeLockRequestedByUser; wakeLockRequestedByUser ? requestScreenWakeLock() : releaseScreenWakeLock(); });
     document.getElementById('btn-toggle-notifs').addEventListener('click', async () => { if ('Notification' in window) { const res = await Notification.requestPermission(); if (res === 'granted') { document.getElementById('btn-toggle-notifs').classList.add('active'); document.getElementById('label-notifs').textContent = 'Push Alerts: ACTIVE'; document.getElementById('notif-badge').style.display = 'inline-flex'; } } });
 
-    let currentProfile = localStorage.getItem('aether_profile') || 'M';
+    // Profile Management System
+    let profiles = JSON.parse(localStorage.getItem('aether_profiles') || '["Main"]');
+    let currentProfile = localStorage.getItem('aether_profile') || profiles[0];
+    if (!profiles.includes(currentProfile)) currentProfile = profiles[0];
     const sKey = (key) => `${currentProfile}_${key}`;
     const generateId = () => Math.random().toString(36).substr(2, 9);
     const getTodayString = () => new Date().toISOString().split('T')[0];
@@ -614,7 +632,7 @@
         nodes: [
           { id: 'n1', title: 'build', duration: '21s', link: '', x: 50, y: 150 },
           { id: 'n2', title: 'report-build-status', duration: '4s', link: '', x: 350, y: 50 },
-          { id: 'n3', title: 'deploy', duration: '13s', link: 'https://hama2079.github.io/Study-Work-Ti...', x: 350, y: 250 }
+          { id: 'n3', title: 'deploy', duration: '13s', link: 'https://github.io/deploy', x: 350, y: 250 }
         ],
         edges: [ { id: 'e1', source: 'n1', target: 'n2' }, { id: 'e2', source: 'n1', target: 'n3' } ]
       }
@@ -623,6 +641,106 @@
     let subjects = [], studyLogs = [], savedPomoMinutes = 25;
     let checklists = {}; // { 'YYYY-MM-DD': [ { id, text, done } ] }
     let pipelines = []; // { id, title, color, nodes: [], edges: [] }
+
+    function renderProfileHeader() {
+      const container = document.getElementById('profile-buttons-container');
+      container.innerHTML = '';
+      profiles.slice(0, 3).forEach(p => {
+        const btn = document.createElement('button');
+        btn.className = `profile-btn ${p === currentProfile ? 'active' : ''}`;
+        btn.textContent = p.substring(0, 2).toUpperCase();
+        btn.title = `Switch to ${p}`;
+        btn.onclick = () => switchProfile(p);
+        container.appendChild(btn);
+      });
+    }
+
+    function switchProfile(pName) {
+      if (pName === currentProfile) return;
+      if (isRunning) pauseTimer();
+      currentProfile = pName;
+      localStorage.setItem('aether_profile', currentProfile);
+      loadProfileData();
+    }
+
+    function openProfileManager() {
+      const list = document.getElementById('profile-list-container');
+      list.innerHTML = '';
+      profiles.forEach(p => {
+        const item = document.createElement('div');
+        item.className = 'profile-list-item';
+        
+        const input = document.createElement('input');
+        input.value = p;
+        input.onchange = (e) => renameProfile(p, e.target.value.trim());
+        
+        const delBtn = document.createElement('button');
+        delBtn.className = 'icon-btn';
+        delBtn.style = 'width: 1.8rem; height: 1.8rem; border-color: rgba(239,68,68,0.3); color: var(--danger);';
+        delBtn.innerHTML = '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6"/></svg>';
+        
+        let confirmTimeout;
+        delBtn.onclick = () => {
+          if (profiles.length === 1) return alert("Cannot delete the last profile.");
+          if (delBtn.textContent === "Sure?") {
+            clearTimeout(confirmTimeout);
+            deleteProfile(p);
+          } else {
+            delBtn.innerHTML = "<span style='font-size:0.6rem; font-weight:bold;'>Sure?</span>";
+            confirmTimeout = setTimeout(() => {
+               delBtn.innerHTML = '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6"/></svg>';
+            }, 2500);
+          }
+        };
+
+        item.appendChild(input);
+        item.appendChild(delBtn);
+        list.appendChild(item);
+      });
+      openModal('modal-manage-profiles');
+    }
+
+    function addProfile() {
+      const input = document.getElementById('new-profile-input');
+      const name = input.value.trim();
+      if (!name || profiles.includes(name)) return;
+      profiles.push(name);
+      localStorage.setItem('aether_profiles', JSON.stringify(profiles));
+      input.value = '';
+      openProfileManager();
+      renderProfileHeader();
+    }
+
+    function renameProfile(oldName, newName) {
+      if (!newName || newName === oldName || profiles.includes(newName)) return openProfileManager();
+      profiles = profiles.map(p => p === oldName ? newName : p);
+      localStorage.setItem('aether_profiles', JSON.stringify(profiles));
+      
+      // Migrate local storage keys
+      ['aether_subjects', 'aether_logs', 'aether_pomo_minutes', 'aether_checklists', 'aether_pipelines', 'aether_active_session'].forEach(key => {
+        const data = localStorage.getItem(`${oldName}_${key}`);
+        if (data) { localStorage.setItem(`${newName}_${key}`, data); localStorage.removeItem(`${oldName}_${key}`); }
+      });
+      
+      if (currentProfile === oldName) {
+        currentProfile = newName;
+        localStorage.setItem('aether_profile', currentProfile);
+      }
+      openProfileManager();
+      renderProfileHeader();
+    }
+
+    function deleteProfile(name) {
+      profiles = profiles.filter(p => p !== name);
+      localStorage.setItem('aether_profiles', JSON.stringify(profiles));
+      // Wipe data
+      ['aether_subjects', 'aether_logs', 'aether_pomo_minutes', 'aether_checklists', 'aether_pipelines', 'aether_active_session'].forEach(key => {
+        localStorage.removeItem(`${name}_${key}`);
+      });
+      
+      if (currentProfile === name) { switchProfile(profiles[0]); }
+      else { openProfileManager(); renderProfileHeader(); }
+    }
 
     function persistData() {
       localStorage.setItem(sKey('aether_subjects'), JSON.stringify(subjects));
@@ -640,13 +758,10 @@
       pipelines = JSON.parse(localStorage.getItem(sKey('aether_pipelines')) || 'null') || DEFAULT_PIPELINES;
       savedPomoMinutes = parseInt(localStorage.getItem(sKey('aether_pomo_minutes')) || '25', 10);
       if (!activeSubjectId || !subjects.find(s => s.id === activeSubjectId)) { activeSubjectId = subjects.length > 0 ? subjects[0].id : null; }
+      
+      renderProfileHeader();
       restoreActiveSessionState(); updatePomoDuration(savedPomoMinutes); populateTimerSubjectSelect(); persistData();
-      document.querySelectorAll('.profile-btn').forEach(b => { b.classList.toggle('active', b.getAttribute('data-profile') === currentProfile); });
     }
-
-    document.querySelectorAll('.profile-btn').forEach(btn => {
-      btn.addEventListener('click', () => { const newProfile = btn.getAttribute('data-profile'); if (newProfile === currentProfile) return; if (isRunning) pauseTimer(); currentProfile = newProfile; localStorage.setItem('aether_profile', currentProfile); loadProfileData(); });
-    });
 
     const formatTime = (secs) => { const h = Math.floor(secs/3600); const m = Math.floor((secs%3600)/60); const s = secs%60; return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`; };
     const formatHours = (secs) => (secs/3600).toFixed(1) + ' hrs';
@@ -808,14 +923,9 @@
     });
 
     let activePipelineId = null;
-    
-    /* Node Dragging State */
     let draggedGHNode = null; 
     let ghNodeOffset = { x: 0, y: 0 };
-    
-    /* Edge Drawing State */
     let drawingEdgeSourceId = null;
-    let ghMousePos = { x: 0, y: 0 };
     
     const svgCanvas = document.getElementById('pipeline-svg');
     const edgesGroup = document.getElementById('pipeline-edges-group');
@@ -846,7 +956,9 @@
       document.getElementById('pipelines-active').classList.remove('hidden');
       renderNodeGraph();
     }
+    
     function closePipeline() { activePipelineId = null; renderPipelinesDashboard(); }
+    
     async function promptDeleteActivePipeline() {
        const res = await promptUser("Delete Pipeline", "Are you sure you want to delete this pipeline and all its nodes?");
        if (res) { pipelines = pipelines.filter(p => p.id !== activePipelineId); persistData(); closePipeline(); }
@@ -867,11 +979,9 @@
       document.getElementById('active-pipeline-title').textContent = pipe.title;
       document.getElementById('active-pipeline-title').style.color = pipe.color;
       
-      // Reset DOM
       edgesGroup.innerHTML = '';
       nodesLayer.innerHTML = '';
       
-      // Fallback arrays if missing from legacy data
       if (!pipe.nodes) pipe.nodes = [];
       if (!pipe.edges) pipe.edges = [];
       
@@ -882,9 +992,7 @@
         div.dataset.id = node.id;
         div.style.left = `${node.x}px`;
         div.style.top = `${node.y}px`;
-        div.style.pointerEvents = 'auto'; // allow interaction above svg
         
-        // Green check SVG
         const checkSvg = `<svg class="gh-icon-check" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path></svg>`;
         
         div.innerHTML = `
@@ -901,37 +1009,23 @@
           <div class="gh-port gh-port-out" data-type="out"></div>
         `;
 
-        // Node Interaction (Drag)
         div.addEventListener('mousedown', (e) => {
           if (e.target.classList.contains('gh-port') || e.target.tagName === 'A' || e.target.tagName === 'BUTTON') return;
+          e.preventDefault(); // Prevents text selection bug
+          e.stopPropagation(); // Prevents bubbling
           const rect = div.getBoundingClientRect();
           draggedGHNode = node;
           ghNodeOffset = { x: e.clientX - rect.left, y: e.clientY - rect.top };
         });
 
-        // Port Interaction (Edge drawing)
         const portOut = div.querySelector('.gh-port-out');
         portOut.addEventListener('mousedown', (e) => {
+          e.preventDefault();
           e.stopPropagation();
           drawingEdgeSourceId = node.id;
           edgePreview.style.display = 'block';
         });
 
-        const portIn = div.querySelector('.gh-port-in');
-        portIn.addEventListener('mouseup', (e) => {
-          e.stopPropagation();
-          if (drawingEdgeSourceId && drawingEdgeSourceId !== node.id) {
-            // Prevent duplicates
-            const exists = pipe.edges.find(edge => edge.source === drawingEdgeSourceId && edge.target === node.id);
-            if (!exists) {
-              pipe.edges.push({ id: generateId(), source: drawingEdgeSourceId, target: node.id });
-              persistData();
-            }
-          }
-          finishEdgeDraw();
-        });
-
-        // Delete Node
         div.querySelector('.gh-node-delete').addEventListener('click', (e) => {
           e.stopPropagation();
           pipe.nodes = pipe.nodes.filter(n => n.id !== node.id);
@@ -939,8 +1033,8 @@
           persistData(); renderNodeGraph();
         });
 
-        // Edit Node via Double Click
         div.addEventListener('dblclick', async (e) => {
+          e.stopPropagation();
           if (e.target.classList.contains('gh-port')) return;
           const newTitle = await promptUser("Edit Node", "Enter title, duration, link (comma separated)", true, `${node.title},${node.duration||''},${node.link||''}`);
           if (newTitle) {
@@ -955,35 +1049,48 @@
         nodesLayer.appendChild(div);
       });
 
-      // Render Edges
-      // Wait for DOM layout to calculate exact port coordinates
-      setTimeout(() => {
-        pipe.edges.forEach(edge => {
-          const sNode = document.querySelector(`.gh-node[data-id="${edge.source}"]`);
-          const tNode = document.querySelector(`.gh-node[data-id="${edge.target}"]`);
-          if (sNode && tNode) {
-            const sRect = sNode.getBoundingClientRect();
-            const tRect = tNode.getBoundingClientRect();
-            const canvasRect = svgCanvas.getBoundingClientRect();
-            
-            // Calculate absolute coords relative to canvas
-            const startX = (sRect.right - canvasRect.left) + 6; // port offset
-            const startY = (sRect.top + sRect.height/2) - canvasRect.top;
-            const endX = (tRect.left - canvasRect.left) - 6;
-            const endY = (tRect.top + tRect.height/2) - canvasRect.top;
+      // Render Edges initially (Timeout ensures DOM positions are painted)
+      setTimeout(() => updateAllEdges(), 0);
+    }
 
-            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-            path.setAttribute("d", getBezierPath(startX, startY, endX, endY));
-            path.setAttribute("class", "pipeline-edge");
-            path.onclick = (e) => {
-              e.stopPropagation();
-              pipe.edges = pipe.edges.filter(x => x.id !== edge.id);
-              persistData(); renderNodeGraph();
-            };
-            edgesGroup.appendChild(path);
-          }
-        });
-      }, 0);
+    function updateAllEdges() {
+      if (!activePipelineId) return;
+      const pipe = pipelines.find(p => p.id === activePipelineId);
+      if(!pipe) return;
+      const canvasRect = document.getElementById('pipeline-canvas').getBoundingClientRect();
+      edgesGroup.innerHTML = '';
+
+      pipe.edges.forEach(edge => {
+        const sNode = document.querySelector(`.gh-node[data-id="${edge.source}"]`);
+        const tNode = document.querySelector(`.gh-node[data-id="${edge.target}"]`);
+        if (sNode && tNode) {
+          const sRect = sNode.getBoundingClientRect();
+          const tRect = tNode.getBoundingClientRect();
+          
+          const startX = (sRect.right - canvasRect.left) + 6;
+          const startY = (sRect.top + sRect.height/2) - canvasRect.top;
+          const endX = (tRect.left - canvasRect.left) - 6;
+          const endY = (tRect.top + tRect.height/2) - canvasRect.top;
+
+          const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+          path.setAttribute("d", getBezierPath(startX, startY, endX, endY));
+          path.setAttribute("class", "pipeline-edge");
+          path.dataset.edgeId = edge.id;
+          path.onclick = (e) => {
+            e.stopPropagation();
+            pipe.edges = pipe.edges.filter(x => x.id !== edge.id);
+            persistData(); updateAllEdges();
+          };
+          edgesGroup.appendChild(path);
+        }
+      });
+    }
+
+    // High performance inline coordinate update (prevents DOM rebuild lag)
+    function updateNodePosition(node) {
+      const div = document.querySelector(`.gh-node[data-id="${node.id}"]`);
+      if (div) { div.style.left = `${node.x}px`; div.style.top = `${node.y}px`; }
+      updateAllEdges();
     }
 
     async function addPipelineNode(clientX = 100, clientY = 100) {
@@ -997,40 +1104,52 @@
       }
     }
 
-    // Canvas Interactions (Drag node & Draw edge)
-    const editorCanvas = document.getElementById('pipeline-canvas');
-    editorCanvas.addEventListener('mousemove', (e) => {
-      const rect = svgCanvas.getBoundingClientRect();
-      ghMousePos = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    /* GLOBAL Window Listeners to fix "Sticks to click" bug */
+    window.addEventListener('mousemove', (e) => {
+      if (!activePipelineId) return;
+      const editorCanvas = document.getElementById('pipeline-canvas');
+      if(!editorCanvas) return;
+      
+      const rect = editorCanvas.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
 
       if (draggedGHNode) {
-        draggedGHNode.x = ghMousePos.x - ghNodeOffset.x;
-        draggedGHNode.y = ghMousePos.y - ghNodeOffset.y;
-        renderNodeGraph(); // Brute force redraw, okay for small graphs
+        draggedGHNode.x = mouseX - ghNodeOffset.x;
+        draggedGHNode.y = mouseY - ghNodeOffset.y;
+        updateNodePosition(draggedGHNode);
       } 
       else if (drawingEdgeSourceId) {
-        const sNode = document.querySelector(`.gh-node[data-id="${drawingEdgeSourceId}"]`);
-        if (sNode) {
-          const sRect = sNode.getBoundingClientRect();
+        const sNodeDiv = document.querySelector(`.gh-node[data-id="${drawingEdgeSourceId}"]`);
+        if (sNodeDiv) {
+          const sRect = sNodeDiv.getBoundingClientRect();
           const startX = (sRect.right - rect.left) + 6;
           const startY = (sRect.top + sRect.height/2) - rect.top;
-          edgePreview.setAttribute('d', getBezierPath(startX, startY, ghMousePos.x, ghMousePos.y));
+          edgePreview.setAttribute('d', getBezierPath(startX, startY, mouseX, mouseY));
         }
       }
     });
 
-    function finishEdgeDraw() {
-      drawingEdgeSourceId = null;
-      edgePreview.style.display = 'none';
-    }
-
-    editorCanvas.addEventListener('mouseup', () => {
+    window.addEventListener('mouseup', (e) => {
       if (draggedGHNode) { persistData(); draggedGHNode = null; }
-      if (drawingEdgeSourceId) finishEdgeDraw();
+      if (drawingEdgeSourceId) {
+        const portIn = e.target.closest('.gh-port-in');
+        if (portIn) {
+          const targetNodeId = portIn.closest('.gh-node').dataset.id;
+          if (drawingEdgeSourceId !== targetNodeId) {
+            const pipe = pipelines.find(p => p.id === activePipelineId);
+            const exists = pipe.edges.find(edge => edge.source === drawingEdgeSourceId && edge.target === targetNodeId);
+            if (!exists) { pipe.edges.push({ id: generateId(), source: drawingEdgeSourceId, target: targetNodeId }); persistData(); renderNodeGraph(); }
+          }
+        }
+        drawingEdgeSourceId = null;
+        edgePreview.style.display = 'none';
+      }
     });
 
+    const editorCanvas = document.getElementById('pipeline-canvas');
     editorCanvas.addEventListener('dblclick', (e) => {
-      if (e.target === editorCanvas || e.target.tagName === 'svg') {
+      if (e.target.id === 'pipeline-canvas' || e.target.tagName === 'svg') {
         const rect = svgCanvas.getBoundingClientRect();
         addPipelineNode(e.clientX - rect.left, e.clientY - rect.top);
       }
@@ -1043,7 +1162,7 @@
       if (tabId === 'dashboard') updateOverviewStats();
       if (tabId === 'calendar') renderCalendar();
       if (tabId === 'analytics') renderAnalytics();
-      if (tabId === 'pipelines') renderPipelinesDashboard();
+      if (tabId === 'pipelines') { if(activePipelineId) renderNodeGraph(); else renderPipelinesDashboard(); }
       if (tabId === 'timer') syncActiveSubjectUI();
     }
     document.querySelectorAll('.nav-btn, .mobile-nav-btn').forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.tab)));
