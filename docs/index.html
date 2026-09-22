@@ -1,326 +1,874 @@
-<div class="app-container">
-  <!-- DASHBOARD VIEW: Shows all plans -->
-  <div id="dashboard-view" class="view active">
-    <h2>My Plans & Pipelines</h2>
-    <div class="plan-grid">
-      <!-- Plan Card 1 -->
-      <div class="plan-card" onclick="openPipeline('STM32 Instrumentation Thesis', '#4a90e2')">
-        <div class="plan-header">
-          <div class="plan-color" style="background: #4a90e2;"></div>
-          <h3>STM32 Instrumentation Thesis</h3>
-        </div>
-        <p class="plan-meta">4 Active Sections • Updated Today</p>
-      </div>
-
-      <!-- Plan Card 2 -->
-      <div class="plan-card" onclick="openPipeline('Salon Dashboard Updates', '#e056fd')">
-        <div class="plan-header">
-          <div class="plan-color" style="background: #e056fd;"></div>
-          <h3>Salon Dashboard Updates</h3>
-        </div>
-        <p class="plan-meta">3 Active Sections • Updated Yesterday</p>
-      </div>
-
-      <!-- Plan Card 3 -->
-      <div class="plan-card" onclick="openPipeline('Custom Altium PCB Design', '#f39c12')">
-        <div class="plan-header">
-          <div class="plan-color" style="background: #f39c12;"></div>
-          <h3>Custom Altium PCB Design</h3>
-        </div>
-        <p class="plan-meta">5 Active Sections • Updated 2 days ago</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- PIPELINE VIEW: Inside a specific plan -->
-  <div id="pipeline-view" class="view">
-    <div class="pipeline-header">
-      <button class="back-btn" onclick="showDashboard()">← Back to Plans</button>
-      <h2 id="current-plan-title">Plan Title</h2>
-    </div>
-
-    <div class="pipeline-board" id="pipeline-board">
-      <!-- Default Sections -->
-      <div class="pipeline-section">
-        <div class="section-header" style="border-top-color: #e74c3c;">
-          <h4>To Do</h4>
-          <span class="task-count">2</span>
-        </div>
-        <div class="task-card">Literature Review</div>
-        <div class="task-card">Order Components</div>
-      </div>
-
-      <div class="pipeline-section">
-        <div class="section-header" style="border-top-color: #f1c40f;">
-          <h4>In Progress</h4>
-          <span class="task-count">1</span>
-        </div>
-        <div class="task-card">Draft Schematic</div>
-      </div>
-
-      <!-- Add New Section Trigger -->
-      <div class="add-section-wrapper" id="add-section-wrapper">
-        <button class="add-section-btn" onclick="toggleAddSectionForm()">+ Add Section</button>
-        
-        <div class="add-section-form" id="add-section-form">
-          <input type="text" id="new-section-name" placeholder="Section Name (e.g., Testing)">
-          <div class="color-picker-wrap">
-            <label>Color:</label>
-            <input type="color" id="new-section-color" value="#2ecc71">
-          </div>
-          <div class="form-actions">
-            <button class="cancel-btn" onclick="toggleAddSectionForm()">Cancel</button>
-            <button class="save-btn" onclick="addNewSection()">Save</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<style>
-  :root {
-    --bg-color: #f8f9fa;
-    --card-bg: #ffffff;
-    --text-main: #2d3436;
-    --text-muted: #636e72;
-    --border-color: #dfe6e9;
-    --shadow: 0 4px 6px rgba(0,0,0,0.05);
-    --shadow-hover: 0 8px 15px rgba(0,0,0,0.1);
-  }
-
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background: var(--bg-color);
-    margin: 0;
-    padding: 20px;
-    color: var(--text-main);
-  }
-
-  /* View Management */
-  .view { display: none; animation: fadeIn 0.3s ease; }
-  .view.active { display: block; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-
-  /* Dashboard Grid */
-  .plan-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 20px;
-    margin-top: 20px;
-  }
-
-  .plan-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 20px;
-    cursor: pointer;
-    box-shadow: var(--shadow);
-    transition: all 0.2s ease;
-  }
-  .plan-card:hover {
-    box-shadow: var(--shadow-hover);
-    transform: translateY(-2px);
-  }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>AetherFocus - Precision AI Study Engine</title>
   
-  .plan-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 10px;
-  }
-  .plan-color {
-    width: 16px;
-    height: 16px;
-    border-radius: 4px;
-  }
-  .plan-header h3 { margin: 0; font-size: 1.1rem; }
-  .plan-meta { margin: 0; font-size: 0.85rem; color: var(--text-muted); }
+  <meta name="theme-color" content="#05070c">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="description" content="Offline-first high-precision study timer, daily checklists, and project pipelines.">
+  <link rel="manifest" id="pwa-manifest">
 
-  /* Pipeline View */
-  .pipeline-header {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    margin-bottom: 30px;
-  }
-  .back-btn {
-    background: none;
-    border: 1px solid var(--border-color);
-    padding: 8px 16px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: 500;
-    transition: background 0.2s;
-  }
-  .back-btn:hover { background: #eee; }
-
-  .pipeline-board {
-    display: flex;
-    gap: 20px;
-    overflow-x: auto;
-    padding-bottom: 20px;
-    align-items: flex-start;
-  }
-
-  /* Pipeline Sections */
-  .pipeline-section {
-    background: var(--card-bg);
-    min-width: 280px;
-    border-radius: 8px;
-    box-shadow: var(--shadow);
-    padding: 15px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-  .section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-top: 4px solid;
-    padding-top: 10px;
-    margin-top: -15px; /* Pull up to touch the border */
-    margin-bottom: 10px;
-  }
-  .section-header h4 { margin: 0; font-size: 1rem; }
-  .task-count {
-    background: var(--bg-color);
-    padding: 2px 8px;
-    border-radius: 12px;
-    font-size: 0.8rem;
-    color: var(--text-muted);
-  }
-
-  .task-card {
-    background: var(--bg-color);
-    border: 1px solid var(--border-color);
-    padding: 12px;
-    border-radius: 6px;
-    font-size: 0.9rem;
-    cursor: grab;
-  }
-  .task-card:hover { border-color: #b2bec3; }
-
-  /* Add Section Form */
-  .add-section-wrapper {
-    min-width: 280px;
-  }
-  .add-section-btn {
-    width: 100%;
-    padding: 15px;
-    background: transparent;
-    border: 2px dashed var(--border-color);
-    border-radius: 8px;
-    color: var(--text-muted);
-    font-weight: 600;
-    cursor: pointer;
-    transition: 0.2s;
-  }
-  .add-section-btn:hover { background: var(--card-bg); border-color: #b2bec3; }
-
-  .add-section-form {
-    display: none; /* Hidden by default */
-    background: var(--card-bg);
-    padding: 15px;
-    border-radius: 8px;
-    box-shadow: var(--shadow);
-    flex-direction: column;
-    gap: 12px;
-  }
-  .add-section-form.active { display: flex; }
-  .add-section-form input[type="text"] {
-    padding: 8px;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    width: 100%;
-    box-sizing: border-box;
-  }
-  .color-picker-wrap {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 0.9rem;
-  }
-  .color-picker-wrap input[type="color"] {
-    border: none;
-    width: 30px;
-    height: 30px;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  .form-actions { display: flex; gap: 10px; }
-  .form-actions button {
-    flex: 1;
-    padding: 8px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: 500;
-  }
-  .save-btn { background: #2d3436; color: white; }
-  .cancel-btn { background: #dfe6e9; color: var(--text-main); }
-</style>
-
-<script>
-  // 1. Navigation Logic
-  function openPipeline(planName, color) {
-    document.getElementById('dashboard-view').classList.remove('active');
-    document.getElementById('pipeline-view').classList.add('active');
-    
-    // Set the title dynamically
-    const titleEl = document.getElementById('current-plan-title');
-    titleEl.textContent = planName;
-    titleEl.style.color = color; // Match the title color to the plan card
-  }
-
-  function showDashboard() {
-    document.getElementById('pipeline-view').classList.remove('active');
-    document.getElementById('dashboard-view').classList.add('active');
-  }
-
-  // 2. Add Section Logic
-  function toggleAddSectionForm() {
-    const form = document.getElementById('add-section-form');
-    const btn = document.querySelector('.add-section-btn');
-    
-    if (form.classList.contains('active')) {
-      form.classList.remove('active');
-      btn.style.display = 'block';
-    } else {
-      form.classList.add('active');
-      btn.style.display = 'none';
-      document.getElementById('new-section-name').focus();
+  <style>
+    :root {
+      --bg-primary: #04060a;
+      --bg-surface: #090d18;
+      --bg-card: #0e1424;
+      --bg-card-hover: #131b30;
+      --border-subtle: rgba(0, 240, 255, 0.12);
+      --border-active: rgba(0, 240, 255, 0.45);
+      --accent-neon: #00f0ff;
+      --accent-blue: #0070f3;
+      --accent-glow: rgba(0, 240, 255, 0.35);
+      --text-main: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-dim: #64748b;
+      --danger: #ef4444;
+      --success: #10b981;
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, sans-serif;
     }
-  }
 
-  function addNewSection() {
-    const nameInput = document.getElementById('new-section-name');
-    const colorInput = document.getElementById('new-section-color');
-    const name = nameInput.value.trim();
-    const color = colorInput.value;
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body {
+      background-color: var(--bg-primary); color: var(--text-main);
+      font-family: var(--font-family); line-height: 1.5;
+      min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden;
+    }
+    body::before {
+      content: ''; position: fixed; top: -160px; right: -120px; width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(0, 240, 255, 0.08) 0%, transparent 70%);
+      pointer-events: none; z-index: 0;
+    }
+    
+    .hidden { display: none !important; }
+    .text-neon { color: var(--accent-neon); }
+    .font-mono { font-family: monospace; }
+    
+    button { cursor: pointer; border: none; background: transparent; font-family: inherit; }
+    input, select { font-family: inherit; }
+  </style>
 
-    if (!name) return alert('Please enter a section name');
+  <style>
+    header {
+      position: sticky; top: 0; z-index: 50; background: rgba(9, 13, 24, 0.88); backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-subtle); padding: 0.75rem 1.25rem;
+      display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
+    }
+    .brand-group { display: flex; align-items: center; gap: 0.75rem; }
+    .brand-icon {
+      width: 2.25rem; height: 2.25rem; border-radius: 0.75rem; background: linear-gradient(135deg, var(--accent-neon), var(--accent-blue));
+      display: flex; align-items: center; justify-content: center; box-shadow: 0 0 16px var(--accent-glow);
+    }
+    .brand-icon svg { width: 1.25rem; height: 1.25rem; color: #04060a; }
+    .brand-text h1 { font-size: 1.15rem; font-weight: 800; background: linear-gradient(90deg, #ffffff, var(--accent-neon)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    
+    .nav-tabs { display: flex; background: rgba(14, 20, 36, 0.8); border: 1px solid var(--border-subtle); border-radius: 0.75rem; padding: 0.25rem; gap: 0.25rem; }
+    .nav-btn {
+      color: var(--text-secondary); padding: 0.5rem 0.9rem; border-radius: 0.5rem; font-size: 0.8rem; font-weight: 600;
+      display: flex; align-items: center; gap: 0.4rem; transition: all 0.2s;
+    }
+    .nav-btn.active { background: rgba(0, 240, 255, 0.15); color: var(--accent-neon); border: 1px solid rgba(0, 240, 255, 0.35); box-shadow: 0 0 12px rgba(0, 240, 255, 0.15); }
+    
+    main { flex: 1; max-width: 1200px; width: 100%; margin: 0 auto; padding: 1.25rem; position: relative; z-index: 1; }
+    .section-title { font-size: 1.1rem; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem; }
+    
+    .btn-primary { background: linear-gradient(135deg, var(--accent-neon), var(--accent-blue)); color: #04060a; font-weight: 700; padding: 0.55rem 1rem; border-radius: 0.65rem; display: flex; align-items: center; gap: 0.4rem; box-shadow: 0 0 16px var(--accent-glow); transition: 0.2s; }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 0 24px rgba(0, 240, 255, 0.5); }
+    .btn-secondary { background: var(--bg-card); border: 1px solid var(--border-subtle); color: var(--text-main); font-weight: 600; padding: 0.5rem 1rem; border-radius: 0.65rem; transition: 0.2s; }
+    .btn-secondary:hover { border-color: var(--accent-neon); }
+    
+    .input-field { width: 100%; background: var(--bg-primary); border: 1px solid var(--border-subtle); color: #fff; padding: 0.65rem; border-radius: 0.5rem; outline: none; transition: 0.2s; }
+    .input-field:focus { border-color: var(--accent-neon); box-shadow: 0 0 8px var(--accent-glow); }
+  </style>
 
-    // Create new section HTML element
-    const newSection = document.createElement('div');
-    newSection.className = 'pipeline-section';
-    newSection.innerHTML = `
-      <div class="section-header" style="border-top-color: ${color};">
-        <h4>${name}</h4>
-        <span class="task-count">0</span>
+  <style>
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+    .stat-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 1rem; padding: 1.2rem; position: relative; overflow: hidden; }
+    .stat-card-stripe { position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--accent-neon); }
+    .stat-label { font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim); font-weight: 600; margin-bottom: 0.4rem; }
+    .stat-value { font-size: 1.6rem; font-weight: 800; font-family: monospace; color: #ffffff; }
+
+    .timer-container { max-width: 600px; margin: 0 auto; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 1.5rem; padding: 2rem; text-align: center; box-shadow: 0 16px 40px rgba(0,0,0,0.6); }
+    .timer-dial-wrapper { position: relative; width: 280px; height: 280px; margin: 2rem auto; display: flex; align-items: center; justify-content: center; }
+    .timer-svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+    .timer-track { fill: none; stroke: rgba(255, 255, 255, 0.05); stroke-width: 6; }
+    .timer-progress { fill: none; stroke: var(--accent-neon); stroke-width: 6; stroke-linecap: round; stroke-dasharray: 283; stroke-dashoffset: 0; transition: stroke-dashoffset 0.4s ease, stroke 0.3s ease; filter: drop-shadow(0 0 8px var(--accent-neon)); }
+    .timer-content { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .timer-digits { font-size: 3.5rem; font-weight: 800; font-family: monospace; text-shadow: 0 0 20px rgba(0, 240, 255, 0.35); }
+    
+    .timer-controls { display: flex; justify-content: center; gap: 1rem; margin-top: 1rem; }
+  </style>
+
+  <style>
+    .calendar-container { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 1.25rem; padding: 1.5rem; }
+    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.4rem; margin-top: 1rem; }
+    .cal-day-cell { aspect-ratio: 1; border-radius: 0.5rem; border: 1px solid rgba(255,255,255,0.05); background: rgba(14,20,36,0.5); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-family: monospace; cursor: pointer; transition: 0.2s; }
+    .cal-day-cell:hover { border-color: var(--accent-neon); transform: scale(1.05); }
+    .cal-day-cell.is-selected { border-color: var(--accent-neon); box-shadow: 0 0 12px var(--accent-glow); }
+    
+    .heat-lvl-0 { background: rgba(14,20,36,0.5); }
+    .heat-lvl-1 { background: rgba(0,240,255,0.15); border-color: rgba(0,240,255,0.25); color: #7dd3fc; }
+    .heat-lvl-2 { background: rgba(0,240,255,0.35); border-color: rgba(0,240,255,0.5); color: #e0f2fe; }
+    .heat-lvl-3 { background: rgba(0,240,255,0.65); border-color: var(--accent-neon); color: #04060a; font-weight: 800; }
+    .heat-lvl-4 { background: #00f0ff; border-color: #fff; color: #000; font-weight: 900; box-shadow: 0 0 10px var(--accent-glow); }
+
+    .daily-planner { margin-top: 2rem; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 1rem; padding: 1.5rem; }
+    .planner-stats { display: flex; gap: 1rem; margin-bottom: 1rem; font-size: 0.85rem; color: var(--text-secondary); background: var(--bg-surface); padding: 0.75rem; border-radius: 0.5rem; border: 1px solid var(--border-subtle); }
+    .progress-bar { flex: 1; height: 6px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; align-self: center; }
+    .progress-fill { height: 100%; background: var(--accent-neon); transition: 0.3s; box-shadow: 0 0 8px var(--accent-glow); }
+    
+    .task-list { display: flex; flex-direction: column; gap: 0.5rem; min-height: 50px; }
+    .task-item { display: flex; align-items: center; gap: 0.75rem; background: var(--bg-surface); padding: 0.75rem; border-radius: 0.5rem; border: 1px solid rgba(255,255,255,0.05); transition: 0.2s; }
+    .task-item.dragging { opacity: 0.5; border-color: var(--accent-neon); }
+    .task-drag-handle { cursor: grab; color: var(--text-dim); }
+    .task-drag-handle:active { cursor: grabbing; }
+    .task-num { font-family: monospace; font-size: 0.75rem; color: var(--text-dim); width: 20px; text-align: right; }
+    .task-checkbox { appearance: none; width: 1.2rem; height: 1.2rem; border: 1px solid var(--text-dim); border-radius: 0.25rem; cursor: pointer; position: relative; transition: 0.2s; }
+    .task-checkbox:checked { background: var(--accent-neon); border-color: var(--accent-neon); }
+    .task-checkbox:checked::after { content: '✓'; position: absolute; color: #000; font-size: 0.85rem; font-weight: bold; top: -1px; left: 3px; }
+    .task-text { flex: 1; outline: none; border-bottom: 1px solid transparent; transition: 0.2s; }
+    .task-text:focus { border-bottom-color: var(--accent-neon); }
+    .task-item.done .task-text { text-decoration: line-through; color: var(--text-dim); }
+    
+    .add-task-bar { display: flex; gap: 0.5rem; margin-top: 1rem; }
+  </style>
+
+  <style>
+    .pipeline-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
+    .pipeline-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 1rem; padding: 1.5rem; cursor: pointer; transition: 0.2s; }
+    .pipeline-card:hover { border-color: var(--accent-neon); transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0, 240, 255, 0.12); }
+    .pipeline-color-bar { width: 40px; height: 6px; border-radius: 3px; margin-bottom: 1rem; }
+    
+    .kanban-board-wrapper { display: flex; flex-direction: column; height: 70vh; }
+    .kanban-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+    .kanban-board { display: flex; gap: 1.5rem; overflow-x: auto; flex: 1; padding-bottom: 1rem; align-items: flex-start; }
+    
+    .kanban-col { background: rgba(14,20,36,0.6); border: 1px solid var(--border-subtle); border-radius: 0.75rem; min-width: 300px; max-width: 300px; display: flex; flex-direction: column; max-height: 100%; }
+    .kanban-col-header { padding: 1rem; border-bottom: 2px solid; font-weight: 700; display: flex; justify-content: space-between; align-items: center; }
+    .kanban-tasks { padding: 1rem; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 0.75rem; min-height: 50px; }
+    
+    .k-task { background: var(--bg-card); border: 1px solid rgba(255,255,255,0.08); padding: 1rem; border-radius: 0.5rem; cursor: grab; font-size: 0.9rem; transition: 0.2s; position: relative; }
+    .k-task:hover { border-color: var(--text-dim); }
+    .k-task.dragging { opacity: 0.5; border-color: var(--accent-neon); box-shadow: 0 0 12px var(--accent-glow); }
+    .k-task-delete { position: absolute; top: 0.5rem; right: 0.5rem; color: var(--danger); opacity: 0; transition: 0.2s; }
+    .k-task:hover .k-task-delete { opacity: 1; }
+    
+    .add-k-task-btn { padding: 0.75rem; text-align: center; color: var(--text-dim); font-size: 0.85rem; font-weight: 600; border-top: 1px solid var(--border-subtle); cursor: pointer; transition: 0.2s; }
+    .add-k-task-btn:hover { color: var(--text-main); background: rgba(255,255,255,0.05); }
+
+    .add-col-wrapper { min-width: 300px; }
+    .add-col-btn { width: 100%; padding: 1rem; border: 2px dashed var(--border-subtle); border-radius: 0.75rem; color: var(--text-dim); font-weight: 600; transition: 0.2s; }
+    .add-col-btn:hover { border-color: var(--text-main); color: var(--text-main); background: rgba(255,255,255,0.02); }
+    .add-col-form { background: var(--bg-card); padding: 1rem; border: 1px solid var(--border-subtle); border-radius: 0.75rem; display: none; flex-direction: column; gap: 0.75rem; }
+    
+    /* Modals */
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; z-index: 100; opacity: 0; pointer-events: none; transition: 0.2s; }
+    .modal-backdrop.open { opacity: 1; pointer-events: auto; }
+    .modal-box { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 1rem; padding: 2rem; width: 100%; max-width: 400px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand-group">
+      <div class="brand-icon">
+        <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
       </div>
-      <!-- Empty state, ready for tasks -->
-    `;
+      <div class="brand-text"><h1>AetherFocus</h1></div>
+    </div>
+    
+    <nav class="nav-tabs" id="main-nav">
+      <button class="nav-btn active" data-tab="dashboard">Dashboard</button>
+      <button class="nav-btn" data-tab="timer">Timer</button>
+      <button class="nav-btn" data-tab="calendar">Calendar</button>
+      <button class="nav-btn" data-tab="pipelines">Pipelines</button>
+    </nav>
+  </header>
 
-    // Insert before the "Add Section" wrapper
-    const board = document.getElementById('pipeline-board');
-    const wrapper = document.getElementById('add-section-wrapper');
-    board.insertBefore(newSection, wrapper);
+  <main>
+    <section id="view-dashboard" class="tab-view">
+      <h2 class="section-title">Overview Statistics</h2>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-card-stripe"></div>
+          <div class="stat-label">Today's Focus</div>
+          <div class="stat-value" id="stat-today">00:00:00</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-stripe" style="background: var(--success);"></div>
+          <div class="stat-label">Focus Streak</div>
+          <div class="stat-value" id="stat-streak" style="color: var(--success);">0 Days</div>
+        </div>
+      </div>
+      
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; margin-top: 2rem;">
+        <h2 class="section-title" style="margin: 0;">Study Subjects</h2>
+        <button class="btn-primary" onclick="openModal('modal-add-subject')" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">+ Add Subject</button>
+      </div>
+      <div class="pipeline-grid" id="subjects-container"></div>
+    </section>
 
-    // Reset and close form
-    nameInput.value = '';
-    toggleAddSectionForm();
-  }
-</script>
+    <section id="view-timer" class="tab-view hidden">
+      <div class="timer-container">
+        <h2 id="timer-subject-title" style="margin-bottom: 0.5rem; color: var(--accent-neon);">General Focus</h2>
+        <select id="timer-subject-select" class="input-field" style="max-width: 300px; margin: 0 auto 1.5rem; display: block; text-align: center;"></select>
+        
+        <div class="timer-dial-wrapper">
+          <svg class="timer-svg" viewBox="0 0 100 100">
+            <circle class="timer-track" cx="50" cy="50" r="45" />
+            <circle class="timer-progress" id="timer-ring" cx="50" cy="50" r="45" />
+          </svg>
+          <div class="timer-content">
+            <div class="stat-label" id="timer-mode-label">Stopwatch</div>
+            <div class="timer-digits" id="timer-display">00:00:00</div>
+          </div>
+        </div>
+        
+        <div class="timer-controls">
+          <button class="btn-primary" id="btn-timer-toggle" style="width: 120px; justify-content: center;">Start</button>
+          <button class="btn-secondary" id="btn-timer-stop" style="width: 120px; justify-content: center;">Stop & Log</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-calendar" class="tab-view hidden">
+      <div class="calendar-container">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <h2 class="section-title">Focus Heatmap</h2>
+          <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <button class="btn-secondary" id="cal-prev" style="padding: 0.2rem 0.6rem;">&lt;</button>
+            <span id="cal-month-label" class="font-mono text-neon" style="font-weight: 700; min-width: 120px; text-align: center;"></span>
+            <button class="btn-secondary" id="cal-next" style="padding: 0.2rem 0.6rem;">&gt;</button>
+          </div>
+        </div>
+        <div class="calendar-grid" id="calendar-grid-cells"></div>
+      </div>
+      
+      <div class="daily-planner">
+        <h3 style="margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
+          <span id="planner-date-title">Daily Checklist</span>
+        </h3>
+        
+        <div class="planner-stats">
+          <div>Total Tasks: <strong id="stat-task-total" class="text-neon">0</strong></div>
+          <div>Completed: <strong id="stat-task-done" style="color: var(--success);">0</strong></div>
+          <div class="progress-bar"><div class="progress-fill" id="stat-task-progress" style="width: 0%;"></div></div>
+        </div>
+
+        <div class="task-list" id="checklist-container">
+          <!-- Tasks injected here -->
+        </div>
+        
+        <div class="add-task-bar">
+          <input type="text" id="new-task-input" class="input-field" placeholder="Add a new task for this day..." />
+          <button class="btn-primary" id="btn-add-task">Add</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-pipelines" class="tab-view hidden">
+      <!-- Dashboard of Plans -->
+      <div id="pipelines-dashboard">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <h2 class="section-title">Project Pipelines</h2>
+          <button class="btn-primary" onclick="openModal('modal-add-pipeline')" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">+ New Plan</button>
+        </div>
+        <div class="pipeline-grid" id="pipelines-container">
+          <!-- Plans injected here -->
+        </div>
+      </div>
+
+      <!-- Active Kanban Board -->
+      <div id="pipeline-active" class="hidden kanban-board-wrapper">
+        <div class="kanban-header">
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <button class="btn-secondary" onclick="closePipeline()" style="padding: 0.4rem 0.8rem;">&larr; Back</button>
+            <h2 class="section-title" id="active-pipeline-title" style="margin: 0;">Pipeline Name</h2>
+          </div>
+        </div>
+        <div class="kanban-board" id="kanban-board">
+          <!-- Columns injected here -->
+          
+          <div class="add-col-wrapper">
+            <button class="add-col-btn" onclick="toggleAddColForm()">+ Add Section</button>
+            <div class="add-col-form" id="add-col-form">
+              <input type="text" id="new-col-name" class="input-field" placeholder="Section Name (e.g. In Progress)">
+              <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <label style="font-size: 0.8rem; color: var(--text-dim);">Color:</label>
+                <input type="color" id="new-col-color" value="#00f0ff" style="border: none; width: 30px; height: 30px; cursor: pointer; background: transparent;">
+              </div>
+              <div style="display: flex; gap: 0.5rem;">
+                <button class="btn-secondary" style="flex: 1;" onclick="toggleAddColForm()">Cancel</button>
+                <button class="btn-primary" style="flex: 1; justify-content: center;" onclick="addKanbanColumn()">Save</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="modal-backdrop" id="modal-add-subject">
+    <div class="modal-box">
+      <h3 style="margin-bottom: 1rem;">Add Study Subject</h3>
+      <input type="text" id="input-subject-name" class="input-field" placeholder="e.g. Mathematics" style="margin-bottom: 1rem;">
+      <div style="display: flex; gap: 0.5rem;">
+        <button class="btn-secondary" style="flex: 1;" onclick="closeModal('modal-add-subject')">Cancel</button>
+        <button class="btn-primary" style="flex: 1; justify-content: center;" onclick="addSubject()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="modal-add-pipeline">
+    <div class="modal-box">
+      <h3 style="margin-bottom: 1rem;">Create New Plan</h3>
+      <input type="text" id="input-pipe-name" class="input-field" placeholder="e.g. STM32 Thesis Project" style="margin-bottom: 1rem;">
+      <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 1rem;">
+        <label style="font-size: 0.8rem; color: var(--text-dim);">Theme Color:</label>
+        <input type="color" id="input-pipe-color" value="#e056fd" style="border: none; width: 30px; height: 30px; cursor: pointer; background: transparent;">
+      </div>
+      <div style="display: flex; gap: 0.5rem;">
+        <button class="btn-secondary" style="flex: 1;" onclick="closeModal('modal-add-pipeline')">Cancel</button>
+        <button class="btn-primary" style="flex: 1; justify-content: center;" onclick="addPipeline()">Create</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- UTILS & STORAGE ---
+    const generateId = () => Math.random().toString(36).substr(2, 9);
+    const getTodayString = () => new Date().toISOString().split('T')[0];
+    const formatTime = (secs) => {
+      const h = Math.floor(secs / 3600);
+      const m = Math.floor((secs % 3600) / 60);
+      const s = secs % 60;
+      return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    };
+
+    let data = {
+      subjects: JSON.parse(localStorage.getItem('aether_subjects')) || [
+        { id: 's1', name: 'Computer Science', color: '#00f0ff' }
+      ],
+      logs: JSON.parse(localStorage.getItem('aether_logs')) || [],
+      checklists: JSON.parse(localStorage.getItem('aether_checklists')) || {},
+      pipelines: JSON.parse(localStorage.getItem('aether_pipelines')) || [
+        { 
+          id: 'p1', title: 'Default Project', color: '#4a90e2', 
+          sections: [
+            { id: 'sec1', title: 'To Do', color: '#e74c3c', tasks: [{id: 't1', text: 'Define architecture'}] },
+            { id: 'sec2', title: 'In Progress', color: '#f1c40f', tasks: [] },
+            { id: 'sec3', title: 'Done', color: '#2ecc71', tasks: [] }
+          ]
+        }
+      ]
+    };
+
+    function saveData() {
+      localStorage.setItem('aether_subjects', JSON.stringify(data.subjects));
+      localStorage.setItem('aether_logs', JSON.stringify(data.logs));
+      localStorage.setItem('aether_checklists', JSON.stringify(data.checklists));
+      localStorage.setItem('aether_pipelines', JSON.stringify(data.pipelines));
+    }
+
+    // --- NAVIGATION ---
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-view').forEach(v => v.classList.add('hidden'));
+        
+        btn.classList.add('active');
+        const tab = btn.getAttribute('data-tab');
+        document.getElementById(`view-${tab}`).classList.remove('hidden');
+
+        if(tab === 'dashboard') renderDashboard();
+        if(tab === 'calendar') renderCalendar();
+        if(tab === 'pipelines') renderPipelinesDashboard();
+      });
+    });
+
+    // --- MODALS ---
+    function openModal(id) { document.getElementById(id).classList.add('open'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+    // --- DASHBOARD & SUBJECTS ---
+    function renderDashboard() {
+      // Stats
+      const today = getTodayString();
+      let todaySecs = 0, streak = 0;
+      data.logs.forEach(l => { if (l.date === today) todaySecs += l.duration; });
+      
+      const activeDays = new Set(data.logs.map(l => l.date));
+      let check = new Date();
+      while (true) {
+        if (activeDays.has(check.toISOString().split('T')[0])) {
+          streak++; check.setDate(check.getDate() - 1);
+        } else { break; }
+      }
+
+      document.getElementById('stat-today').textContent = formatTime(todaySecs);
+      document.getElementById('stat-streak').textContent = `${streak} Days`;
+
+      // Subjects
+      const container = document.getElementById('subjects-container');
+      container.innerHTML = '';
+      const select = document.getElementById('timer-subject-select');
+      select.innerHTML = '';
+
+      data.subjects.forEach(sub => {
+        // Build card
+        const card = document.createElement('div');
+        card.className = 'pipeline-card';
+        card.innerHTML = `
+          <div class="pipeline-color-bar" style="background: ${sub.color}"></div>
+          <h3>${sub.name}</h3>
+        `;
+        card.onclick = () => {
+          select.value = sub.id;
+          document.querySelector('[data-tab="timer"]').click();
+        };
+        container.appendChild(card);
+
+        // Build select option
+        const opt = document.createElement('option');
+        opt.value = sub.id; opt.textContent = sub.name;
+        select.appendChild(opt);
+      });
+    }
+
+    function addSubject() {
+      const name = document.getElementById('input-subject-name').value.trim();
+      if(!name) return;
+      data.subjects.push({ id: generateId(), name, color: '#00f0ff' });
+      saveData(); renderDashboard(); closeModal('modal-add-subject');
+      document.getElementById('input-subject-name').value = '';
+    }
+
+    // --- TIMER (Delta time tracking) ---
+    let timerState = { isRunning: false, startTs: null, accumSecs: 0, interval: null };
+    const timerDisplay = document.getElementById('timer-display');
+    const timerRing = document.getElementById('timer-ring');
+    const btnTimerToggle = document.getElementById('btn-timer-toggle');
+
+    function syncTimer() {
+      let total = timerState.accumSecs;
+      if (timerState.isRunning && timerState.startTs) {
+        total += Math.floor((Date.now() - timerState.startTs) / 1000);
+      }
+      timerDisplay.textContent = formatTime(total);
+      
+      const percent = (total % 3600) / 3600; // Ring resets every hour
+      timerRing.style.strokeDashoffset = 283 - (percent * 283);
+      
+      const sub = data.subjects.find(s => s.id === document.getElementById('timer-subject-select').value);
+      if(sub) {
+        document.getElementById('timer-subject-title').textContent = sub.name;
+        timerRing.style.stroke = sub.color;
+      }
+    }
+
+    btnTimerToggle.addEventListener('click', () => {
+      if (timerState.isRunning) {
+        // Pause
+        timerState.accumSecs += Math.floor((Date.now() - timerState.startTs) / 1000);
+        timerState.isRunning = false;
+        timerState.startTs = null;
+        clearInterval(timerState.interval);
+        btnTimerToggle.textContent = 'Resume';
+      } else {
+        // Start
+        timerState.isRunning = true;
+        timerState.startTs = Date.now();
+        timerState.interval = setInterval(syncTimer, 500);
+        btnTimerToggle.textContent = 'Pause';
+      }
+      syncTimer();
+    });
+
+    document.getElementById('btn-timer-stop').addEventListener('click', () => {
+      if(timerState.isRunning) {
+        timerState.accumSecs += Math.floor((Date.now() - timerState.startTs) / 1000);
+      }
+      if(timerState.accumSecs > 5) { // Only log if > 5s
+        data.logs.push({
+          id: generateId(),
+          date: getTodayString(),
+          duration: timerState.accumSecs,
+          subjectId: document.getElementById('timer-subject-select').value
+        });
+        saveData();
+      }
+      timerState.isRunning = false; timerState.startTs = null; timerState.accumSecs = 0;
+      clearInterval(timerState.interval);
+      btnTimerToggle.textContent = 'Start';
+      syncTimer();
+      alert('Session Logged!');
+    });
+
+
+    // --- CALENDAR & CHECKLIST (Drag & Drop) ---
+    let calDate = new Date();
+    let selectedCalDateStr = getTodayString();
+    let draggedTaskIdx = null;
+
+    function renderCalendar() {
+      const year = calDate.getFullYear(), month = calDate.getMonth();
+      document.getElementById('cal-month-label').textContent = calDate.toLocaleString('default', { month: 'long', year: 'numeric' });
+      
+      const grid = document.getElementById('calendar-grid-cells');
+      grid.innerHTML = '';
+      
+      const firstDay = new Date(year, month, 1).getDay();
+      const days = new Date(year, month + 1, 0).getDate();
+      
+      for(let i=0; i<firstDay; i++) grid.appendChild(document.createElement('div'));
+      
+      for(let day=1; day<=days; day++) {
+        const dStr = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+        const dayLogs = data.logs.filter(l => l.date === dStr);
+        const daySecs = dayLogs.reduce((a,c) => a + c.duration, 0);
+        
+        let heat = 'heat-lvl-0';
+        if(daySecs > 0) {
+          const hrs = daySecs/3600;
+          if(hrs < 1) heat = 'heat-lvl-1';
+          else if(hrs < 3) heat = 'heat-lvl-2';
+          else if(hrs < 5) heat = 'heat-lvl-3';
+          else heat = 'heat-lvl-4';
+        }
+
+        const cell = document.createElement('div');
+        cell.className = `cal-day-cell ${heat} ${selectedCalDateStr === dStr ? 'is-selected' : ''}`;
+        cell.textContent = day;
+        cell.onclick = () => { selectedCalDateStr = dStr; renderCalendar(); };
+        grid.appendChild(cell);
+      }
+      renderChecklist();
+    }
+
+    document.getElementById('cal-prev').onclick = () => { calDate.setMonth(calDate.getMonth() - 1); renderCalendar(); };
+    document.getElementById('cal-next').onclick = () => { calDate.setMonth(calDate.getMonth() + 1); renderCalendar(); };
+
+    function renderChecklist() {
+      document.getElementById('planner-date-title').textContent = `Checklist: ${selectedCalDateStr}`;
+      const container = document.getElementById('checklist-container');
+      container.innerHTML = '';
+      
+      let tasks = data.checklists[selectedCalDateStr] || [];
+      
+      let doneCount = tasks.filter(t => t.done).length;
+      let totalCount = tasks.length;
+      let progress = totalCount === 0 ? 0 : (doneCount / totalCount) * 100;
+      
+      document.getElementById('stat-task-total').textContent = totalCount;
+      document.getElementById('stat-task-done').textContent = doneCount;
+      document.getElementById('stat-task-progress').style.width = `${progress}%`;
+
+      tasks.forEach((t, index) => {
+        const div = document.createElement('div');
+        div.className = `task-item ${t.done ? 'done' : ''}`;
+        div.draggable = true;
+        
+        div.innerHTML = `
+          <div class="task-drag-handle" title="Drag to reorder">
+            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M8 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm8-12a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"/></svg>
+          </div>
+          <div class="task-num">#${index + 1}</div>
+          <input type="checkbox" class="task-checkbox" ${t.done ? 'checked' : ''}>
+          <input type="text" class="task-text" value="${t.text}" style="background:transparent; border:none; color:inherit; font-size:0.9rem;">
+          <button class="btn-secondary" style="padding:0.2rem 0.4rem; font-size:0.7rem; border-color:var(--danger); color:var(--danger);">X</button>
+        `;
+
+        // Checkbox Toggle
+        div.querySelector('.task-checkbox').onchange = (e) => {
+          tasks[index].done = e.target.checked;
+          saveData(); renderChecklist();
+        };
+
+        // Edit Text
+        const textInput = div.querySelector('.task-text');
+        textInput.onblur = () => {
+          if(textInput.value.trim() !== '') {
+            tasks[index].text = textInput.value.trim();
+            saveData();
+          } else {
+            textInput.value = tasks[index].text; // Revert if empty
+          }
+        };
+
+        // Delete
+        div.querySelector('button').onclick = () => {
+          tasks.splice(index, 1);
+          saveData(); renderChecklist();
+        };
+
+        // Drag & Drop Mechanics
+        div.addEventListener('dragstart', (e) => {
+          draggedTaskIdx = index;
+          div.classList.add('dragging');
+        });
+        
+        div.addEventListener('dragend', () => {
+          div.classList.remove('dragging');
+          draggedTaskIdx = null;
+        });
+
+        div.addEventListener('dragover', (e) => {
+          e.preventDefault(); // Necessary to allow dropping
+        });
+
+        div.addEventListener('drop', (e) => {
+          e.preventDefault();
+          if (draggedTaskIdx === null || draggedTaskIdx === index) return;
+          // Reorder array
+          const movedTask = tasks.splice(draggedTaskIdx, 1)[0];
+          tasks.splice(index, 0, movedTask);
+          saveData();
+          renderChecklist();
+        });
+
+        container.appendChild(div);
+      });
+      
+      // Allow dropping on empty container area to move to end
+      container.addEventListener('dragover', e => e.preventDefault());
+    }
+
+    document.getElementById('btn-add-task').onclick = () => {
+      const input = document.getElementById('new-task-input');
+      const text = input.value.trim();
+      if(!text) return;
+      
+      if(!data.checklists[selectedCalDateStr]) data.checklists[selectedCalDateStr] = [];
+      data.checklists[selectedCalDateStr].push({ id: generateId(), text, done: false });
+      
+      saveData();
+      input.value = '';
+      renderChecklist();
+    };
+
+
+    // --- PIPELINES (Kanban) ---
+    let activePipelineId = null;
+    let draggedKanbanTask = null; // { colId, taskId, taskObj }
+
+    function renderPipelinesDashboard() {
+      document.getElementById('pipelines-dashboard').classList.remove('hidden');
+      document.getElementById('pipeline-active').classList.add('hidden');
+      
+      const container = document.getElementById('pipelines-container');
+      container.innerHTML = '';
+      
+      data.pipelines.forEach(p => {
+        let totalTasks = 0;
+        p.sections.forEach(s => totalTasks += s.tasks.length);
+        
+        const card = document.createElement('div');
+        card.className = 'pipeline-card';
+        card.innerHTML = `
+          <div class="pipeline-color-bar" style="background: ${p.color}"></div>
+          <h3>${p.title}</h3>
+          <p style="font-size: 0.8rem; color: var(--text-dim); margin-top: 0.5rem;">
+            ${p.sections.length} Sections • ${totalTasks} Tasks
+          </p>
+        `;
+        card.onclick = () => openPipeline(p.id);
+        container.appendChild(card);
+      });
+    }
+
+    function addPipeline() {
+      const title = document.getElementById('input-pipe-name').value.trim();
+      const color = document.getElementById('input-pipe-color').value;
+      if(!title) return;
+      data.pipelines.push({ id: generateId(), title, color, sections: [] });
+      saveData();
+      renderPipelinesDashboard();
+      closeModal('modal-add-pipeline');
+      document.getElementById('input-pipe-name').value = '';
+    }
+
+    function openPipeline(id) {
+      activePipelineId = id;
+      document.getElementById('pipelines-dashboard').classList.add('hidden');
+      document.getElementById('pipeline-active').classList.remove('hidden');
+      renderKanbanBoard();
+    }
+
+    function closePipeline() {
+      activePipelineId = null;
+      renderPipelinesDashboard();
+    }
+
+    function toggleAddColForm() {
+      const form = document.getElementById('add-col-form');
+      const btn = document.querySelector('.add-col-btn');
+      if (form.style.display === 'flex') {
+        form.style.display = 'none'; btn.style.display = 'block';
+      } else {
+        form.style.display = 'flex'; btn.style.display = 'none';
+      }
+    }
+
+    function addKanbanColumn() {
+      const name = document.getElementById('new-col-name').value.trim();
+      const color = document.getElementById('new-col-color').value;
+      if(!name) return;
+      
+      const pipe = data.pipelines.find(p => p.id === activePipelineId);
+      pipe.sections.push({ id: generateId(), title: name, color, tasks: [] });
+      saveData();
+      renderKanbanBoard();
+      
+      document.getElementById('new-col-name').value = '';
+      toggleAddColForm();
+    }
+
+    function renderKanbanBoard() {
+      const pipe = data.pipelines.find(p => p.id === activePipelineId);
+      if(!pipe) return;
+      
+      const titleEl = document.getElementById('active-pipeline-title');
+      titleEl.textContent = pipe.title;
+      titleEl.style.color = pipe.color;
+      
+      const board = document.getElementById('kanban-board');
+      // Keep the add column button, remove the rest
+      const addWrapper = board.querySelector('.add-col-wrapper');
+      board.innerHTML = '';
+      
+      pipe.sections.forEach(sec => {
+        const col = document.createElement('div');
+        col.className = 'kanban-col';
+        
+        let tasksHtml = '';
+        sec.tasks.forEach(t => {
+          tasksHtml += `
+            <div class="k-task" draggable="true" data-id="${t.id}" data-col="${sec.id}">
+              ${t.text}
+              <button class="k-task-delete" onclick="deleteKTask('${sec.id}', '${t.id}')">X</button>
+            </div>
+          `;
+        });
+
+        col.innerHTML = `
+          <div class="kanban-col-header" style="border-bottom-color: ${sec.color};">
+            <span>${sec.title}</span>
+            <span style="font-size:0.75rem; background:rgba(255,255,255,0.1); padding:0.1rem 0.5rem; border-radius:1rem;">${sec.tasks.length}</span>
+          </div>
+          <div class="kanban-tasks" data-col="${sec.id}">
+            ${tasksHtml}
+          </div>
+          <div class="add-k-task-btn" onclick="addKTask('${sec.id}')">+ Add Task</div>
+        `;
+        board.appendChild(col);
+      });
+      
+      board.appendChild(addWrapper); // Append the "add section" block at the end
+      
+      attachKanbanDragEvents();
+    }
+
+    function addKTask(colId) {
+      const text = prompt("Enter task text:");
+      if(!text) return;
+      const pipe = data.pipelines.find(p => p.id === activePipelineId);
+      const sec = pipe.sections.find(s => s.id === colId);
+      sec.tasks.push({ id: generateId(), text });
+      saveData();
+      renderKanbanBoard();
+    }
+    
+    // Globally accessible delete for inline onclick
+    window.deleteKTask = (colId, taskId) => {
+      const pipe = data.pipelines.find(p => p.id === activePipelineId);
+      const sec = pipe.sections.find(s => s.id === colId);
+      sec.tasks = sec.tasks.filter(t => t.id !== taskId);
+      saveData(); renderKanbanBoard();
+    };
+
+    function attachKanbanDragEvents() {
+      const tasks = document.querySelectorAll('.k-task');
+      const containers = document.querySelectorAll('.kanban-tasks');
+      
+      tasks.forEach(t => {
+        t.addEventListener('dragstart', () => {
+          t.classList.add('dragging');
+          const pipe = data.pipelines.find(p => p.id === activePipelineId);
+          const colId = t.getAttribute('data-col');
+          const taskId = t.getAttribute('data-id');
+          const sec = pipe.sections.find(s => s.id === colId);
+          draggedKanbanTask = { colId, taskId, taskObj: sec.tasks.find(x => x.id === taskId) };
+        });
+        
+        t.addEventListener('dragend', () => {
+          t.classList.remove('dragging');
+          draggedKanbanTask = null;
+        });
+      });
+      
+      containers.forEach(container => {
+        container.addEventListener('dragover', e => {
+          e.preventDefault(); // allow drop
+          const afterElement = getDragAfterElement(container, e.clientY);
+          const draggable = document.querySelector('.k-task.dragging');
+          if (afterElement == null) {
+            container.appendChild(draggable);
+          } else {
+            container.insertBefore(draggable, afterElement);
+          }
+        });
+        
+        container.addEventListener('drop', e => {
+          e.preventDefault();
+          if(!draggedKanbanTask) return;
+          
+          const pipe = data.pipelines.find(p => p.id === activePipelineId);
+          const targetColId = container.getAttribute('data-col');
+          
+          // Remove from original
+          const sourceSec = pipe.sections.find(s => s.id === draggedKanbanTask.colId);
+          sourceSec.tasks = sourceSec.tasks.filter(t => t.id !== draggedKanbanTask.taskId);
+          
+          // Insert into new (determine position based on DOM)
+          const targetSec = pipe.sections.find(s => s.id === targetColId);
+          const currentDOMTasks = [...container.querySelectorAll('.k-task')];
+          const newIdx = currentDOMTasks.findIndex(el => el.getAttribute('data-id') === draggedKanbanTask.taskId);
+          
+          if(newIdx === -1) {
+             targetSec.tasks.push(draggedKanbanTask.taskObj);
+          } else {
+             targetSec.tasks.splice(newIdx, 0, draggedKanbanTask.taskObj);
+          }
+          
+          saveData();
+          // We don't necessarily need to re-render immediately as the DOM handles the visual move,
+          // but re-rendering ensures data consistency and updates counters.
+          renderKanbanBoard(); 
+        });
+      });
+    }
+    
+    // Helper for Kanban sorting physics
+    function getDragAfterElement(container, y) {
+      const draggableElements = [...container.querySelectorAll('.k-task:not(.dragging)')];
+      return draggableElements.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+        if (offset < 0 && offset > closest.offset) {
+          return { offset: offset, element: child };
+        } else {
+          return closest;
+        }
+      }, { offset: Number.NEGATIVE_INFINITY }).element;
+    }
+
+    // --- INIT ---
+    window.onload = () => {
+      renderDashboard(); // Default tab
+      syncTimer();       // Setup initial SVG constraints
+    };
+  </script>
+</body>
+</html>
