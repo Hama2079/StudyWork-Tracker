@@ -1101,6 +1101,7 @@
       overflow: hidden; 
       background-color: #0d1117; 
       cursor: crosshair; 
+      touch-action: none; /* Mobile fix: prevents screen from scrolling while interacting */
     }
     
     .pipeline-svg-layer { 
@@ -1150,6 +1151,7 @@
       user-select: none; 
       transition: box-shadow 0.2s, border-color 0.2s; 
       pointer-events: auto; 
+      touch-action: none; /* Mobile fix: prevents bouncing while dragging nodes */
     }
 
     .gh-node:hover { 
@@ -1822,8 +1824,7 @@
   </nav>
 
   <script>
-    // --- Service Worker Cache Busting & Registration ---
-    const CACHE_NAME = 'aether-focus-v5-complete-untruncated';
+    const CACHE_NAME = 'aether-focus-v6-mobile-touch';
     const swCode = `
       self.addEventListener('install', (e) => {
         self.skipWaiting();
@@ -1858,6 +1859,16 @@
     }
     function closeModal(id) { 
       document.getElementById(id).classList.remove('open'); 
+    }
+    
+    // Safely extract coordinates from either mouse or touch event
+    function getEventCoords(e) {
+      if (e.changedTouches && e.changedTouches.length > 0) {
+        return { clientX: e.changedTouches[0].clientX, clientY: e.changedTouches[0].clientY };
+      } else if (e.touches && e.touches.length > 0) {
+        return { clientX: e.touches[0].clientX, clientY: e.touches[0].clientY };
+      }
+      return { clientX: e.clientX, clientY: e.clientY };
     }
 
     /* Custom Confirm/Prompt Logic */
@@ -1898,7 +1909,6 @@
     };
     const formatHours = (secs) => (secs/3600).toFixed(1) + ' hrs';
 
-    // --- Audio, Wake Lock, & Notifications ---
     let soundMuted = false;
     function playChime(freq = 587.33, freq2 = 880) {
       if (soundMuted) return;
@@ -2175,7 +2185,6 @@
       populateTimerSubjectSelect(); 
       persistData();
     }
-
 
     let timerMode = 'stopwatch';
     let pomoStage = 'focus';
@@ -2796,7 +2805,6 @@
       renderChecklist(selectedCalDayStr);
     });
 
-
     let activePipelineId = null;
     let draggedGHNode = null; 
     let ghNodeOffset = { x: 0, y: 0 };
@@ -2904,22 +2912,31 @@
           <div class="gh-port gh-port-out" data-type="out"></div>
         `;
 
-        div.addEventListener('mousedown', (e) => {
+        const handleNodeStart = (e) => {
           if (e.target.classList.contains('gh-port') || e.target.tagName === 'A' || e.target.tagName === 'BUTTON') return;
-          e.preventDefault(); 
+          if (e.type === 'touchstart' && e.touches.length > 1) return; // ignore multi-touch
+          if (e.type !== 'touchstart') e.preventDefault(); // allow mobile double-tap
           e.stopPropagation(); 
           const rect = div.getBoundingClientRect();
+          const coords = getEventCoords(e);
           draggedGHNode = node;
-          ghNodeOffset = { x: e.clientX - rect.left, y: e.clientY - rect.top };
-        });
+          ghNodeOffset = { x: coords.clientX - rect.left, y: coords.clientY - rect.top };
+        };
+
+        div.addEventListener('mousedown', handleNodeStart);
+        div.addEventListener('touchstart', handleNodeStart, {passive: false});
 
         const portOut = div.querySelector('.gh-port-out');
-        portOut.addEventListener('mousedown', (e) => {
+        const handlePortStart = (e) => {
+          if (e.type === 'touchstart' && e.touches.length > 1) return;
           e.preventDefault();
           e.stopPropagation();
           drawingEdgeSourceId = node.id;
           edgePreview.style.display = 'block';
-        });
+        };
+
+        portOut.addEventListener('mousedown', handlePortStart);
+        portOut.addEventListener('touchstart', handlePortStart, {passive: false});
 
         div.querySelector('.gh-node-delete').addEventListener('click', (e) => {
           e.stopPropagation();
@@ -3021,14 +3038,21 @@
       }
     }
 
-    window.addEventListener('mousemove', (e) => {
+    const handleGlobalMove = (e) => {
       if (!activePipelineId) return;
+      if (!draggedGHNode && !drawingEdgeSourceId) return;
+
       const editorCanvas = document.getElementById('pipeline-canvas');
       if(!editorCanvas) return;
       
+      if (e.type === 'touchmove') {
+        e.preventDefault(); // crucial for mobile dragging
+      }
+
       const rect = editorCanvas.getBoundingClientRect();
-      const mouseX = e.clientX - rect.left;
-      const mouseY = e.clientY - rect.top;
+      const coords = getEventCoords(e);
+      const mouseX = coords.clientX - rect.left;
+      const mouseY = coords.clientY - rect.top;
 
       if (draggedGHNode) {
         draggedGHNode.x = mouseX - ghNodeOffset.x;
@@ -3044,31 +3068,46 @@
           edgePreview.setAttribute('d', getBezierPath(startX, startY, mouseX, mouseY));
         }
       }
-    });
+    };
 
-    window.addEventListener('mouseup', (e) => {
+    window.addEventListener('mousemove', handleGlobalMove);
+    window.addEventListener('touchmove', handleGlobalMove, {passive: false});
+
+    const handleGlobalEnd = (e) => {
       if (draggedGHNode) { 
         persistData(); 
         draggedGHNode = null; 
       }
       if (drawingEdgeSourceId) {
-        const portIn = e.target.closest('.gh-port-in');
-        if (portIn) {
-          const targetNodeId = portIn.closest('.gh-node').dataset.id;
-          if (drawingEdgeSourceId !== targetNodeId) {
-            const pipe = pipelines.find(p => p.id === activePipelineId);
-            const exists = pipe.edges.find(edge => edge.source === drawingEdgeSourceId && edge.target === targetNodeId);
-            if (!exists) { 
-              pipe.edges.push({ id: generateId(), source: drawingEdgeSourceId, target: targetNodeId }); 
-              persistData(); 
-              renderNodeGraph(); 
+        let targetElement = e.target;
+        if (e.type === 'touchend' || e.type === 'touchcancel') {
+          const coords = getEventCoords(e);
+          targetElement = document.elementFromPoint(coords.clientX, coords.clientY);
+        }
+
+        if (targetElement) {
+          const portIn = targetElement.closest('.gh-port-in');
+          if (portIn) {
+            const targetNodeId = portIn.closest('.gh-node').dataset.id;
+            if (drawingEdgeSourceId !== targetNodeId) {
+              const pipe = pipelines.find(p => p.id === activePipelineId);
+              const exists = pipe.edges.find(edge => edge.source === drawingEdgeSourceId && edge.target === targetNodeId);
+              if (!exists) { 
+                pipe.edges.push({ id: generateId(), source: drawingEdgeSourceId, target: targetNodeId }); 
+                persistData(); 
+                renderNodeGraph(); 
+              }
             }
           }
         }
         drawingEdgeSourceId = null;
         edgePreview.style.display = 'none';
       }
-    });
+    };
+
+    window.addEventListener('mouseup', handleGlobalEnd);
+    window.addEventListener('touchend', handleGlobalEnd);
+    window.addEventListener('touchcancel', handleGlobalEnd);
 
     const editorCanvas = document.getElementById('pipeline-canvas');
     if (editorCanvas) {
