@@ -7,6 +7,7 @@
   <meta name="theme-color" content="#05070c">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="AetherFocus">
   
   <style>
     :root {
@@ -186,11 +187,11 @@
     .pipeline-svg-layer { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
     .pipeline-edge { fill: none; stroke: #8b949e; stroke-width: 2.5px; transition: stroke 0.2s; pointer-events: stroke; cursor: pointer; }
     .pipeline-edge:hover { stroke: #f85149; stroke-width: 4px; }
-    .pipeline-edge-drawing { fill: none; stroke: #8b949e; stroke-width: 2.5px; stroke-dasharray: 4; }
+    .pipeline-edge-drawing { fill: none; stroke: #8b949e; stroke-width: 2.5px; stroke-dasharray: 4; pointer-events: none; }
 
     .gh-node { position: absolute; background: #1c2128; border: 1px solid #30363d; border-radius: 6px; padding: 12px 16px; min-width: 220px; display: flex; flex-direction: column; gap: 8px; cursor: grab; z-index: 20; box-shadow: 0 4px 12px rgba(0,0,0,0.5); user-select: none; transition: box-shadow 0.2s, border-color 0.2s; pointer-events: auto; }
     .gh-node:hover { border-color: #8b949e; }
-    .gh-node.dragging { cursor: grabbing; box-shadow: 0 8px 24px rgba(0,0,0,0.8); z-index: 25; }
+    .gh-node:active { cursor: grabbing; box-shadow: 0 8px 24px rgba(0,0,0,0.8); z-index: 25; }
     
     .gh-node-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
     .gh-node-title-group { display: flex; align-items: center; gap: 8px; }
@@ -226,7 +227,7 @@
     .mobile-nav-btn svg { width: 1.25rem; height: 1.25rem; }
     
     .profile-list-item { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 0.5rem; margin-bottom: 0.5rem; }
-    .profile-list-item input { background: transparent; border: none; color: #fff; outline: none; font-size: 0.9rem; font-weight: 600; }
+    .profile-list-item input { background: transparent; border: none; color: #fff; outline: none; font-size: 0.9rem; font-weight: 600; width: 60%; }
     .profile-list-item input:focus { border-bottom: 1px solid var(--accent-neon); }
 
     @media (max-width: 768px) {
@@ -437,7 +438,7 @@
             <h2 class="section-title" id="active-pipeline-title" style="margin: 0; font-family: monospace;">Pipeline</h2>
           </div>
           <div style="display: flex; align-items: center; gap: 0.75rem;">
-            <span style="font-size: 0.75rem; color: var(--text-dim); margin-right: 0.5rem;">Double-click canvas to add node</span>
+            <span style="font-size: 0.75rem; color: var(--text-dim); margin-right: 0.5rem;" class="hidden-mobile">Double-click canvas to add node</span>
             <button class="btn-primary" onclick="addPipelineNode()" style="padding: 0.4rem 0.8rem; font-size: 0.75rem;">+ Node</button>
             <button class="icon-btn" style="color:var(--danger); border-color:rgba(239,68,68,0.3); width: 1.8rem; height: 1.8rem;" onclick="promptDeleteActivePipeline()" title="Delete Pipeline">
               <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
@@ -548,7 +549,7 @@
     </div>
   </div>
 
-  <!-- Custom Prompt/Confirm Modal (Replaces native alerts) -->
+  <!-- Custom Prompt/Confirm Modal -->
   <div class="modal-backdrop" id="modal-custom-action">
     <div class="modal-box" style="z-index: 105;">
       <h3 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 0.75rem;" id="modal-action-title">Confirm</h3>
@@ -570,7 +571,15 @@
   </nav>
 
   <script>
-    const swCode = `self.addEventListener('install', (e) => self.skipWaiting()); self.addEventListener('activate', (e) => e.waitUntil(clients.claim())); self.addEventListener('fetch', (e) => { e.respondWith(fetch(e.request).catch(() => caches.match(e.request))); });`;
+    // CRITICAL FIX 1: Bump Cache Name to bust user's live broken cache
+    const CACHE_NAME = 'aether-focus-v4-node-update';
+    const swCode = `
+      self.addEventListener('install', (e) => self.skipWaiting()); 
+      self.addEventListener('activate', (e) => {
+        e.waitUntil(caches.keys().then(keys => Promise.all(keys.map(k => { if(k !== '${CACHE_NAME}') return caches.delete(k); }))).then(() => clients.claim()));
+      });
+      self.addEventListener('fetch', (e) => { e.respondWith(fetch(e.request).catch(() => caches.match(e.request))); });
+    `;
     if ('serviceWorker' in navigator) { try { const swBlob = new Blob([swCode], { type: 'application/javascript' }); navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(e => {}); } catch (e) {} }
 
     function openModal(id) { document.getElementById(id).classList.add('open'); }
@@ -617,7 +626,6 @@
     document.getElementById('btn-toggle-wakelock').addEventListener('click', () => { wakeLockRequestedByUser = !wakeLockRequestedByUser; wakeLockRequestedByUser ? requestScreenWakeLock() : releaseScreenWakeLock(); });
     document.getElementById('btn-toggle-notifs').addEventListener('click', async () => { if ('Notification' in window) { const res = await Notification.requestPermission(); if (res === 'granted') { document.getElementById('btn-toggle-notifs').classList.add('active'); document.getElementById('label-notifs').textContent = 'Push Alerts: ACTIVE'; document.getElementById('notif-badge').style.display = 'inline-flex'; } } });
 
-    // Profile Management System
     let profiles = JSON.parse(localStorage.getItem('aether_profiles') || '["Main"]');
     let currentProfile = localStorage.getItem('aether_profile') || profiles[0];
     if (!profiles.includes(currentProfile)) currentProfile = profiles[0];
@@ -639,8 +647,8 @@
     ];
 
     let subjects = [], studyLogs = [], savedPomoMinutes = 25;
-    let checklists = {}; // { 'YYYY-MM-DD': [ { id, text, done } ] }
-    let pipelines = []; // { id, title, color, nodes: [], edges: [] }
+    let checklists = {};
+    let pipelines = [];
 
     function renderProfileHeader() {
       const container = document.getElementById('profile-buttons-container');
@@ -681,7 +689,7 @@
         
         let confirmTimeout;
         delBtn.onclick = () => {
-          if (profiles.length === 1) return alert("Cannot delete the last profile.");
+          if (profiles.length === 1) return promptUser("Cannot Delete", "You cannot delete your only profile.");
           if (delBtn.textContent === "Sure?") {
             clearTimeout(confirmTimeout);
             deleteProfile(p);
@@ -716,7 +724,6 @@
       profiles = profiles.map(p => p === oldName ? newName : p);
       localStorage.setItem('aether_profiles', JSON.stringify(profiles));
       
-      // Migrate local storage keys
       ['aether_subjects', 'aether_logs', 'aether_pomo_minutes', 'aether_checklists', 'aether_pipelines', 'aether_active_session'].forEach(key => {
         const data = localStorage.getItem(`${oldName}_${key}`);
         if (data) { localStorage.setItem(`${newName}_${key}`, data); localStorage.removeItem(`${oldName}_${key}`); }
@@ -733,7 +740,6 @@
     function deleteProfile(name) {
       profiles = profiles.filter(p => p !== name);
       localStorage.setItem('aether_profiles', JSON.stringify(profiles));
-      // Wipe data
       ['aether_subjects', 'aether_logs', 'aether_pomo_minutes', 'aether_checklists', 'aether_pipelines', 'aether_active_session'].forEach(key => {
         localStorage.removeItem(`${name}_${key}`);
       });
@@ -748,14 +754,38 @@
       localStorage.setItem(sKey('aether_pomo_minutes'), savedPomoMinutes.toString());
       localStorage.setItem(sKey('aether_checklists'), JSON.stringify(checklists));
       localStorage.setItem(sKey('aether_pipelines'), JSON.stringify(pipelines));
-      updateOverviewStats(); renderSubjectsList(); renderCalendar(); renderAnalytics(); renderPipelinesDashboard();
+      
+      updateOverviewStats(); 
+      renderSubjectsList(); 
+      renderCalendar(); 
+      renderAnalytics(); 
+      
+      // CRITICAL FIX 2: Only redraw dashboard if pipeline is NOT active. Prevents popping out!
+      const pipelineCanvasActive = document.getElementById('pipelines-active').classList.contains('active');
+      if (activePipelineId === null && !pipelineCanvasActive) { 
+        renderPipelinesDashboard(); 
+      }
     }
 
     function loadProfileData() {
       subjects = JSON.parse(localStorage.getItem(sKey('aether_subjects')) || 'null') || DEFAULT_SUBJECTS;
       studyLogs = JSON.parse(localStorage.getItem(sKey('aether_logs')) || 'null') || [];
       checklists = JSON.parse(localStorage.getItem(sKey('aether_checklists')) || 'null') || {};
-      pipelines = JSON.parse(localStorage.getItem(sKey('aether_pipelines')) || 'null') || DEFAULT_PIPELINES;
+      
+      // CRITICAL FIX 3: Robust data sanitization for Pipelines (protect against old Kanban arrays)
+      let loadedPipelines = JSON.parse(localStorage.getItem(sKey('aether_pipelines')) || 'null');
+      if (loadedPipelines && Array.isArray(loadedPipelines)) {
+        pipelines = loadedPipelines.map(p => ({
+          id: p.id || generateId(),
+          title: p.title || 'Untitled Plan',
+          color: p.color || '#00f0ff',
+          nodes: Array.isArray(p.nodes) ? p.nodes : [],
+          edges: Array.isArray(p.edges) ? p.edges : []
+        }));
+      } else {
+        pipelines = DEFAULT_PIPELINES;
+      }
+
       savedPomoMinutes = parseInt(localStorage.getItem(sKey('aether_pomo_minutes')) || '25', 10);
       if (!activeSubjectId || !subjects.find(s => s.id === activeSubjectId)) { activeSubjectId = subjects.length > 0 ? subjects[0].id : null; }
       
@@ -923,12 +953,8 @@
     });
 
     let activePipelineId = null;
-    let draggedGHNode = null;
+    let draggedGHNode = null; 
     let ghNodeOffset = { x: 0, y: 0 };
-    let pendingGHNode = null;
-    let pendingGHNodeStart = { x: 0, y: 0 };
-    let ghNodeIsDragging = false;
-    const GH_DRAG_THRESHOLD = 5;
     let drawingEdgeSourceId = null;
     
     const svgCanvas = document.getElementById('pipeline-svg');
@@ -968,13 +994,11 @@
        if (res) { pipelines = pipelines.filter(p => p.id !== activePipelineId); persistData(); closePipeline(); }
     }
     
-    // Core SVG rendering helper
     function getBezierPath(startX, startY, endX, endY) {
       const curvature = Math.max(Math.abs(endX - startX) / 2, 40);
       return `M ${startX} ${startY} C ${startX + curvature} ${startY}, ${endX - curvature} ${endY}, ${endX} ${endY}`;
     }
 
-    // Handles drawing everything inside the active pipeline
     function renderNodeGraph() {
       if (!activePipelineId) return;
       const pipe = pipelines.find(p => p.id === activePipelineId);
@@ -989,7 +1013,6 @@
       if (!pipe.nodes) pipe.nodes = [];
       if (!pipe.edges) pipe.edges = [];
       
-      // Render Nodes
       pipe.nodes.forEach(node => {
         const div = document.createElement('div');
         div.className = 'gh-node';
@@ -1013,16 +1036,14 @@
           <div class="gh-port gh-port-out" data-type="out"></div>
         `;
 
+        // CRITICAL FIX 4: Strong event isolation for dragging
         div.addEventListener('mousedown', (e) => {
-          if (e.button !== 0) return;
           if (e.target.classList.contains('gh-port') || e.target.tagName === 'A' || e.target.tagName === 'BUTTON') return;
-          e.preventDefault();
-          e.stopPropagation();
+          e.preventDefault(); 
+          e.stopPropagation(); 
           const rect = div.getBoundingClientRect();
-          pendingGHNode = node;
-          pendingGHNodeStart = { x: e.clientX, y: e.clientY };
+          draggedGHNode = node;
           ghNodeOffset = { x: e.clientX - rect.left, y: e.clientY - rect.top };
-          ghNodeIsDragging = false;
         });
 
         const portOut = div.querySelector('.gh-port-out');
@@ -1040,6 +1061,7 @@
           persistData(); renderNodeGraph();
         });
 
+        // CRITICAL FIX 4: Isolate double click text-edit
         div.addEventListener('dblclick', async (e) => {
           e.stopPropagation();
           if (e.target.classList.contains('gh-port')) return;
@@ -1056,7 +1078,6 @@
         nodesLayer.appendChild(div);
       });
 
-      // Render Edges initially (Timeout ensures DOM positions are painted)
       setTimeout(() => updateAllEdges(), 0);
     }
 
@@ -1093,7 +1114,6 @@
       });
     }
 
-    // High performance inline coordinate update (prevents DOM rebuild lag)
     function updateNodePosition(node) {
       const div = document.querySelector(`.gh-node[data-id="${node.id}"]`);
       if (div) { div.style.left = `${node.x}px`; div.style.top = `${node.y}px`; }
@@ -1111,7 +1131,6 @@
       }
     }
 
-    /* GLOBAL Window Listeners to fix "Sticks to click" bug */
     window.addEventListener('mousemove', (e) => {
       if (!activePipelineId) return;
       const editorCanvas = document.getElementById('pipeline-canvas');
@@ -1120,18 +1139,6 @@
       const rect = editorCanvas.getBoundingClientRect();
       const mouseX = e.clientX - rect.left;
       const mouseY = e.clientY - rect.top;
-
-      if (pendingGHNode && !ghNodeIsDragging) {
-        const dx = e.clientX - pendingGHNodeStart.x;
-        const dy = e.clientY - pendingGHNodeStart.y;
-        if (Math.hypot(dx, dy) >= GH_DRAG_THRESHOLD) {
-          draggedGHNode = pendingGHNode;
-          pendingGHNode = null;
-          ghNodeIsDragging = true;
-          const div = document.querySelector(`.gh-node[data-id="${draggedGHNode.id}"]`);
-          if (div) div.classList.add('dragging');
-        }
-      }
 
       if (draggedGHNode) {
         draggedGHNode.x = mouseX - ghNodeOffset.x;
@@ -1150,15 +1157,7 @@
     });
 
     window.addEventListener('mouseup', (e) => {
-      if (draggedGHNode) {
-        const div = document.querySelector(`.gh-node[data-id="${draggedGHNode.id}"]`);
-        if (div) div.classList.remove('dragging');
-        persistData();
-      }
-      draggedGHNode = null;
-      pendingGHNode = null;
-      ghNodeIsDragging = false;
-
+      if (draggedGHNode) { persistData(); draggedGHNode = null; }
       if (drawingEdgeSourceId) {
         const portIn = e.target.closest('.gh-port-in');
         if (portIn) {
@@ -1205,6 +1204,15 @@
     document.getElementById('btn-export-json').addEventListener('click', () => { const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ exportDate: new Date().toISOString(), profile: currentProfile, pomoMinutes: savedPomoMinutes, subjects, studyLogs, checklists, pipelines }, null, 2)); const a = document.createElement('a'); a.href = dataStr; a.download = `aetherfocus_backup_${getTodayString()}.json`; document.body.appendChild(a); a.click(); a.remove(); });
     document.getElementById('input-import-json').addEventListener('change', (e) => { const file = e.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (event) => { try { const imp = JSON.parse(event.target.result); if (Array.isArray(imp.subjects) && Array.isArray(imp.studyLogs)) { subjects = imp.subjects; studyLogs = imp.studyLogs; if (imp.checklists) checklists = imp.checklists; if (imp.pipelines) pipelines = imp.pipelines; if (imp.pomoMinutes) updatePomoDuration(imp.pomoMinutes); persistData(); populateTimerSubjectSelect(); closeModal('modal-sync'); playChime(659.25, 880); } } catch (err) {} }; reader.readAsText(file); });
     document.getElementById('btn-toggle-sound').addEventListener('click', () => { soundMuted = !soundMuted; document.getElementById('btn-toggle-sound').style.opacity = soundMuted ? '0.4' : '1'; });
+
+    let selectedColor = '#00f0ff';
+    document.querySelectorAll('.color-option').forEach(opt => {
+      opt.addEventListener('click', () => {
+        document.querySelectorAll('.color-option').forEach(o => o.classList.remove('selected'));
+        opt.classList.add('selected');
+        selectedColor = opt.getAttribute('data-color');
+      });
+    });
 
     window.addEventListener('DOMContentLoaded', () => loadProfileData());
   </script>
