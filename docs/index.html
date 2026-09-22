@@ -917,6 +917,41 @@
       border-radius: 0.65rem;
       margin-bottom: 0.6rem;
       transition: all 0.2s ease;
+      cursor: grab;
+    }
+
+    .checklist-item.dragging {
+      opacity: 0.4;
+      background: rgba(0, 240, 255, 0.1);
+      transform: scale(0.98);
+    }
+
+    .checklist-item.drag-over {
+      border-top: 2px dashed var(--accent-neon);
+    }
+
+    .checklist-item.drag-over-bottom {
+      border-bottom: 2px dashed var(--accent-neon);
+    }
+
+    .drag-handle {
+      color: var(--text-dim);
+      display: flex;
+      align-items: center;
+      padding-right: 0.4rem;
+      cursor: grab;
+      margin-top: 0.1rem;
+    }
+
+    .drag-handle:hover {
+      color: var(--text-main);
+    }
+
+    .task-number {
+      font-family: monospace;
+      color: var(--accent-neon);
+      font-weight: 800;
+      margin-right: 0.4rem;
     }
 
     .checklist-item:hover {
@@ -1476,6 +1511,7 @@
               Task
             </button>
           </div>
+          <div id="cal-task-stats" style="display: none; gap: 0.75rem; margin-bottom: 1rem;"></div>
           <div id="cal-checklist-container">
             <!-- Checklist items injected via JavaScript -->
           </div>
@@ -1542,10 +1578,11 @@
   <!-- MODAL: ADD TASK -->
   <div class="modal-backdrop" id="modal-task">
     <div class="modal-box">
-      <h3 style="font-size: 1.1rem; font-weight: 800; color: #fff; margin-bottom: 0.25rem;">Add New Task</h3>
+      <h3 style="font-size: 1.1rem; font-weight: 800; color: #fff; margin-bottom: 0.25rem;" id="modal-task-title">Add New Task</h3>
       <p style="font-size: 0.75rem; color: var(--text-dim); margin-bottom: 1.25rem;">Add a to-do item for your daily checklist.</p>
 
       <form id="form-task">
+        <input type="hidden" id="task-id">
         <div class="form-group">
           <label class="form-label">Task Name</label>
           <input type="text" id="task-name" class="form-input" required placeholder="e.g. Review Flashcards">
@@ -2585,46 +2622,130 @@
 
     function renderChecklist(dateStr) {
       const container = document.getElementById('cal-checklist-container');
+      const statsContainer = document.getElementById('cal-task-stats');
       container.innerHTML = '';
 
       // Get tasks relevant to this day: global tasks or tasks specific to this date
       const dayTasks = tasks.filter(t => t.isGlobal || t.date === dateStr);
+
+      if (statsContainer) {
+        const totalTasks = dayTasks.length;
+        let completedTasks = 0;
+        if (taskCompletions[dateStr]) {
+            completedTasks = dayTasks.filter(t => taskCompletions[dateStr].includes(t.id)).length;
+        }
+        const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
+        if (totalTasks > 0) {
+            statsContainer.innerHTML = `
+              <div style="flex: 1; background: rgba(14, 20, 36, 0.6); padding: 0.6rem; border-radius: 0.65rem; border: 1px solid rgba(255,255,255,0.05); text-align: center;">
+                 <div style="font-size: 0.65rem; text-transform: uppercase; color: var(--text-dim); font-weight: 700; letter-spacing: 0.05em; margin-bottom: 0.2rem;">Total Tasks</div>
+                 <div class="font-mono text-neon" style="font-size: 1.1rem; font-weight: 800;">${totalTasks}</div>
+              </div>
+              <div style="flex: 1; background: rgba(14, 20, 36, 0.6); padding: 0.6rem; border-radius: 0.65rem; border: 1px solid rgba(255,255,255,0.05); text-align: center;">
+                 <div style="font-size: 0.65rem; text-transform: uppercase; color: var(--text-dim); font-weight: 700; letter-spacing: 0.05em; margin-bottom: 0.2rem;">Completed</div>
+                 <div class="font-mono" style="font-size: 1.1rem; font-weight: 800; color: var(--break-green);">${completedTasks}</div>
+              </div>
+              <div style="flex: 1; background: rgba(14, 20, 36, 0.6); padding: 0.6rem; border-radius: 0.65rem; border: 1px solid rgba(255,255,255,0.05); text-align: center;">
+                 <div style="font-size: 0.65rem; text-transform: uppercase; color: var(--text-dim); font-weight: 700; letter-spacing: 0.05em; margin-bottom: 0.2rem;">Progress</div>
+                 <div class="font-mono" style="font-size: 1.1rem; font-weight: 800; color: var(--break-purple);">${completionRate}%</div>
+              </div>
+            `;
+            statsContainer.style.display = 'flex';
+        } else {
+            statsContainer.style.display = 'none';
+        }
+      }
 
       if (dayTasks.length === 0) {
         container.innerHTML = '<p style="font-size: 0.75rem; color: var(--text-dim); text-align: center; margin-top: 1rem;">No tasks added for this day yet.</p>';
         return;
       }
 
-      // Sort: Completed tasks at the bottom
-      dayTasks.sort((a, b) => {
-        const aDone = taskCompletions[dateStr] && taskCompletions[dateStr].includes(a.id);
-        const bDone = taskCompletions[dateStr] && taskCompletions[dateStr].includes(b.id);
-        if (aDone === bDone) return 0;
-        return aDone ? 1 : -1;
-      });
+      // Sort by manual order assigned by drag & drop
+      dayTasks.sort((a, b) => (a.order || 0) - (b.order || 0));
 
-      dayTasks.forEach(task => {
+      let draggedItemId = null;
+
+      dayTasks.forEach((task, index) => {
         const isCompleted = taskCompletions[dateStr] && taskCompletions[dateStr].includes(task.id);
         
         const el = document.createElement('div');
         el.className = `checklist-item ${isCompleted ? 'is-completed' : ''}`;
+        el.setAttribute('draggable', 'true');
+        el.dataset.taskId = task.id;
+        
         el.innerHTML = `
+          <div class="drag-handle" title="Drag to reorder">
+            <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><circle cx="9" cy="5" r="1.5"/><circle cx="15" cy="5" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="19" r="1.5"/><circle cx="15" cy="19" r="1.5"/></svg>
+          </div>
           <div class="checklist-checkbox">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
           </div>
           <div class="checklist-content">
             <div style="display: flex; align-items: center;">
+              <span class="task-number">${index + 1}.</span>
               <span class="checklist-title">${task.name}</span>
               ${task.isGlobal ? '<span class="checklist-badge">Everyday</span>' : ''}
             </div>
             ${task.desc ? `<span class="checklist-desc">${task.desc}</span>` : ''}
           </div>
-          <div class="checklist-actions">
+          <div class="checklist-actions" style="display: flex; gap: 0.2rem;">
+            <button class="icon-btn edit-task" style="width:1.75rem; height:1.75rem; border:none; background:transparent;" title="Edit Task">
+              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
             <button class="icon-btn del-task" style="width:1.75rem; height:1.75rem; border:none; background:transparent;" title="Delete Task">
               <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
             </button>
           </div>
         `;
+
+        // Drag and Drop Listeners
+        el.addEventListener('dragstart', (e) => {
+          draggedItemId = task.id;
+          e.dataTransfer.effectAllowed = 'move';
+          e.dataTransfer.setData('text/plain', task.id);
+          setTimeout(() => el.classList.add('dragging'), 0);
+        });
+
+        el.addEventListener('dragend', () => {
+          el.classList.remove('dragging');
+          document.querySelectorAll('.checklist-item').forEach(item => item.classList.remove('drag-over', 'drag-over-bottom'));
+          draggedItemId = null;
+        });
+
+        el.addEventListener('dragover', (e) => {
+          e.preventDefault(); 
+          e.dataTransfer.dropEffect = 'move';
+          
+          if (draggedItemId === task.id) return;
+
+          const rect = el.getBoundingClientRect();
+          const relY = e.clientY - rect.top;
+          
+          document.querySelectorAll('.checklist-item').forEach(item => item.classList.remove('drag-over', 'drag-over-bottom'));
+          
+          if (relY < rect.height / 2) {
+              el.classList.add('drag-over');
+          } else {
+              el.classList.add('drag-over-bottom');
+          }
+        });
+
+        el.addEventListener('drop', (e) => {
+          e.preventDefault();
+          el.classList.remove('drag-over', 'drag-over-bottom');
+          if (draggedItemId === task.id) return;
+          
+          const draggedId = e.dataTransfer.getData('text/plain');
+          if (!draggedId) return;
+          
+          const rect = el.getBoundingClientRect();
+          const relY = e.clientY - rect.top;
+          const insertAfter = relY >= rect.height / 2;
+
+          reorderTasks(draggedId, task.id, insertAfter, dateStr);
+        });
 
         // Toggle completion
         el.querySelector('.checklist-checkbox').addEventListener('click', (e) => {
@@ -2639,7 +2760,18 @@
             taskCompletions[dateStr].push(task.id);
           }
           
-          persistData(); // saves and re-renders
+          persistData(); 
+        });
+
+        // Edit task
+        el.querySelector('.edit-task').addEventListener('click', (e) => {
+          e.stopPropagation();
+          document.getElementById('task-id').value = task.id;
+          document.getElementById('task-name').value = task.name;
+          document.getElementById('task-desc').value = task.desc || '';
+          document.getElementById('task-is-global').checked = task.isGlobal;
+          document.getElementById('modal-task-title').textContent = 'Edit Task';
+          taskModal.classList.add('open');
         });
 
         // Delete task
@@ -2658,6 +2790,27 @@
 
         container.appendChild(el);
       });
+    }
+
+    function reorderTasks(draggedId, targetId, insertAfter, dateStr) {
+      let currentDayTasks = tasks.filter(t => t.isGlobal || t.date === dateStr);
+      currentDayTasks.sort((a, b) => (a.order || 0) - (b.order || 0));
+
+      const draggedIdx = currentDayTasks.findIndex(t => t.id === draggedId);
+      const targetIdx = currentDayTasks.findIndex(t => t.id === targetId);
+
+      if (draggedIdx === -1 || targetIdx === -1) return;
+
+      const [draggedItem] = currentDayTasks.splice(draggedIdx, 1);
+      const newTargetIdx = currentDayTasks.findIndex(t => t.id === targetId);
+      
+      currentDayTasks.splice(insertAfter ? newTargetIdx + 1 : newTargetIdx, 0, draggedItem);
+
+      currentDayTasks.forEach((t, i) => {
+          t.order = i * 1000; // Multiply by 1000 for safe float spacing on next sort
+      });
+
+      persistData();
     }
 
     document.getElementById('cal-prev').addEventListener('click', () => {
@@ -2787,9 +2940,11 @@
     const formTask = document.getElementById('form-task');
 
     document.getElementById('btn-open-add-task').addEventListener('click', () => {
+      document.getElementById('task-id').value = '';
       document.getElementById('task-name').value = '';
       document.getElementById('task-desc').value = '';
       document.getElementById('task-is-global').checked = false;
+      document.getElementById('modal-task-title').textContent = 'Add New Task';
       taskModal.classList.add('open');
     });
 
@@ -2799,21 +2954,35 @@
 
     formTask.addEventListener('submit', (e) => {
       e.preventDefault();
+      const id = document.getElementById('task-id').value;
       const name = document.getElementById('task-name').value.trim();
       const desc = document.getElementById('task-desc').value.trim();
       const isGlobal = document.getElementById('task-is-global').checked;
 
       if (!name) return;
 
-      const newTask = {
-        id: 'task-' + Date.now(),
-        name,
-        desc,
-        isGlobal,
-        date: isGlobal ? null : selectedCalDayStr
-      };
+      if (id) {
+        // Edit existing task
+        const existingTask = tasks.find(t => t.id === id);
+        if (existingTask) {
+          existingTask.name = name;
+          existingTask.desc = desc;
+          existingTask.isGlobal = isGlobal;
+          existingTask.date = isGlobal ? null : (existingTask.date || selectedCalDayStr);
+        }
+      } else {
+        // Create new task
+        const newTask = {
+          id: 'task-' + Date.now(),
+          name,
+          desc,
+          isGlobal,
+          date: isGlobal ? null : selectedCalDayStr,
+          order: Date.now() // By default, new tasks go to the bottom of the order list
+        };
+        tasks.push(newTask);
+      }
       
-      tasks.push(newTask);
       persistData(); // this calls renderCalendar and updates the UI automatically
       taskModal.classList.remove('open');
     });
