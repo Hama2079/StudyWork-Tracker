@@ -53,6 +53,7 @@
       overflow-x: hidden;
     }
 
+    /* Ambient neon halo */
     body::before {
       content: '';
       position: fixed;
@@ -114,7 +115,6 @@
 
     .profile-switch {
       display: flex;
-      align-items: center;
       background: rgba(14, 20, 36, 0.8);
       border: 1px solid var(--border-subtle);
       border-radius: 0.6rem;
@@ -139,24 +139,6 @@
       background: var(--accent-neon);
       color: #04060a;
       box-shadow: 0 0 8px rgba(0, 240, 255, 0.3);
-    }
-
-    .profile-manage-btn {
-      background: transparent;
-      border: none;
-      color: var(--text-dim);
-      cursor: pointer;
-      padding: 0.25rem;
-      border-radius: 0.4rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: 0.2s;
-    }
-
-    .profile-manage-btn:hover {
-      color: #fff;
-      background: rgba(255,255,255,0.1);
     }
 
     .nav-tabs {
@@ -906,22 +888,6 @@
       box-shadow: 0 0 12px var(--accent-glow);
     }
 
-    .cal-day-cell span { pointer-events: none; }
-
-    .cal-task-dot {
-      position: absolute;
-      bottom: 3px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 5px;
-      height: 5px;
-      border-radius: 50%;
-      pointer-events: none;
-    }
-
-    .cal-task-dot.dot-pending { background: #fbbf24; box-shadow: 0 0 4px rgba(251,191,36,0.7); }
-    .cal-task-dot.dot-done { background: var(--break-green); box-shadow: 0 0 4px rgba(52,211,153,0.7); }
-
     .heat-lvl-0 { background: rgba(14, 20, 36, 0.5); }
     .heat-lvl-1 { background: rgba(0, 240, 255, 0.15); border-color: rgba(0, 240, 255, 0.25); color: #7dd3fc; }
     .heat-lvl-2 { background: rgba(0, 240, 255, 0.35); border-color: rgba(0, 240, 255, 0.5); color: #e0f2fe; }
@@ -941,191 +907,136 @@
       margin-top: 1.25rem;
     }
 
-    /* Checklist CSS */
-    .checklist-task-item {
+    .checklist-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      background: rgba(14, 20, 36, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 0.75rem;
+      border-radius: 0.65rem;
+      margin-bottom: 0.6rem;
+      transition: all 0.2s ease;
+      cursor: grab;
+    }
+
+    .checklist-item.dragging {
+      opacity: 0.4;
+      background: rgba(0, 240, 255, 0.1);
+      transform: scale(0.98);
+    }
+
+    .checklist-item.drag-over {
+      border-top: 2px dashed var(--accent-neon);
+    }
+
+    .checklist-item.drag-over-bottom {
+      border-bottom: 2px dashed var(--accent-neon);
+    }
+
+    .drag-handle {
+      color: var(--text-dim);
       display: flex;
       align-items: center;
-      gap: 0.75rem;
-      background: var(--bg-surface);
-      padding: 0.75rem;
-      border-radius: 0.5rem;
-      border: 1px solid rgba(255,255,255,0.05);
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      margin-bottom: 0.5rem;
-      touch-action: pan-y;
-      transform-origin: top;
+      padding-right: 0.4rem;
+      cursor: grab;
+      margin-top: 0.1rem;
+    }
+
+    .drag-handle:hover {
+      color: var(--text-main);
+    }
+
+    .task-number {
+      font-family: monospace;
+      color: var(--accent-neon);
+      font-weight: 800;
+      margin-right: 0.4rem;
+    }
+
+    .checklist-item:hover {
+      border-color: rgba(0, 240, 255, 0.3);
+      background: rgba(14, 20, 36, 0.8);
+    }
+
+    .checklist-checkbox {
+      width: 1.25rem;
+      height: 1.25rem;
+      border-radius: 0.35rem;
+      border: 2px solid var(--border-active);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      margin-top: 0.1rem;
+      transition: all 0.2s ease;
+      background: transparent;
+    }
+
+    .checklist-item.is-completed .checklist-checkbox {
+      background: var(--accent-neon);
+      border-color: var(--accent-neon);
+      box-shadow: 0 0 10px var(--accent-glow);
+    }
+
+    .checklist-checkbox svg {
+      width: 0.85rem;
+      height: 0.85rem;
+      color: #04060a;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    .checklist-item.is-completed .checklist-checkbox svg {
       opacity: 1;
     }
 
-    .checklist-task-item.removing {
-      transform: scale(0.95);
-      opacity: 0;
-      margin-bottom: -0.5rem;
-      padding-top: 0;
-      padding-bottom: 0;
-      height: 0;
-      border-width: 0;
-      overflow: hidden;
-    }
-
-    .checklist-task-item.done {
-      background: rgba(52, 211, 153, 0.05);
-      border-color: rgba(52, 211, 153, 0.15);
-    }
-
-    .checklist-task-item.dragging {
-      border-color: var(--accent-neon);
-      box-shadow: 0 10px 24px rgba(0,0,0,0.5), 0 0 0 1px var(--accent-neon);
-      background: var(--bg-card-hover);
-      cursor: grabbing;
-    }
-
-    .checklist-drag-handle {
-      cursor: grab;
-      color: var(--text-dim);
-      touch-action: none;
-      padding: 0.5rem 0.25rem;
-      margin: -0.5rem -0.25rem;
-      display: flex;
-      align-items: center;
-      border-radius: 0.35rem;
-      transition: color 0.2s, background 0.2s;
-    }
-
-    .checklist-drag-handle:hover {
-      color: var(--accent-neon);
-      background: rgba(0, 240, 255, 0.08);
-    }
-
-    .checklist-drag-handle:active {
-      cursor: grabbing;
-      color: var(--accent-neon);
-    }
-
-    .checklist-checkbox {
-      transition: transform 0.15s ease;
-    }
-
-    .checklist-checkbox:active {
-      transform: scale(0.85);
-    }
-
-    .checklist-empty-state {
+    .checklist-content {
+      flex: 1;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      padding: 1.75rem 1rem;
-      color: var(--text-dim);
-      text-align: center;
     }
 
-    .checklist-empty-state svg {
-      opacity: 0.5;
-    }
-
-    .checklist-empty-state span {
-      font-size: 0.8rem;
-    }
-
-    .checklist-complete-banner {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      background: rgba(52, 211, 153, 0.1);
-      border: 1px solid rgba(52, 211, 153, 0.3);
-      color: var(--break-green);
-      font-size: 0.78rem;
-      font-weight: 700;
-      padding: 0.55rem 0.8rem;
-      border-radius: 0.6rem;
-      margin-bottom: 0.85rem;
-    }
-
-    #btn-clear-completed {
-      transition: all 0.2s ease;
-    }
-
-    #btn-clear-completed:hover {
-      background: rgba(239, 68, 68, 0.15) !important;
-    }
-
-    .checklist-task-num {
-      font-family: monospace;
-      font-size: 0.75rem;
-      color: var(--text-dim);
-      min-width: 20px;
-      text-align: right;
-    }
-
-    .checklist-checkbox {
-      appearance: none;
-      width: 1.2rem;
-      height: 1.2rem;
-      border: 1px solid var(--text-dim);
-      border-radius: 0.25rem;
-      cursor: pointer;
-      position: relative;
-      transition: 0.2s;
-      flex-shrink: 0;
-    }
-
-    .checklist-checkbox:checked {
-      background: var(--accent-neon);
-      border-color: var(--accent-neon);
-    }
-
-    .checklist-checkbox:checked::after {
-      content: '✓';
-      position: absolute;
-      color: #000;
+    .checklist-title {
       font-size: 0.85rem;
-      font-weight: bold;
-      top: -2px;
-      left: 3px;
+      font-weight: 600;
+      color: #fff;
+      transition: color 0.2s ease;
     }
 
-    .checklist-task-text {
-      flex: 1;
-      font-size: 0.85rem;
-      color: var(--text-main);
-      word-break: break-word;
-      outline: none;
-      padding: 0.3rem 0.4rem;
-      border-radius: 0.35rem;
-      border: 1px solid transparent;
-      transition: background 0.2s, border-color 0.2s;
-    }
-
-    .checklist-task-text:hover,
-    .checklist-task-text:focus {
-      background: rgba(255, 255, 255, 0.05);
-      border-color: rgba(255, 255, 255, 0.1);
-    }
-
-    .checklist-task-item.done .checklist-task-text {
+    .checklist-item.is-completed .checklist-title {
+      color: var(--text-dim);
       text-decoration: line-through;
-      color: var(--text-dim);
     }
 
-    .checklist-progress-bg {
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 9999px;
-      height: 8px;
-      overflow: hidden;
-      margin-bottom: 1rem;
+    .checklist-desc {
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+      margin-top: 0.2rem;
     }
 
-    .checklist-progress-fill {
-      height: 100%;
-      border-radius: 9999px;
-      background: var(--accent-neon);
-      transition: width 0.4s ease, background-color 0.3s ease;
-      box-shadow: 0 0 8px var(--accent-glow);
+    .checklist-badge {
+      font-size: 0.6rem;
+      background: rgba(0, 240, 255, 0.1);
+      color: var(--accent-neon);
+      padding: 0.1rem 0.3rem;
+      border-radius: 0.2rem;
+      margin-left: 0.4rem;
+      font-weight: 700;
+      text-transform: uppercase;
     }
 
-    /* Pipelines CSS */
+    .checklist-actions {
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    .checklist-item:hover .checklist-actions {
+      opacity: 1;
+    }
+
+    /* PIPELINES CSS */
     .pipeline-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -1163,7 +1074,7 @@
       margin-bottom: 0.5rem;
       margin-top: 0.5rem;
     }
-
+    
     .pipeline-editor-wrapper {
       display: flex;
       flex-direction: column;
@@ -1202,7 +1113,7 @@
     .pipeline-canvas.is-panning {
       cursor: grabbing;
     }
-
+    
     .pipeline-svg-layer {
       position: absolute;
       inset: 0;
@@ -1262,7 +1173,7 @@
       box-shadow: 0 8px 24px rgba(0,0,0,0.8);
       z-index: 25;
     }
-
+    
     .gh-node-header {
       display: flex;
       align-items: center;
@@ -1559,30 +1470,18 @@
       border-color: #fff;
       transform: scale(1.15);
     }
-    
-    .profile-list-item {
+
+    .checkbox-wrapper {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      padding: 0.75rem;
-      background: var(--bg-card);
-      border: 1px solid var(--border-subtle);
-      border-radius: 0.5rem;
-      margin-bottom: 0.5rem;
+      gap: 0.5rem;
+      cursor: pointer;
     }
 
-    .profile-list-item input {
-      background: transparent;
-      border: none;
-      color: #fff;
-      outline: none;
-      font-size: 0.9rem;
-      font-weight: 600;
-      width: 60%;
-    }
-
-    .profile-list-item input:focus {
-      border-bottom: 1px solid var(--accent-neon);
+    .checkbox-wrapper input[type="checkbox"] {
+      width: 1rem;
+      height: 1rem;
+      accent-color: var(--accent-neon);
     }
 
     .mobile-nav {
@@ -1631,7 +1530,9 @@
       .stats-grid { grid-template-columns: repeat(2, 1fr); }
       .timer-dial-wrapper { width: 230px; height: 230px; }
       .timer-digits { font-size: 2.7rem; }
-      .pipeline-editor-wrapper { min-height: 80vh; }
+      .checklist-item:hover .checklist-actions { opacity: 1; }
+      .checklist-actions { opacity: 1; }
+      .hidden-mobile { display: none !important; }
       .pipeline-canvas-hint { display: none; }
     }
 
@@ -1655,14 +1556,9 @@
         </div>
       </div>
       <!-- Offline Profile Switcher -->
-      <div class="profile-switch" title="Manage Profiles">
-        <div id="profile-buttons-container" style="display: flex; gap: 0.15rem;"></div>
-        <button class="profile-manage-btn" onclick="openProfileManager()" title="Edit Profiles">
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/>
-            <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
-          </svg>
-        </button>
+      <div class="profile-switch" title="Switch User Profile">
+        <button class="profile-btn active" data-profile="M">M</button>
+        <button class="profile-btn" data-profile="H">H</button>
       </div>
     </div>
 
@@ -1891,7 +1787,7 @@
       </div>
     </section>
 
-    <!-- TAB 3: HEATMAP CALENDAR VIEW & CHECKLIST -->
+    <!-- TAB 3: HEATMAP CALENDAR VIEW -->
     <section id="view-calendar" class="tab-view hidden">
       <div class="calendar-container">
         <div class="calendar-header">
@@ -1929,31 +1825,22 @@
           <div id="cal-inspect-breakdown" style="font-size: 0.8rem; color: var(--text-secondary);">
             <!-- Breakdown items -->
           </div>
-        </div>
 
-        <div class="day-details-panel" id="checklist-panel" style="margin-top: 1.25rem;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
-            <h3 class="font-mono" style="font-size: 0.9rem; color: #fff;">Daily Checklist</h3>
-            <div style="display: flex; align-items: center; gap: 0.6rem;">
-              <button id="btn-clear-completed" class="hidden" style="background: transparent; border: 1px solid rgba(239,68,68,0.3); color: #f87171; font-size: 0.7rem; font-weight: 600; padding: 0.3rem 0.6rem; border-radius: 0.5rem; cursor: pointer;">Clear completed</button>
-              <span id="checklist-stats-text" class="font-mono text-neon" style="font-size: 0.85rem; font-weight: 700;">0/0 Completed</span>
-            </div>
+          <!-- New Daily Checklist Section -->
+          <hr style="border:0; border-top: 1px solid var(--border-subtle); margin: 1.25rem 0;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+            <h3 class="font-mono" style="font-size: 0.9rem; color: #fff; display: flex; align-items: center; gap: 0.4rem;">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+              Daily Checklist
+            </h3>
+            <button class="btn-secondary" id="btn-open-add-task" style="padding: 0.3rem 0.6rem; font-size: 0.75rem; gap: 0.2rem;">
+              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Task
+            </button>
           </div>
-          
-          <div class="checklist-progress-bg">
-            <div class="checklist-progress-fill" id="checklist-progress" style="width: 0%;"></div>
-          </div>
-
-          <div id="checklist-complete-banner" class="checklist-complete-banner hidden">
-            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-            All tasks complete for this day
-          </div>
-          
-          <div id="checklist-tasks" style="display: flex; flex-direction: column; min-height: 20px; padding-bottom: 0.5rem;"></div>
-          
-          <div style="display: flex; gap: 0.5rem;">
-            <input type="text" id="checklist-input" class="form-input" placeholder="Add a new task for this day...">
-            <button class="btn-primary" id="btn-add-checklist-task">Add</button>
+          <div id="cal-task-stats" style="display: none; gap: 0.75rem; margin-bottom: 1rem;"></div>
+          <div id="cal-checklist-container">
+            <!-- Checklist items injected via JavaScript -->
           </div>
         </div>
       </div>
@@ -1978,7 +1865,7 @@
             <h2 class="section-title" id="active-pipeline-title" style="margin: 0; font-family: monospace;">Pipeline</h2>
           </div>
           <div style="display: flex; align-items: center; gap: 0.75rem;">
-            <span style="font-size: 0.75rem; color: var(--text-dim); margin-right: 0.5rem;" class="hidden-mobile">Double-click canvas to add node · drag empty space to pan · pinch to zoom</span>
+            <span style="font-size: 0.75rem; color: var(--text-dim); margin-right: 0.5rem;" class="hidden-mobile">Drag empty space to pan · pinch to zoom</span>
             <button class="btn-primary" onclick="addPipelineNode()" style="padding: 0.4rem 0.8rem; font-size: 0.75rem;">+ Node</button>
             <button class="icon-btn" style="color:var(--danger); border-color:rgba(239,68,68,0.3); width: 1.8rem; height: 1.8rem;" onclick="promptDeleteActivePipeline()" title="Delete Pipeline">
               <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
@@ -1987,15 +1874,12 @@
         </div>
         
         <div class="pipeline-canvas" id="pipeline-canvas">
-          <!-- SVG Layer for drawing connecting curves (kept in screen-space, unaffected by the nodes-layer zoom/pan transform) -->
           <svg class="pipeline-svg-layer" id="pipeline-svg">
             <g id="pipeline-edges-group"></g>
             <path id="pipeline-edge-preview" class="pipeline-edge-drawing" d="" style="display:none;"></path>
           </svg>
-          <!-- DOM Layer for Nodes: this layer is scaled/panned for zoom -->
           <div id="pipeline-nodes-layer" style="position: absolute; inset: 0; pointer-events: none; transform-origin: 0 0;"></div>
 
-          <!-- Zoom controls -->
           <div class="pipeline-zoom-controls">
             <button class="zoom-ctrl-btn" id="btn-zoom-in" title="Zoom in">+</button>
             <div class="zoom-ctrl-divider"></div>
@@ -2005,7 +1889,7 @@
             <div class="zoom-ctrl-divider"></div>
             <button class="zoom-ctrl-btn" id="btn-zoom-reset" title="Reset view" style="font-size: 0.9rem;">⟲</button>
           </div>
-          <div class="pipeline-canvas-hint">Drag empty space to pan · pinch to zoom · double-tap for new node</div>
+          <div class="pipeline-canvas-hint">Drag empty space to pan · pinch to zoom</div>
         </div>
       </div>
     </section>
@@ -2066,7 +1950,41 @@
     </div>
   </div>
 
-  <!-- Add Pipeline Modal -->
+  <!-- MODAL: ADD TASK -->
+  <div class="modal-backdrop" id="modal-task">
+    <div class="modal-box">
+      <h3 style="font-size: 1.1rem; font-weight: 800; color: #fff; margin-bottom: 0.25rem;" id="modal-task-title">Add New Task</h3>
+      <p style="font-size: 0.75rem; color: var(--text-dim); margin-bottom: 1.25rem;">Add a to-do item for your daily checklist.</p>
+
+      <form id="form-task">
+        <input type="hidden" id="task-id">
+        <div class="form-group">
+          <label class="form-label">Task Name</label>
+          <input type="text" id="task-name" class="form-input" required placeholder="e.g. Review Flashcards">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Instructions (Optional)</label>
+          <input type="text" id="task-desc" class="form-input" placeholder="e.g. Chapter 4 vocab">
+        </div>
+
+        <div class="form-group" style="margin-top: 1.5rem;">
+          <label class="checkbox-wrapper">
+            <input type="checkbox" id="task-is-global">
+            <span style="font-size: 0.8rem; color: var(--text-main); font-weight: 600;">Everyday Task</span>
+          </label>
+          <p style="font-size: 0.7rem; color: var(--text-dim); margin-top: 0.2rem; padding-left: 1.5rem;">Check this if you want this task to appear on all days globally. Otherwise, it will only appear on the currently selected day.</p>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1.5rem;">
+          <button type="button" class="btn-secondary" id="btn-cancel-task">Cancel</button>
+          <button type="submit" class="btn-primary">Save Task</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Add Pipeline -->
   <div class="modal-backdrop" id="modal-add-pipeline">
     <div class="modal-box">
       <h3 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 1.25rem;">Create New Pipeline Plan</h3>
@@ -2081,21 +1999,6 @@
       <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1.5rem;">
         <button type="button" class="btn-secondary" onclick="closeModal('modal-add-pipeline')">Cancel</button>
         <button type="button" class="btn-primary" onclick="createPipeline()">Create Canvas</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Profile Management Modal -->
-  <div class="modal-backdrop" id="modal-manage-profiles">
-    <div class="modal-box">
-      <h3 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 1rem;">Manage Profiles</h3>
-      <div id="profile-list-container" style="max-height: 200px; overflow-y: auto; margin-bottom: 1rem;"></div>
-      <div style="display: flex; gap: 0.5rem;">
-        <input type="text" id="new-profile-input" class="form-input" placeholder="New profile name (e.g. Work)">
-        <button class="btn-primary" onclick="addProfile()">Add</button>
-      </div>
-      <div style="display: flex; justify-content: flex-end; margin-top: 1.5rem;">
-        <button type="button" class="btn-secondary" onclick="closeModal('modal-manage-profiles')">Close</button>
       </div>
     </div>
   </div>
@@ -2158,7 +2061,7 @@
           Clear All Logged Study Times (Keep Subjects & Tasks)
         </button>
         <button class="btn-ctrl-stop" id="btn-action-wipe-all" style="justify-content: center; padding: 0.65rem; border-radius: 0.65rem; font-size: 0.8rem; font-weight: 700; cursor: pointer;">
-          Factory Reset (Wipe All Subjects, Tasks & Logs)
+          Factory Reset (Wipe All Subjects, Tasks, Logs & Pipelines)
         </button>
       </div>
 
@@ -2194,7 +2097,7 @@
 
   <script>
     const swCode = `
-      const CACHE_NAME = 'aether-focus-v3.3-unified';
+      const CACHE_NAME = 'aether-focus-v3.2.1';
       self.addEventListener('install', (e) => self.skipWaiting());
       self.addEventListener('activate', (e) => e.waitUntil(clients.claim()));
       self.addEventListener('fetch', (e) => {
@@ -2416,9 +2319,10 @@
     });
 
     const DEFAULT_SUBJECTS = [
-      { id: 'sub-1', name: 'Mathematics & Logic', color: '#00f0ff', tag: 'Core', goalMinutes: 60 },
-      { id: 'sub-2', name: 'Computer Science', color: '#0070f3', tag: 'Tech', goalMinutes: 45 },
-      { id: 'sub-3', name: 'Languages & Reading', color: '#10b981', tag: 'General', goalMinutes: 30 }
+      { id: 'sub-1', name: 'Advanced Machine Learning', color: '#00f0ff', tag: 'AI/Tech', goalMinutes: 60 },
+      { id: 'sub-2', name: 'Distributed Systems & OS', color: '#0070f3', tag: 'Engineering', goalMinutes: 45 },
+      { id: 'sub-3', name: 'Algorithms & Complexity', color: '#6366f1', tag: 'CS Theory', goalMinutes: 60 },
+      { id: 'sub-4', name: 'Neuroscience Foundations', color: '#10b981', tag: 'Cognition', goalMinutes: 30 }
     ];
     
     const DEFAULT_PIPELINES = [
@@ -2439,11 +2343,7 @@
     ];
 
     // Profile State
-    let profiles = JSON.parse(localStorage.getItem('aether_profiles') || '["Main"]');
-    let currentProfile = localStorage.getItem('aether_profile') || profiles[0];
-    if (!profiles.includes(currentProfile)) {
-      currentProfile = profiles[0];
-    }
+    let currentProfile = localStorage.getItem('aether_profile') || 'M';
 
     // Helper to namespace all localStorage keys to the active profile
     function sKey(key) {
@@ -2452,132 +2352,22 @@
 
     let subjects = [];
     let studyLogs = [];
-    let checklists = {};
-    let pipelines = [];
+    let tasks = []; // Daily & Global tasks
+    let taskCompletions = {}; // Mapping of Date String -> Array of completed Task IDs
+    let pipelines = []; // Project Pipelines
     let savedPomoMinutes = 25;
-    
-    function renderProfileHeader() {
-      const container = document.getElementById('profile-buttons-container');
-      container.innerHTML = '';
-      profiles.slice(0, 3).forEach(p => {
-        const btn = document.createElement('button');
-        btn.className = `profile-btn ${p === currentProfile ? 'active' : ''}`;
-        btn.textContent = p.substring(0, 2).toUpperCase();
-        btn.title = `Switch to ${p}`;
-        btn.onclick = () => switchProfile(p);
-        container.appendChild(btn);
-      });
-    }
-
-    function switchProfile(pName) {
-      if (pName === currentProfile) return;
-      if (isRunning) pauseTimer();
-      currentProfile = pName;
-      localStorage.setItem('aether_profile', currentProfile);
-      loadProfileData();
-    }
-
-    function openProfileManager() {
-      const list = document.getElementById('profile-list-container');
-      list.innerHTML = '';
-      profiles.forEach(p => {
-        const item = document.createElement('div');
-        item.className = 'profile-list-item';
-        
-        const input = document.createElement('input');
-        input.value = p;
-        input.onchange = (e) => renameProfile(p, e.target.value.trim());
-        
-        const delBtn = document.createElement('button');
-        delBtn.className = 'icon-btn';
-        delBtn.style = 'width: 1.8rem; height: 1.8rem; border-color: rgba(239,68,68,0.3); color: var(--danger);';
-        delBtn.innerHTML = '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6"/></svg>';
-        
-        let confirmTimeout;
-        delBtn.onclick = () => {
-          if (profiles.length === 1) {
-            return promptUser("Cannot Delete", "You cannot delete your only profile.");
-          }
-          if (delBtn.textContent === "Sure?") {
-            clearTimeout(confirmTimeout);
-            deleteProfile(p);
-          } else {
-            delBtn.innerHTML = "<span style='font-size:0.6rem; font-weight:bold;'>Sure?</span>";
-            confirmTimeout = setTimeout(() => {
-               delBtn.innerHTML = '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6"/></svg>';
-            }, 2500);
-          }
-        };
-
-        item.appendChild(input);
-        item.appendChild(delBtn);
-        list.appendChild(item);
-      });
-      openModal('modal-manage-profiles');
-    }
-
-    function addProfile() {
-      const input = document.getElementById('new-profile-input');
-      const name = input.value.trim();
-      if (!name || profiles.includes(name)) return;
-      profiles.push(name);
-      localStorage.setItem('aether_profiles', JSON.stringify(profiles));
-      input.value = '';
-      openProfileManager();
-      renderProfileHeader();
-    }
-
-    function renameProfile(oldName, newName) {
-      if (!newName || newName === oldName || profiles.includes(newName)) {
-        return openProfileManager();
-      }
-      profiles = profiles.map(p => p === oldName ? newName : p);
-      localStorage.setItem('aether_profiles', JSON.stringify(profiles));
-      
-      const keysToMigrate = ['aether_subjects', 'aether_logs', 'aether_pomo_minutes', 'aether_checklists', 'aether_pipelines', 'aether_active_session'];
-      keysToMigrate.forEach(key => {
-        const data = localStorage.getItem(`${oldName}_${key}`);
-        if (data) { 
-          localStorage.setItem(`${newName}_${key}`, data); 
-          localStorage.removeItem(`${oldName}_${key}`); 
-        }
-      });
-      
-      if (currentProfile === oldName) {
-        currentProfile = newName;
-        localStorage.setItem('aether_profile', currentProfile);
-      }
-      openProfileManager();
-      renderProfileHeader();
-    }
-
-    function deleteProfile(name) {
-      profiles = profiles.filter(p => p !== name);
-      localStorage.setItem('aether_profiles', JSON.stringify(profiles));
-      
-      const keysToDelete = ['aether_subjects', 'aether_logs', 'aether_pomo_minutes', 'aether_checklists', 'aether_pipelines', 'aether_active_session'];
-      keysToDelete.forEach(key => {
-        localStorage.removeItem(`${name}_${key}`);
-      });
-      
-      if (currentProfile === name) { 
-        switchProfile(profiles[0]); 
-      } else { 
-        openProfileManager(); 
-        renderProfileHeader(); 
-      }
-    }
 
     function persistData() {
       localStorage.setItem(sKey('aether_subjects'), JSON.stringify(subjects));
       localStorage.setItem(sKey('aether_logs'), JSON.stringify(studyLogs));
-      localStorage.setItem(sKey('aether_checklists'), JSON.stringify(checklists));
+      localStorage.setItem(sKey('aether_tasks'), JSON.stringify(tasks));
+      localStorage.setItem(sKey('aether_task_completions'), JSON.stringify(taskCompletions));
       localStorage.setItem(sKey('aether_pipelines'), JSON.stringify(pipelines));
       localStorage.setItem(sKey('aether_pomo_minutes'), savedPomoMinutes.toString());
       
       updateOverviewStats();
       renderSubjectsList();
-      renderCalendar(); 
+      renderCalendar(); // This also triggers inspectCalendarDate to update checklist
       renderAnalytics();
       
       const pipelineCanvasActive = document.getElementById('pipelines-active').classList.contains('active') || !document.getElementById('pipelines-active').classList.contains('hidden');
@@ -2610,7 +2400,8 @@
     function loadProfileData() {
       subjects = JSON.parse(localStorage.getItem(sKey('aether_subjects')) || 'null') || DEFAULT_SUBJECTS;
       studyLogs = JSON.parse(localStorage.getItem(sKey('aether_logs')) || 'null') || [];
-      checklists = JSON.parse(localStorage.getItem(sKey('aether_checklists')) || 'null') || {};
+      tasks = JSON.parse(localStorage.getItem(sKey('aether_tasks')) || 'null') || [];
+      taskCompletions = JSON.parse(localStorage.getItem(sKey('aether_task_completions')) || 'null') || {};
       
       let loadedPipelines = JSON.parse(localStorage.getItem(sKey('aether_pipelines')) || 'null');
       if (loadedPipelines && Array.isArray(loadedPipelines)) {
@@ -2632,12 +2423,38 @@
         activeSubjectId = subjects.length > 0 ? subjects[0].id : null;
       }
 
-      renderProfileHeader();
+      // Restore session state for this user
       restoreActiveSessionState();
+
+      // UI Re-render
       updatePomoDuration(savedPomoMinutes);
       populateTimerSubjectSelect();
-      persistData();
+      updateOverviewStats();
+      renderSubjectsList();
+      renderCalendar();
+      renderAnalytics();
+      
+      // Sync Profile Buttons
+      document.querySelectorAll('.profile-btn').forEach(b => {
+        b.classList.toggle('active', b.getAttribute('data-profile') === currentProfile);
+      });
     }
+
+    document.querySelectorAll('.profile-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const newProfile = btn.getAttribute('data-profile');
+        if (newProfile === currentProfile) return;
+
+        // Vital: Always pause active timer before swapping to save the delta to old profile
+        if (isRunning) pauseTimer();
+        
+        currentProfile = newProfile;
+        localStorage.setItem('aether_profile', currentProfile);
+        
+        // Full reload of data context
+        loadProfileData();
+      });
+    });
 
     let timerMode = 'stopwatch'; // 'stopwatch' | 'pomodoro'
     let pomoStage = 'focus';     // 'focus' | 'shortBreak' | 'longBreak'
@@ -2688,6 +2505,7 @@
     function restoreActiveSessionState() {
       const raw = localStorage.getItem(sKey('aether_active_session'));
       if (!raw) {
+        // If clean state, reset completely for safety
         resetTimerState();
         return;
       }
@@ -2702,6 +2520,7 @@
         isRunning = state.isRunning || false;
         startTimestamp = state.startTimestamp || null;
 
+        // Sync Mode UI
         if (timerMode === 'pomodoro') {
           document.getElementById('btn-mode-pomodoro').classList.add('active');
           document.getElementById('btn-mode-stopwatch').classList.remove('active');
@@ -2719,6 +2538,7 @@
 
         populateTimerSubjectSelect();
 
+        // If it was running when user left or refreshed, calculate exact elapsed time!
         if (isRunning && startTimestamp) {
           const delta = Math.floor((Date.now() - startTimestamp) / 1000);
           totalElapsedSeconds = accumulatedSeconds + Math.max(0, delta);
@@ -2744,6 +2564,7 @@
       const delta = Math.floor((Date.now() - startTimestamp) / 1000);
       totalElapsedSeconds = accumulatedSeconds + Math.max(0, delta);
 
+      // Pomodoro complete check
       if (timerMode === 'pomodoro' && totalElapsedSeconds >= timerTargetSeconds) {
         handleTimerCompletion();
         return;
@@ -3088,6 +2909,7 @@
       document.getElementById('stat-subjects-count').textContent = subjects.length;
       document.getElementById('stat-alltime-sub').textContent = `All-time: ${formatHours(allTimeSecs)}`;
 
+      // Calculate streak
       const activeDays = new Set(studyLogs.map(l => l.dateString));
       let streak = 0;
       let check = new Date();
@@ -3171,10 +2993,9 @@
           openSubjectModal(sub);
         });
 
-        card.querySelector('.del-sub').addEventListener('click', async (e) => {
+        card.querySelector('.del-sub').addEventListener('click', (e) => {
           e.stopPropagation();
-          const res = await promptUser("Delete Subject", `Are you sure you want to delete "${sub.name}"?`);
-          if (res) {
+          if (confirm(`Delete "${sub.name}" and its logs?`)) {
             subjects = subjects.filter(s => s.id !== sub.id);
             studyLogs = studyLogs.filter(l => l.subjectId !== sub.id);
             if (activeSubjectId === sub.id) activeSubjectId = subjects[0]?.id || null;
@@ -3235,14 +3056,10 @@
           else heatClass = 'heat-lvl-4';
         }
 
-        const dayTasks = checklists[dayStr] || [];
-        const hasTasks = dayTasks.length > 0;
-        const allTasksDone = hasTasks && dayTasks.every(t => t.done);
-        
         const cell = document.createElement('div');
         cell.className = `cal-day-cell ${heatClass} ${selectedCalDayStr === dayStr ? 'is-selected' : ''}`;
-        cell.title = hasTasks ? `${dayTasks.filter(t=>t.done).length}/${dayTasks.length} tasks done` : `${dayStr}: ${formatHours(daySeconds)}`;
-        cell.innerHTML = `<span>${day}</span>${hasTasks ? `<span class="cal-task-dot ${allTasksDone ? 'dot-done' : 'dot-pending'}"></span>` : ''}`;
+        cell.textContent = day;
+        cell.title = `${dayStr}: ${formatHours(daySeconds)}`;
 
         cell.addEventListener('click', () => {
           selectedCalDayStr = dayStr;
@@ -3255,18 +3072,10 @@
       inspectCalendarDate(selectedCalDayStr);
     }
 
-    function getRelativeDayLabel(dateStr) {
-      const diffDays = Math.round((new Date(dateStr + 'T00:00:00') - new Date(getTodayString() + 'T00:00:00')) / 86400000);
-      if (diffDays === 0) return 'Today';
-      if (diffDays === -1) return 'Yesterday';
-      if (diffDays === 1) return 'Tomorrow';
-      return null;
-    }
-
     function inspectCalendarDate(dateStr) {
-      const relLabel = getRelativeDayLabel(dateStr);
-      const fullLabel = new Date(dateStr + 'T00:00:00').toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
-      document.getElementById('cal-inspect-date').textContent = relLabel ? `${relLabel} · ${fullLabel}` : fullLabel;
+      document.getElementById('cal-inspect-date').textContent = new Date(dateStr + 'T00:00:00').toLocaleDateString(undefined, {
+        weekday: 'short', month: 'short', day: 'numeric', year: 'numeric'
+      });
 
       const dayLogs = studyLogs.filter(l => l.dateString === dateStr);
       const totalSecs = dayLogs.reduce((acc, curr) => acc + curr.duration, 0);
@@ -3301,204 +3110,204 @@
         });
       }
 
+      // Render the Checklist
       renderChecklist(dateStr);
     }
-    
-    let checklistDrag = null; 
 
     function renderChecklist(dateStr) {
-      const tasks = checklists[dateStr] || [];
-      tasks.forEach(t => { if (!t.id) t.id = generateId(); });
-
-      const container = document.getElementById('checklist-tasks'); 
+      const container = document.getElementById('cal-checklist-container');
+      const statsContainer = document.getElementById('cal-task-stats');
       container.innerHTML = '';
-      
-      const total = tasks.length;
-      const completed = tasks.filter(t => t.done).length;
-      const progress = total === 0 ? 0 : (completed / total) * 100;
-      
-      document.getElementById('checklist-stats-text').textContent = `${completed}/${total} Completed`;
-      document.getElementById('checklist-progress').style.width = `${progress}%`;
-      document.getElementById('checklist-progress').style.background = (total > 0 && completed === total) ? 'var(--break-green)' : 'var(--accent-neon)';
 
-      document.getElementById('btn-clear-completed').classList.toggle('hidden', completed === 0);
-      document.getElementById('checklist-complete-banner').classList.toggle('hidden', !(total > 0 && completed === total));
+      // Get tasks relevant to this day: global tasks or tasks specific to this date
+      const dayTasks = tasks.filter(t => t.isGlobal || t.date === dateStr);
 
-      if (total === 0) {
-        container.innerHTML = `
-          <div class="checklist-empty-state">
-            <svg width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            <span>No tasks yet for this day. Add one below.</span>
-          </div>
-        `;
+      if (statsContainer) {
+        const totalTasks = dayTasks.length;
+        let completedTasks = 0;
+        if (taskCompletions[dateStr]) {
+            completedTasks = dayTasks.filter(t => taskCompletions[dateStr].includes(t.id)).length;
+        }
+        const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
+        if (totalTasks > 0) {
+            statsContainer.innerHTML = `
+              <div style="flex: 1; background: rgba(14, 20, 36, 0.6); padding: 0.6rem; border-radius: 0.65rem; border: 1px solid rgba(255,255,255,0.05); text-align: center;">
+                 <div style="font-size: 0.65rem; text-transform: uppercase; color: var(--text-dim); font-weight: 700; letter-spacing: 0.05em; margin-bottom: 0.2rem;">Total Tasks</div>
+                 <div class="font-mono text-neon" style="font-size: 1.1rem; font-weight: 800;">${totalTasks}</div>
+              </div>
+              <div style="flex: 1; background: rgba(14, 20, 36, 0.6); padding: 0.6rem; border-radius: 0.65rem; border: 1px solid rgba(255,255,255,0.05); text-align: center;">
+                 <div style="font-size: 0.65rem; text-transform: uppercase; color: var(--text-dim); font-weight: 700; letter-spacing: 0.05em; margin-bottom: 0.2rem;">Completed</div>
+                 <div class="font-mono" style="font-size: 1.1rem; font-weight: 800; color: var(--break-green);">${completedTasks}</div>
+              </div>
+              <div style="flex: 1; background: rgba(14, 20, 36, 0.6); padding: 0.6rem; border-radius: 0.65rem; border: 1px solid rgba(255,255,255,0.05); text-align: center;">
+                 <div style="font-size: 0.65rem; text-transform: uppercase; color: var(--text-dim); font-weight: 700; letter-spacing: 0.05em; margin-bottom: 0.2rem;">Progress</div>
+                 <div class="font-mono" style="font-size: 1.1rem; font-weight: 800; color: var(--break-purple);">${completionRate}%</div>
+              </div>
+            `;
+            statsContainer.style.display = 'flex';
+        } else {
+            statsContainer.style.display = 'none';
+        }
+      }
+
+      if (dayTasks.length === 0) {
+        container.innerHTML = '<p style="font-size: 0.75rem; color: var(--text-dim); text-align: center; margin-top: 1rem;">No tasks added for this day yet.</p>';
         return;
       }
 
-      tasks.forEach((t, index) => {
-        const item = document.createElement('div'); 
-        item.className = `checklist-task-item ${t.done ? 'done' : ''}`; 
-        item.dataset.taskId = t.id;
+      // Sort by manual order assigned by drag & drop
+      dayTasks.sort((a, b) => (a.order || 0) - (b.order || 0));
+
+      let draggedItemId = null;
+
+      dayTasks.forEach((task, index) => {
+        const isCompleted = taskCompletions[dateStr] && taskCompletions[dateStr].includes(task.id);
         
-        item.innerHTML = `
-          <div class="checklist-drag-handle" title="Drag to reorder">
-            <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M8 6a2 2 0 11-4 0 2 2 0 014 0zm0 6a2 2 0 11-4 0 2 2 0 014 0zm0 6a2 2 0 11-4 0 2 2 0 014 0zm8-12a2 2 0 11-4 0 2 2 0 014 0zm0 6a2 2 0 11-4 0 2 2 0 014 0zm0 6a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+        const el = document.createElement('div');
+        el.className = `checklist-item ${isCompleted ? 'is-completed' : ''}`;
+        el.setAttribute('draggable', 'true');
+        el.dataset.taskId = task.id;
+        
+        el.innerHTML = `
+          <div class="drag-handle" title="Drag to reorder">
+            <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><circle cx="9" cy="5" r="1.5"/><circle cx="15" cy="5" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="19" r="1.5"/><circle cx="15" cy="19" r="1.5"/></svg>
           </div>
-          <div class="checklist-task-num">#${index + 1}</div>
-          <input type="checkbox" class="checklist-checkbox" ${t.done ? 'checked' : ''}>
-          <div class="checklist-task-text" contenteditable="true" title="Click to edit">${t.text}</div>
-          <div style="display:flex; gap:0.4rem; margin-left:auto;">
-            <button class="icon-btn del-task-btn" style="width:1.5rem; height:1.5rem; color:var(--danger); border-color:rgba(239,68,68,0.2);">
-              <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6"/></svg>
+          <div class="checklist-checkbox">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </div>
+          <div class="checklist-content">
+            <div style="display: flex; align-items: center;">
+              <span class="task-number">${index + 1}.</span>
+              <span class="checklist-title">${task.name}</span>
+              ${task.isGlobal ? '<span class="checklist-badge">Everyday</span>' : ''}
+            </div>
+            ${task.desc ? `<span class="checklist-desc">${task.desc}</span>` : ''}
+          </div>
+          <div class="checklist-actions" style="display: flex; gap: 0.2rem;">
+            <button class="icon-btn edit-task" style="width:1.75rem; height:1.75rem; border:none; background:transparent;" title="Edit Task">
+              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            <button class="icon-btn del-task" style="width:1.75rem; height:1.75rem; border:none; background:transparent;" title="Delete Task">
+              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
             </button>
           </div>
         `;
 
-        item.querySelector('.checklist-checkbox').addEventListener('change', (e) => { 
-          const task = (checklists[dateStr] || []).find(x => x.id === t.id);
-          if (task) task.done = e.target.checked; 
-          persistData(); 
-          renderChecklist(dateStr); 
-        });
-        
-        const textEl = item.querySelector('.checklist-task-text');
-        textEl.addEventListener('blur', () => { 
-          const task = (checklists[dateStr] || []).find(x => x.id === t.id);
-          if(textEl.textContent.trim()) { 
-            if (task) task.text = textEl.textContent.trim(); 
-            persistData(); 
-          } else if (task) { 
-            textEl.textContent = task.text; 
-          } 
-        });
-        
-        textEl.addEventListener('keydown', (e) => { 
-          if (e.key === 'Enter') { 
-            e.preventDefault(); 
-            textEl.blur(); 
-          } 
-        });
-        
-        item.querySelector('.del-task-btn').addEventListener('click', () => { 
-          item.classList.add('removing');
-          setTimeout(() => {
-            checklists[dateStr] = (checklists[dateStr] || []).filter(x => x.id !== t.id); 
-            persistData(); 
-            renderChecklist(dateStr); 
-          }, 300);
+        // Drag and Drop Listeners
+        el.addEventListener('dragstart', (e) => {
+          draggedItemId = task.id;
+          e.dataTransfer.effectAllowed = 'move';
+          e.dataTransfer.setData('text/plain', task.id);
+          setTimeout(() => el.classList.add('dragging'), 0);
         });
 
-        attachChecklistDragHandlers(item, container, dateStr);
-        
-        container.appendChild(item);
-      });
-    }
+        el.addEventListener('dragend', () => {
+          el.classList.remove('dragging');
+          document.querySelectorAll('.checklist-item').forEach(item => item.classList.remove('drag-over', 'drag-over-bottom'));
+          draggedItemId = null;
+        });
 
-    function attachChecklistDragHandlers(item, container, dateStr) {
-      const handle = item.querySelector('.checklist-drag-handle');
+        el.addEventListener('dragover', (e) => {
+          e.preventDefault(); 
+          e.dataTransfer.dropEffect = 'move';
+          
+          if (draggedItemId === task.id) return;
 
-      handle.addEventListener('pointerdown', (e) => {
-        if (e.button !== undefined && e.button !== 0) return;
-        e.preventDefault();
-        try { handle.setPointerCapture(e.pointerId); } catch (err) {}
-        checklistDrag = { pointerId: e.pointerId, itemEl: item, handleEl: handle, container, startClientY: e.clientY };
-        item.classList.add('dragging');
-        item.style.position = 'relative';
-        item.style.zIndex = '10';
-      });
-
-      handle.addEventListener('pointermove', (e) => {
-        if (!checklistDrag || checklistDrag.itemEl !== item) return;
-        const deltaY = e.clientY - checklistDrag.startClientY;
-        item.style.transform = `translateY(${deltaY}px)`;
-
-        const itemRect = item.getBoundingClientRect();
-        const itemMidY = itemRect.top + itemRect.height / 2;
-        const siblings = Array.from(container.children).filter(el => el !== item);
-
-        for (const sib of siblings) {
-          const sibRect = sib.getBoundingClientRect();
-          const sibMidY = sibRect.top + sibRect.height / 2;
-          const itemIsBefore = !!(item.compareDocumentPosition(sib) & Node.DOCUMENT_POSITION_FOLLOWING);
-
-          if (itemIsBefore && itemMidY > sibMidY) {
-            container.insertBefore(item, sib.nextSibling);
-            checklistDrag.startClientY = e.clientY;
-            item.style.transform = 'translateY(0px)';
-            break;
-          } else if (!itemIsBefore && itemMidY < sibMidY) {
-            container.insertBefore(item, sib);
-            checklistDrag.startClientY = e.clientY;
-            item.style.transform = 'translateY(0px)';
-            break;
+          const rect = el.getBoundingClientRect();
+          const relY = e.clientY - rect.top;
+          
+          document.querySelectorAll('.checklist-item').forEach(item => item.classList.remove('drag-over', 'drag-over-bottom'));
+          
+          if (relY < rect.height / 2) {
+              el.classList.add('drag-over');
+          } else {
+              el.classList.add('drag-over-bottom');
           }
-        }
+        });
+
+        el.addEventListener('drop', (e) => {
+          e.preventDefault();
+          el.classList.remove('drag-over', 'drag-over-bottom');
+          if (draggedItemId === task.id) return;
+          
+          const draggedId = e.dataTransfer.getData('text/plain');
+          if (!draggedId) return;
+          
+          const rect = el.getBoundingClientRect();
+          const relY = e.clientY - rect.top;
+          const insertAfter = relY >= rect.height / 2;
+
+          reorderTasks(draggedId, task.id, insertAfter, dateStr);
+        });
+
+        // Toggle completion
+        el.querySelector('.checklist-checkbox').addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (!taskCompletions[dateStr]) {
+            taskCompletions[dateStr] = [];
+          }
+
+          if (isCompleted) {
+            taskCompletions[dateStr] = taskCompletions[dateStr].filter(id => id !== task.id);
+          } else {
+            taskCompletions[dateStr].push(task.id);
+          }
+          
+          persistData(); 
+        });
+
+        // Edit task
+        el.querySelector('.edit-task').addEventListener('click', (e) => {
+          e.stopPropagation();
+          document.getElementById('task-id').value = task.id;
+          document.getElementById('task-name').value = task.name;
+          document.getElementById('task-desc').value = task.desc || '';
+          document.getElementById('task-is-global').checked = task.isGlobal;
+          document.getElementById('modal-task-title').textContent = 'Edit Task';
+          taskModal.classList.add('open');
+        });
+
+        // Delete task
+        el.querySelector('.del-task').addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (confirm(`Are you sure you want to delete the task "${task.name}"?`)) {
+            tasks = tasks.filter(t => t.id !== task.id);
+            // Cleanup completions across all dates
+            Object.keys(taskCompletions).forEach(d => {
+              taskCompletions[d] = taskCompletions[d].filter(id => id !== task.id);
+              if (taskCompletions[d].length === 0) delete taskCompletions[d];
+            });
+            persistData();
+          }
+        });
+
+        container.appendChild(el);
+      });
+    }
+
+    function reorderTasks(draggedId, targetId, insertAfter, dateStr) {
+      let currentDayTasks = tasks.filter(t => t.isGlobal || t.date === dateStr);
+      currentDayTasks.sort((a, b) => (a.order || 0) - (b.order || 0));
+
+      const draggedIdx = currentDayTasks.findIndex(t => t.id === draggedId);
+      const targetIdx = currentDayTasks.findIndex(t => t.id === targetId);
+
+      if (draggedIdx === -1 || targetIdx === -1) return;
+
+      const [draggedItem] = currentDayTasks.splice(draggedIdx, 1);
+      const newTargetIdx = currentDayTasks.findIndex(t => t.id === targetId);
+      
+      currentDayTasks.splice(insertAfter ? newTargetIdx + 1 : newTargetIdx, 0, draggedItem);
+
+      currentDayTasks.forEach((t, i) => {
+          t.order = i * 1000; // Multiply by 1000 for safe float spacing on next sort
       });
 
-      const endChecklistDrag = (e) => {
-        if (!checklistDrag || checklistDrag.itemEl !== item) return;
-        try { handle.releasePointerCapture(checklistDrag.pointerId); } catch (err) {}
-        item.style.transform = '';
-        item.style.zIndex = '';
-        item.style.position = '';
-        item.classList.remove('dragging');
-        checklistDrag = null;
-
-        const newOrderIds = Array.from(container.children).map(el => el.dataset.taskId);
-        const currentTasks = checklists[dateStr] || [];
-        const reordered = newOrderIds.map(id => currentTasks.find(t => t.id === id)).filter(Boolean);
-        if (reordered.length === currentTasks.length) {
-          checklists[dateStr] = reordered;
-          persistData(); 
-          renderChecklist(dateStr);
-        }
-      };
-
-      handle.addEventListener('pointerup', endChecklistDrag);
-      handle.addEventListener('pointercancel', endChecklistDrag);
+      persistData();
     }
 
-    document.getElementById('btn-clear-completed').addEventListener('click', async () => {
-      const remaining = (checklists[selectedCalDayStr] || []).filter(t => !t.done).length;
-      const removing = (checklists[selectedCalDayStr] || []).length - remaining;
-      const res = await promptUser('Clear Completed', `Remove ${removing} completed task${removing === 1 ? '' : 's'} from this day?`);
-      if (res) {
-        const completedItems = Array.from(document.querySelectorAll('.checklist-task-item.done'));
-        completedItems.forEach(el => el.classList.add('removing'));
-        
-        setTimeout(() => {
-          checklists[selectedCalDayStr] = (checklists[selectedCalDayStr] || []).filter(t => !t.done);
-          persistData();
-          renderChecklist(selectedCalDayStr);
-        }, 300);
-      }
-    });
-
-    function addChecklistTaskFromInput() {
-      const input = document.getElementById('checklist-input'); 
-      const text = input.value.trim(); 
-      if (!text) return;
-      
-      if (!checklists[selectedCalDayStr]) {
-        checklists[selectedCalDayStr] = [];
-      }
-      
-      checklists[selectedCalDayStr].push({ id: generateId(), text: text, done: false });
-      input.value = ''; 
-      persistData(); 
-      renderChecklist(selectedCalDayStr);
-      input.focus();
-    }
-
-    document.getElementById('btn-add-checklist-task').addEventListener('click', addChecklistTaskFromInput);
-
-    document.getElementById('checklist-input').addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        addChecklistTaskFromInput();
-      }
-    });
-
-    /* PIPELINE NODE EDITOR */
+    // PIPELINE NODE EDITOR LOGIC 
     let activePipelineId = null;
     let draggedGHNode = null; 
     let ghNodeOffset = { x: 0, y: 0 };
@@ -3596,8 +3405,6 @@
       }
     });
 
-    let lastTapTime = 0;
-
     editorCanvas.addEventListener('touchstart', (e) => {
       if (e.touches.length === 2) {
         e.preventDefault();
@@ -3648,19 +3455,6 @@
         isPanning = false;
         editorCanvas.classList.remove('is-panning');
       }
-      
-      const currentTime = Date.now();
-      const tapLen = currentTime - lastTapTime;
-      if (tapLen < 300 && tapLen > 0 && !draggedGHNode && !drawingEdgeSourceId && !isPanning) {
-         if (e.target === editorCanvas || e.target === svgCanvas || e.target.tagName === 'svg') {
-             const rect = editorCanvas.getBoundingClientRect();
-             const coords = getEventCoords(e);
-             const world = screenToWorld(coords.clientX - rect.left, coords.clientY - rect.top);
-             addPipelineNode(world.x, world.y);
-             e.preventDefault();
-         }
-      }
-      lastTapTime = currentTime;
     };
     editorCanvas.addEventListener('touchend', endCanvasTouch);
     editorCanvas.addEventListener('touchcancel', endCanvasTouch);
@@ -3803,9 +3597,8 @@
           e.stopPropagation();
         }, {passive: true});
 
-        div.addEventListener('dblclick', async (e) => {
+        div.querySelector('.gh-icon-check').addEventListener('dblclick', async (e) => {
           e.stopPropagation();
-          if (e.target.classList.contains('gh-port')) return;
           const newTitle = await promptUser(
             "Edit Node", 
             "Enter title, duration, link (comma separated)", 
@@ -3876,17 +3669,13 @@
       updateAllEdges();
     }
 
-    async function addPipelineNode(worldX, worldY) {
+    async function addPipelineNode() {
       if (!activePipelineId) return;
       const pipe = pipelines.find(p => p.id === activePipelineId);
 
-      if (typeof worldX !== 'number' || typeof worldY !== 'number') {
-        const rect = editorCanvas.getBoundingClientRect();
-        const center = screenToWorld(rect.width / 2, rect.height / 2);
-        worldX = center.x - 110;
-        worldY = center.y - 40;
-      }
-
+      const rect = editorCanvas.getBoundingClientRect();
+      const center = screenToWorld(rect.width / 2, rect.height / 2);
+      
       const val = await promptUser("New Node", "Enter title, duration (optional) (comma separated)", true, "build, 10s");
       
       if (val) {
@@ -3896,8 +3685,8 @@
           title: parts[0]?.trim() || 'Node', 
           duration: parts[1]?.trim() || '', 
           link: '', 
-          x: worldX, 
-          y: worldY 
+          x: center.x - 110, 
+          y: center.y - 40 
         });
         persistData(); 
         renderNodeGraph();
@@ -3976,15 +3765,7 @@
     window.addEventListener('touchend', handleGlobalEnd);
     window.addEventListener('touchcancel', handleGlobalEnd);
 
-    if (editorCanvas) {
-      editorCanvas.addEventListener('dblclick', (e) => {
-        if (e.target.id === 'pipeline-canvas' || e.target.tagName === 'svg') {
-          const rect = editorCanvas.getBoundingClientRect();
-          const world = screenToWorld(e.clientX - rect.left, e.clientY - rect.top);
-          addPipelineNode(world.x, world.y);
-        }
-      });
-    }
+    // End Pipeline Editor Logic
 
     document.getElementById('cal-prev').addEventListener('click', () => {
       currentCalDate.setMonth(currentCalDate.getMonth() - 1);
@@ -4112,6 +3893,58 @@
       subjectModal.classList.remove('open');
     });
 
+    // Task Modal Logic
+    const taskModal = document.getElementById('modal-task');
+    const formTask = document.getElementById('form-task');
+
+    document.getElementById('btn-open-add-task').addEventListener('click', () => {
+      document.getElementById('task-id').value = '';
+      document.getElementById('task-name').value = '';
+      document.getElementById('task-desc').value = '';
+      document.getElementById('task-is-global').checked = false;
+      document.getElementById('modal-task-title').textContent = 'Add New Task';
+      taskModal.classList.add('open');
+    });
+
+    document.getElementById('btn-cancel-task').addEventListener('click', () => {
+      taskModal.classList.remove('open');
+    });
+
+    formTask.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const id = document.getElementById('task-id').value;
+      const name = document.getElementById('task-name').value.trim();
+      const desc = document.getElementById('task-desc').value.trim();
+      const isGlobal = document.getElementById('task-is-global').checked;
+
+      if (!name) return;
+
+      if (id) {
+        // Edit existing task
+        const existingTask = tasks.find(t => t.id === id);
+        if (existingTask) {
+          existingTask.name = name;
+          existingTask.desc = desc;
+          existingTask.isGlobal = isGlobal;
+          existingTask.date = isGlobal ? null : (existingTask.date || selectedCalDayStr);
+        }
+      } else {
+        // Create new task
+        const newTask = {
+          id: 'task-' + Date.now(),
+          name,
+          desc,
+          isGlobal,
+          date: isGlobal ? null : selectedCalDayStr,
+          order: Date.now() // By default, new tasks go to the bottom of the order list
+        };
+        tasks.push(newTask);
+      }
+      
+      persistData(); // this calls renderCalendar and updates the UI automatically
+      taskModal.classList.remove('open');
+    });
+
     const syncModal = document.getElementById('modal-sync');
     document.getElementById('btn-open-sync').addEventListener('click', () => syncModal.classList.add('open'));
     document.getElementById('btn-close-sync').addEventListener('click', () => syncModal.classList.remove('open'));
@@ -4120,52 +3953,53 @@
     document.getElementById('btn-open-clear-data').addEventListener('click', () => clearDataModal.classList.add('open'));
     document.getElementById('btn-close-clear-data').addEventListener('click', () => clearDataModal.classList.remove('open'));
 
-    document.getElementById('btn-action-wipe-logs-only').addEventListener('click', async () => {
-      const r = await promptUser('Clear Logs', 'Clear all logged times and checklists?'); 
-      if (r) { 
-        studyLogs = [];
-        checklists = {}; 
-        resetTimerState();
-        persistData();
-        clearDataModal.classList.remove('open');
-        playChime(440, 587.33);
-      }
+    document.getElementById('btn-action-wipe-logs-only').addEventListener('click', () => {
+      studyLogs = [];
+      resetTimerState();
+      persistData();
+      clearDataModal.classList.remove('open');
+      playChime(440, 587.33);
     });
 
-    document.getElementById('btn-action-wipe-all').addEventListener('click', async () => {
-      const r = await promptUser('Factory Reset', 'Wipe EVERYTHING for this profile?');
-      if (r) {
-        localStorage.removeItem(sKey('aether_subjects'));
-        localStorage.removeItem(sKey('aether_logs'));
-        localStorage.removeItem(sKey('aether_checklists'));
-        localStorage.removeItem(sKey('aether_pipelines'));
-        localStorage.removeItem(sKey('aether_pomo_minutes'));
-        clearActiveSessionState();
-  
-        subjects = DEFAULT_SUBJECTS;
-        studyLogs = [];
-        checklists = {};
-        pipelines = DEFAULT_PIPELINES;
-        activeSubjectId = subjects[0].id;
-        
-        updatePomoDuration(25);
-        resetTimerState();
-        persistData();
-        populateTimerSubjectSelect();
-        clearDataModal.classList.remove('open');
-        playChime(440, 330);
-      }
+    document.getElementById('btn-action-wipe-all').addEventListener('click', () => {
+      localStorage.removeItem(sKey('aether_subjects'));
+      localStorage.removeItem(sKey('aether_logs'));
+      localStorage.removeItem(sKey('aether_tasks'));
+      localStorage.removeItem(sKey('aether_task_completions'));
+      localStorage.removeItem(sKey('aether_pipelines'));
+      localStorage.removeItem(sKey('aether_pomo_minutes'));
+      clearActiveSessionState();
+
+      subjects = [
+        { id: 'sub-1', name: 'Mathematics & Logic', color: '#00f0ff', tag: 'Core', goalMinutes: 60 },
+        { id: 'sub-2', name: 'Computer Science', color: '#0070f3', tag: 'Tech', goalMinutes: 45 },
+        { id: 'sub-3', name: 'Languages & Reading', color: '#10b981', tag: 'General', goalMinutes: 30 }
+      ];
+      studyLogs = [];
+      tasks = [];
+      taskCompletions = {};
+      pipelines = DEFAULT_PIPELINES;
+      activeSubjectId = subjects[0].id;
+      savedPomoMinutes = 25;
+      
+      updatePomoDuration(25);
+      resetTimerState();
+      persistData();
+      populateTimerSubjectSelect();
+      clearDataModal.classList.remove('open');
+      playChime(440, 330);
     });
 
     document.getElementById('btn-export-json').addEventListener('click', () => {
       const backupData = {
         exportDate: new Date().toISOString(),
-        version: "3.3-unified",
+        version: "3.2.1",
         profile: currentProfile,
         pomoMinutes: savedPomoMinutes,
         subjects: subjects,
         studyLogs: studyLogs,
-        checklists: checklists,
+        tasks: tasks,
+        taskCompletions: taskCompletions,
         pipelines: pipelines
       };
 
@@ -4189,8 +4023,9 @@
           if (Array.isArray(imported.subjects) && Array.isArray(imported.studyLogs)) {
             subjects = imported.subjects;
             studyLogs = imported.studyLogs;
-            if (imported.checklists) checklists = imported.checklists; 
-            if (imported.pipelines) pipelines = imported.pipelines; 
+            tasks = Array.isArray(imported.tasks) ? imported.tasks : [];
+            taskCompletions = imported.taskCompletions || {};
+            pipelines = Array.isArray(imported.pipelines) ? imported.pipelines : [];
             
             if (imported.pomoMinutes) updatePomoDuration(imported.pomoMinutes);
             persistData();
@@ -4211,6 +4046,7 @@
     });
 
     window.addEventListener('DOMContentLoaded', () => {
+      // Boot up the profile system on DOM load
       loadProfileData();
       updateNotificationUI();
     });
