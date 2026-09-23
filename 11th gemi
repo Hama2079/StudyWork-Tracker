@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>AetherFocus - Precision AI Study Engine</title>
+  <meta name="theme-color" content="#05070c">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" id="pwa-manifest">
+
+  <style>
+    :root {
+      --bg-primary: #04060a; --bg-surface: #090d18; --bg-card: #0e1424; --bg-card-hover: #131b30;
+      --border-subtle: rgba(0, 240, 255, 0.12); --border-active: rgba(0, 240, 255, 0.45);
+      --accent-neon: #00f0ff; --accent-blue: #0070f3; --accent-indigo: #6366f1;
+      --accent-glow: rgba(0, 240, 255, 0.35); --text-main: #f8fafc; --text-secondary: #94a3b8;
+      --text-dim: #64748b; --danger: #ef4444; --warning: #f59e0b; --success: #10b981;
+      --break-green: #34d399; --break-purple: #c084fc;
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body { background-color: var(--bg-primary); color: var(--text-main); font-family: var(--font-family); line-height: 1.5; min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
+    body::before { content: ''; position: fixed; top: -160px; right: -120px; width: 500px; height: 500px; background: radial-gradient(circle, rgba(0, 240, 255, 0.08) 0%, transparent 70%); pointer-events: none; z-index: 0; }
+    
+    header { position: sticky; top: 0; z-index: 50; background: rgba(9, 13, 24, 0.88); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border-subtle); padding: 0.75rem 1.25rem; display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
+    .brand-group { display: flex; align-items: center; gap: 0.75rem; }
+    .brand-icon { width: 2.25rem; height: 2.25rem; border-radius: 0.75rem; background: linear-gradient(135deg, var(--accent-neon), var(--accent-blue)); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 16px var(--accent-glow); color: #04060a; }
+    .brand-text h1 { font-size: 1.15rem; font-weight: 800; background: linear-gradient(90deg, #ffffff, var(--accent-neon)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    
+    .profile-switch { display: flex; align-items: center; background: rgba(14, 20, 36, 0.8); border: 1px solid var(--border-subtle); border-radius: 0.6rem; padding: 0.15rem; gap: 0.15rem; margin-left: 0.5rem; }
+    .profile-btn { background: transparent; border: none; color: var(--text-secondary); padding: 0.25rem 0.6rem; border-radius: 0.45rem; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease; }
+    .profile-btn.active { background: var(--accent-neon); color: #04060a; box-shadow: 0 0 8px rgba(0, 240, 255, 0.3); }
+    .manage-profiles-btn { background: transparent; border: none; color: var(--text-dim); padding: 0.25rem 0.4rem; cursor: pointer; display: flex; align-items: center; border-radius: 0.4rem; }
+    .manage-profiles-btn:hover { color: var(--accent-neon); background: rgba(0,240,255,0.1); }
+
+    .nav-tabs { display: flex; background: rgba(14, 20, 36, 0.8); border: 1px solid var(--border-subtle); border-radius: 0.75rem; padding: 0.25rem; gap: 0.25rem; }
+    .nav-btn { background: transparent; border: none; color: var(--text-secondary); padding: 0.5rem 0.9rem; border-radius: 0.5rem; font-size: 0.8rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.4rem; transition: all 0.2s ease; }
+    .nav-btn.active { background: rgba(0, 240, 255, 0.15); color: var(--accent-neon); border: 1px solid rgba(0, 240, 255, 0.35); box-shadow: 0 0 12px rgba(0, 240, 255, 0.15); }
+    
+    .header-actions { display: flex; align-items: center; gap: 0.45rem; }
+    .icon-btn { background: var(--bg-card); border: 1px solid var(--border-subtle); color: var(--text-secondary); width: 2.25rem; height: 2.25rem; border-radius: 0.65rem; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s ease; }
+    .icon-btn:hover { color: var(--accent-neon); border-color: var(--accent-neon); transform: translateY(-1px); }
+    .btn-primary { background: linear-gradient(135deg, var(--accent-neon), var(--accent-blue)); color: #04060a; font-weight: 700; font-size: 0.8rem; padding: 0.55rem 1rem; border-radius: 0.65rem; border: none; cursor: pointer; display: flex; align-items: center; gap: 0.4rem; box-shadow: 0 0 16px var(--accent-glow); transition: all 0.2s; }
+    .btn-primary:hover { box-shadow: 0 0 24px rgba(0, 240, 255, 0.5); transform: translateY(-1px); }
+    .btn-secondary { background: var(--bg-card); border: 1px solid var(--border-subtle); color: var(--text-main); font-weight: 600; font-size: 0.8rem; padding: 0.55rem 1rem; border-radius: 0.65rem; cursor: pointer; display: flex; align-items: center; gap: 0.4rem; transition: all 0.2s; }
+    .btn-secondary:hover { border-color: var(--accent-neon); }
+
+    main { flex: 1; max-width: 1200px; width: 100%; margin: 0 auto; padding: 1.25rem; position: relative; z-index: 1; display: flex; flex-direction: column; }
+    
+    /* Overview Tab */
+    .banner-engine { background: linear-gradient(90deg, #0d1527, #09101f); border: 1px solid var(--border-subtle); border-radius: 1rem; padding: 0.9rem 1.25rem; margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem; box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
+    .engine-pills { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+    .chip-badge { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.2rem 0.55rem; border-radius: 9999px; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; font-family: monospace; background: rgba(0, 240, 255, 0.08); border: 1px solid rgba(0, 240, 255, 0.25); color: var(--accent-neon); }
+    .chip-badge.active-green { background: rgba(16, 185, 129, 0.12); border-color: rgba(16, 185, 129, 0.35); color: #34d399; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+    .stat-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 1rem; padding: 1.2rem; position: relative; overflow: hidden; transition: all 0.25s ease; }
+    .stat-card:hover { border-color: var(--border-active); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0, 240, 255, 0.08); }
+    .stat-card-stripe { position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--accent-neon); }
+    .stat-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-dim); font-weight: 600; margin-bottom: 0.4rem; display: flex; justify-content: space-between; align-items: center; }
+    .stat-value { font-size: 1.6rem; font-weight: 800; font-family: monospace; color: #ffffff; letter-spacing: -0.02em; }
+    .stat-subtext { font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.3rem; }
+    .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+    .section-title { font-size: 1.1rem; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem; }
+    .subject-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 1.75rem; }
+    .subject-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 1.1rem; padding: 1.25rem; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; transition: all 0.25s ease; }
+    .subject-card:hover { border-color: var(--accent-neon); transform: translateY(-2px); }
+    .subject-card.is-active-subject { border-color: var(--accent-neon); box-shadow: 0 0 20px rgba(0, 240, 255, 0.25); }
+    .subject-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem; }
+    .subject-pill { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.2rem 0.55rem; border-radius: 0.5rem; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); font-size: 0.7rem; font-family: monospace; color: var(--text-secondary); }
+    .subject-name { font-size: 1.05rem; font-weight: 700; color: #ffffff; margin-bottom: 0.25rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .subject-time-summary { display: flex; justify-content: space-between; padding: 0.6rem 0; border-top: 1px solid rgba(255, 255, 255, 0.06); margin-top: 0.75rem; font-size: 0.75rem; }
+    .subject-time-summary div span { display: block; color: var(--text-dim); font-size: 0.65rem; text-transform: uppercase; }
+    .subject-time-summary div strong { font-family: monospace; font-size: 0.85rem; color: var(--accent-neon); }
+    .subject-btn-launch { width: 100%; margin-top: 0.75rem; background: rgba(0, 240, 255, 0.08); border: 1px solid rgba(0, 240, 255, 0.3); color: var(--accent-neon); padding: 0.6rem; border-radius: 0.65rem; font-weight: 700; font-size: 0.75rem; display: flex; align-items: center; justify-content: center; gap: 0.4rem; cursor: pointer; transition: all 0.2s ease; }
+    .subject-btn-launch:hover { background: var(--accent-neon); color: #04060a; box-shadow: 0 0 16px var(--accent-glow); }
+
+    /* Timer Tab */
+    .timer-container { max-width: 640px; margin: 0 auto; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 1.5rem; padding: 1.75rem 1.25rem; text-align: center; box-shadow: 0 16px 40px rgba(0,0,0,0.6); }
+    .mode-switch { display: inline-flex; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 0.75rem; padding: 0.25rem; gap: 0.25rem; margin-bottom: 0.75rem; }
+    .mode-switch button { background: transparent; border: none; color: var(--text-dim); font-size: 0.75rem; font-weight: 600; padding: 0.45rem 0.9rem; border-radius: 0.5rem; cursor: pointer; transition: all 0.2s; }
+    .mode-switch button.active { background: var(--accent-neon); color: #04060a; font-weight: 700; }
+    .pomo-stage-bar { display: flex; justify-content: center; gap: 0.4rem; margin-bottom: 0.9rem; }
+    .pomo-stage-btn { background: rgba(14, 20, 36, 0.8); border: 1px solid rgba(255, 255, 255, 0.08); color: var(--text-secondary); font-size: 0.72rem; padding: 0.3rem 0.7rem; border-radius: 0.5rem; cursor: pointer; }
+    .pomo-stage-btn.active[data-stage="focus"] { background: rgba(0, 240, 255, 0.2); border-color: var(--accent-neon); color: var(--accent-neon); }
+    .pomo-stage-btn.active[data-stage="shortBreak"] { background: rgba(52, 211, 153, 0.2); border-color: var(--break-green); color: var(--break-green); }
+    .pomo-stage-btn.active[data-stage="longBreak"] { background: rgba(192, 132, 252, 0.2); border-color: var(--break-purple); color: var(--break-purple); }
+    .pomo-customizer-box { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 0.9rem; padding: 0.75rem 1rem; margin: 0.5rem auto 1rem; max-width: 520px; }
+    .pomo-presets-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.35rem; margin-bottom: 0.6rem; }
+    .preset-chip { background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); color: var(--text-secondary); font-size: 0.75rem; padding: 0.3rem 0.6rem; border-radius: 0.45rem; cursor: pointer; }
+    .preset-chip.active { background: rgba(0, 240, 255, 0.2); border-color: var(--accent-neon); color: var(--accent-neon); font-weight: 700; }
+    .custom-input-stepper { display: flex; align-items: center; justify-content: center; gap: 0.4rem; }
+    .stepper-btn { width: 1.85rem; height: 1.85rem; background: var(--bg-surface); border: 1px solid var(--border-subtle); color: var(--text-main); border-radius: 0.45rem; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    .stepper-input { width: 4.2rem; text-align: center; background: var(--bg-surface); border: 1px solid var(--border-subtle); color: var(--accent-neon); font-family: monospace; font-weight: 700; border-radius: 0.45rem; padding: 0.3rem; outline: none; }
+    .controls-aux-bar { display: flex; justify-content: center; gap: 0.6rem; margin: 0.5rem auto 1rem; flex-wrap: wrap; }
+    .aux-toggle-btn { background: rgba(14, 20, 36, 0.7); border: 1px solid var(--border-subtle); color: var(--text-secondary); border-radius: 0.65rem; padding: 0.35rem 0.75rem; font-size: 0.72rem; font-weight: 600; display: flex; align-items: center; gap: 0.4rem; cursor: pointer; }
+    .aux-toggle-btn.active { color: var(--accent-neon); border-color: var(--accent-neon); background: rgba(0, 240, 255, 0.12); }
+    .timer-dial-wrapper { position: relative; width: 270px; height: 270px; margin: 0.75rem auto 1.25rem; display: flex; align-items: center; justify-content: center; }
+    .timer-svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+    .timer-track { fill: none; stroke: rgba(255, 255, 255, 0.05); stroke-width: 5.5; }
+    .timer-progress { fill: none; stroke: var(--accent-neon); stroke-width: 5.5; stroke-linecap: round; stroke-dasharray: 283; stroke-dashoffset: 0; transition: stroke-dashoffset 0.4s ease, stroke 0.3s; filter: drop-shadow(0 0 8px var(--accent-neon)); }
+    .timer-content { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .timer-digits { font-size: 3.1rem; font-weight: 800; font-family: monospace; color: #ffffff; text-shadow: 0 0 20px rgba(0, 240, 255, 0.35); line-height: 1.05; margin: 0.25rem 0; }
+    .timer-mode-tag { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent-neon); }
+    .timer-controls { display: flex; align-items: center; justify-content: center; gap: 0.75rem; margin-top: 1rem; }
+    .btn-ctrl { padding: 0.75rem 1.5rem; border-radius: 0.75rem; font-size: 0.9rem; font-weight: 700; display: flex; align-items: center; gap: 0.4rem; cursor: pointer; border: none; }
+    .btn-ctrl-primary { background: linear-gradient(135deg, var(--accent-neon), var(--accent-blue)); color: #04060a; box-shadow: 0 0 16px var(--accent-glow); }
+    .btn-ctrl-pause { background: var(--warning); color: #04060a; }
+    .btn-ctrl-stop { background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171; }
+
+    /* Calendar & Heatmap */
+    .calendar-container { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 1.25rem; padding: 1.5rem; margin-bottom: 1.5rem; }
+    .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; }
+    .cal-nav-btn { background: var(--bg-card); border: 1px solid var(--border-subtle); color: var(--text-secondary); padding: 0.4rem 0.8rem; border-radius: 0.5rem; cursor: pointer; }
+    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.4rem; }
+    .calendar-day-label { text-align: center; font-size: 0.7rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; padding-bottom: 0.5rem; }
+    .cal-day-cell { aspect-ratio: 1; border-radius: 0.5rem; border: 1px solid rgba(255, 255, 255, 0.05); background: rgba(14, 20, 36, 0.5); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; font-size: 0.75rem; color: var(--text-secondary); font-family: monospace; transition: all 0.2s; }
+    .cal-day-cell:hover { border-color: var(--accent-neon); transform: scale(1.05); }
+    .cal-day-cell.is-selected { border-color: var(--accent-neon); box-shadow: 0 0 12px var(--accent-glow); }
+    .heat-lvl-0 { background: rgba(14, 20, 36, 0.5); }
+    .heat-lvl-1 { background: rgba(0, 240, 255, 0.15); border-color: rgba(0, 240, 255, 0.25); color: #7dd3fc; }
+    .heat-lvl-2 { background: rgba(0, 240, 255, 0.35); border-color: rgba(0, 240, 255, 0.5); color: #e0f2fe; }
+    .heat-lvl-3 { background: rgba(0, 240, 255, 0.65); border-color: var(--accent-neon); color: #04060a; font-weight: 800; }
+    .heat-lvl-4 { background: #00f0ff; border-color: #ffffff; color: #000; font-weight: 900; box-shadow: 0 0 10px var(--accent-glow); }
+    .cal-day-empty { aspect-ratio: 1; visibility: hidden; }
+
+    /* Modern Checklist System */
+    .checklist-section { margin-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 1.5rem; }
+    .checklist-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+    .checklist-progress-wrap { margin-bottom: 1.25rem; }
+    .checklist-progress-text { font-size: 0.75rem; color: var(--text-secondary); display: flex; justify-content: space-between; margin-bottom: 0.4rem; font-weight: 600; }
+    .checklist-progress-bar { width: 100%; height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden; }
+    .checklist-progress-fill { height: 100%; background: var(--accent-neon); width: 0%; transition: width 0.4s ease; box-shadow: 0 0 8px var(--accent-glow); }
+    
+    .checklist-list { display: flex; flex-direction: column; gap: 0.6rem; }
+    .task-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 0.75rem; padding: 0.75rem 1rem; display: flex; align-items: center; gap: 0.8rem; transition: all 0.2s; position: relative; }
+    .task-card.is-dragging { opacity: 0.5; background: var(--bg-card-hover); border-color: var(--accent-neon); box-shadow: 0 10px 20px rgba(0,0,0,0.5); z-index: 100; }
+    .task-card.completed { background: rgba(14, 20, 36, 0.4); border-color: rgba(255,255,255,0.05); }
+    .task-card.completed .task-title { color: var(--text-dim); text-decoration: line-through; }
+    .task-drag-handle { color: var(--text-dim); cursor: grab; display: flex; align-items: center; padding: 0.5rem; margin: -0.5rem; touch-action: none; }
+    .task-drag-handle:active { cursor: grabbing; color: var(--accent-neon); }
+    .task-num { font-family: monospace; font-size: 0.75rem; color: var(--accent-indigo); font-weight: 800; min-width: 1.2rem; }
+    
+    /* Animated Checkbox */
+    .task-checkbox-wrap { cursor: pointer; display: flex; align-items: center; justify-content: center; width: 1.5rem; height: 1.5rem; position: relative; }
+    .task-checkbox-wrap input { display: none; }
+    .task-checkbox-svg { width: 1.25rem; height: 1.25rem; border: 2px solid var(--border-active); border-radius: 0.35rem; transition: all 0.2s; fill: none; stroke: #04060a; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 20; stroke-dashoffset: 20; }
+    .task-checkbox-wrap input:checked + .task-checkbox-svg { background: var(--accent-neon); border-color: var(--accent-neon); stroke-dashoffset: 0; transition: stroke-dashoffset 0.3s ease-in-out, background 0.2s, border-color 0.2s; }
+    
+    .task-content { flex: 1; display: flex; flex-direction: column; gap: 0.2rem; overflow: hidden; }
+    .task-title { font-size: 0.85rem; font-weight: 600; color: var(--text-main); transition: all 0.2s; }
+    .task-desc { font-size: 0.7rem; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .task-badge { font-size: 0.6rem; font-weight: 700; padding: 0.1rem 0.4rem; border-radius: 0.25rem; text-transform: uppercase; font-family: monospace; letter-spacing: 0.05em; margin-left: 0.5rem; }
+    .badge-everyday { background: rgba(99, 102, 241, 0.15); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.3); }
+    .badge-once { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+    
+    .task-actions { display: flex; gap: 0.3rem; opacity: 0; transition: opacity 0.2s; }
+    .task-card:hover .task-actions { opacity: 1; }
+    .task-btn { background: transparent; border: none; color: var(--text-dim); padding: 0.3rem; border-radius: 0.3rem; cursor: pointer; transition: all 0.2s; }
+    .task-btn:hover { background: rgba(255,255,255,0.05); color: var(--accent-neon); }
+    .task-btn.delete:hover { color: var(--danger); background: rgba(239,68,68,0.1); }
+
+    /* Visual Node Pipelines */
+    #view-pipelines { display: flex; flex-direction: column; height: 100%; min-height: 80vh; }
+    .pipeline-dashboard { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.25rem; }
+    .pipeline-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 1rem; padding: 1.5rem; cursor: pointer; transition: all 0.2s; }
+    .pipeline-card:hover { border-color: var(--accent-neon); transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,240,255,0.1); }
+    .pipeline-card-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem; }
+    .pipeline-color-dot { width: 12px; height: 12px; border-radius: 50%; }
+    .pipeline-title { font-weight: 700; font-size: 1.1rem; color: #fff; }
+    .pipeline-meta { font-size: 0.75rem; color: var(--text-secondary); display: flex; justify-content: space-between; }
+    
+    .pipeline-canvas-area { flex: 1; display: none; flex-direction: column; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 1rem; overflow: hidden; position: relative; }
+    .pipeline-canvas-area.active { display: flex; }
+    .pipeline-canvas-header { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; background: rgba(14,20,36,0.8); z-index: 10; backdrop-filter: blur(8px); }
+    .pipeline-board { flex: 1; position: relative; overflow: hidden; touch-action: none; background: #060913; cursor: grab; }
+    .pipeline-board:active { cursor: grabbing; }
+    .pipeline-canvas-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; transform-origin: 0 0; }
+    
+    .node-element { position: absolute; width: 240px; height: 72px; background: #161b22; border: 1px solid #30363d; border-radius: 8px; display: flex; align-items: center; padding: 0 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); user-select: none; transition: box-shadow 0.2s, border-color 0.2s; z-index: 20; }
+    .node-element:hover { border-color: #8b949e; }
+    .node-element.completed { border-color: rgba(35,134,54,0.5); }
+    .node-element.is-dragging { z-index: 100; border-color: #58a6ff; box-shadow: 0 12px 24px rgba(0,0,0,0.8), 0 0 0 1px #58a6ff; }
+    
+    .node-status-btn { background: transparent; border: none; cursor: pointer; padding: 8px; margin-left: -8px; margin-right: 4px; display: flex; align-items: center; justify-content: center; }
+    .node-content { flex: 1; overflow: hidden; }
+    .node-title-input { width: 100%; background: transparent; border: none; color: #c9d1d9; font-size: 0.85rem; outline: none; }
+    .node-title-display { font-size: 0.85rem; font-weight: 600; color: #c9d1d9; cursor: text; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .node-element.completed .node-title-display { color: #8b949e; text-decoration: line-through; }
+    .node-priority-badge { font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; border: 1px solid; cursor: pointer; display: inline-block; margin-top: 4px; }
+    
+    /* Edge Routing Ports */
+    .node-port { position: absolute; top: 50%; transform: translateY(-50%); width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; cursor: crosshair; z-index: 25; touch-action: none; }
+    .node-port-in { left: -12px; }
+    .node-port-out { right: -12px; }
+    .node-port-inner { width: 12px; height: 12px; background: #0d1117; border: 2px solid #30363d; border-radius: 50%; transition: all 0.2s; pointer-events: none; }
+    .node-port:hover .node-port-inner { border-color: #58a6ff; transform: scale(1.3); background: #58a6ff; }
+    
+    .node-drag-handle { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); color: #8b949e; opacity: 0; transition: opacity 0.2s; pointer-events: none; }
+    .node-element:hover .node-drag-handle { opacity: 1; }
+
+    /* Modals */
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; padding: 1rem; z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+    .modal-backdrop.open { opacity: 1; pointer-events: auto; }
+    .modal-box { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 1.25rem; padding: 1.75rem; width: 100%; max-width: 480px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
+    .form-group { margin-bottom: 1.25rem; }
+    .form-label { display: block; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-dim); margin-bottom: 0.4rem; }
+    .form-input { width: 100%; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 0.65rem; padding: 0.65rem 0.9rem; color: #fff; font-size: 0.85rem; outline: none; }
+    .form-input:focus { border-color: var(--accent-neon); box-shadow: 0 0 10px var(--accent-glow); }
+
+    .mobile-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: rgba(9, 13, 24, 0.95); backdrop-filter: blur(16px); border-top: 1px solid var(--border-subtle); padding: 0.5rem; justify-content: space-around; z-index: 50; }
+    .mobile-nav-btn { display: flex; flex-direction: column; align-items: center; gap: 0.25rem; background: transparent; border: none; color: var(--text-dim); font-size: 0.65rem; font-weight: 600; padding: 0.35rem 0.75rem; border-radius: 0.5rem; }
+    .mobile-nav-btn.active { color: var(--accent-neon); }
+
+    @media (max-width: 768px) {
+      .nav-tabs { display: none; }
+      .mobile-nav { display: flex; }
+      main { padding-bottom: 5rem; }
+      .task-actions { opacity: 1; }
+    }
+    .hidden { display: none !important; }
+    .text-neon { color: var(--accent-neon); }
+    .font-mono { font-family: monospace; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand-group">
+      <div class="brand-icon">
+        <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+      </div>
+      <div class="brand-text"><h1>AetherFocus</h1></div>
+      
+      <div class="profile-switch" title="Active Profile">
+        <span id="active-profile-label" style="font-size:0.75rem; font-weight:700; padding: 0 0.5rem; color: var(--accent-neon);">M</span>
+        <button class="manage-profiles-btn" id="btn-open-profiles" title="Manage Profiles">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <nav class="nav-tabs" id="desktop-tabs">
+      <button class="nav-btn active" data-tab="dashboard">Overview</button>
+      <button class="nav-btn" data-tab="timer">Timer</button>
+      <button class="nav-btn" data-tab="calendar">Calendar & Tasks</button>
+      <button class="nav-btn" data-tab="pipelines">Pipelines</button>
+      <button class="nav-btn" data-tab="analytics">Analytics</button>
+    </nav>
+
+    <div class="header-actions">
+      <button class="icon-btn" id="btn-open-sync" title="Export / Import Data Backup"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg></button>
+      <button class="icon-btn" id="btn-toggle-sound" title="Toggle Synthesizer Sound"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></button>
+      <button class="btn-primary" id="btn-add-subject"><span>+ Subject</span></button>
+    </div>
+  </header>
+
+  <main>
+    <div class="banner-engine">
+      <div class="engine-pills">
+        <span class="chip-badge active-green" id="sync-engine-badge"><svg width="10" height="10" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg> Delta Sync Active</span>
+        <span class="chip-badge" id="wake-lock-badge" style="display: none;">Display Sleep Prevented</span>
+      </div>
+      <button class="aux-toggle-btn" id="btn-toggle-wakelock"><span id="label-wakelock">Wakelock: Off</span></button>
+    </div>
+
+    <!-- OVERVIEW TAB -->
+    <section id="view-dashboard" class="tab-view">
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-card-stripe"></div><div class="stat-label">Today's Total</div><div class="stat-value" id="stat-today">00:00:00</div></div>
+        <div class="stat-card"><div class="stat-card-stripe" style="background: var(--accent-blue);"></div><div class="stat-label">Past 7 Days</div><div class="stat-value" id="stat-week">0.0 hrs</div></div>
+        <div class="stat-card"><div class="stat-card-stripe" style="background: #f59e0b;"></div><div class="stat-label">Focus Streak</div><div class="stat-value" id="stat-streak" style="color: #fcd34d;">0 Days</div></div>
+      </div>
+      <div class="section-header"><h2 class="section-title">Study Topics Overview</h2></div>
+      <div class="subject-grid" id="subjects-container"></div>
+    </section>
+
+    <!-- TIMER TAB -->
+    <section id="view-timer" class="tab-view hidden">
+      <div class="timer-container">
+        <div class="mode-switch">
+          <button class="active" id="btn-mode-stopwatch">Stopwatch</button>
+          <button id="btn-mode-pomodoro">Pomodoro</button>
+        </div>
+        <div class="pomo-stage-bar hidden" id="pomo-stage-bar">
+          <button class="pomo-stage-btn active" data-stage="focus">Focus</button>
+          <button class="pomo-stage-btn" data-stage="shortBreak">Short Break</button>
+          <button class="pomo-stage-btn" data-stage="longBreak">Long Break</button>
+        </div>
+        <div class="pomo-customizer-box hidden" id="pomo-customizer-box">
+          <div class="pomo-presets-grid" id="pomo-presets-container">
+            <button class="preset-chip" data-mins="15">15m</button>
+            <button class="preset-chip active" data-mins="25">25m</button>
+            <button class="preset-chip" data-mins="45">45m</button>
+            <button class="preset-chip" data-mins="60">60m</button>
+          </div>
+          <div class="custom-input-stepper">
+            <button class="stepper-btn" id="btn-step-dec">-</button>
+            <input type="number" id="input-pomo-minutes" class="stepper-input" value="25">
+            <button class="stepper-btn" id="btn-step-inc">+</button>
+          </div>
+        </div>
+        
+        <select id="timer-subject-select" class="form-input" style="max-width: 280px; margin: 0 auto 0.5rem; display: block; text-align: center;"></select>
+        
+        <div class="timer-dial-wrapper">
+          <svg class="timer-svg" viewBox="0 0 100 100">
+            <circle class="timer-track" cx="50" cy="50" r="45" />
+            <circle class="timer-progress" id="timer-ring" cx="50" cy="50" r="45" />
+          </svg>
+          <div class="timer-content">
+            <span class="timer-mode-tag" id="timer-status-badge">Ready</span>
+            <div class="timer-digits" id="timer-display">00:00:00</div>
+            <div class="timer-subject-name" id="timer-selected-title">Subject</div>
+          </div>
+        </div>
+        
+        <div class="timer-controls">
+          <button class="btn-ctrl btn-ctrl-primary" id="btn-timer-toggle"><span id="timer-toggle-text">Start Focus</span></button>
+          <button class="btn-ctrl btn-ctrl-stop" id="btn-timer-stop">Stop & Log</button>
+        </div>
+        <input type="text" id="timer-session-note" class="form-input" placeholder="Optional session note..." style="margin-top: 1.25rem; text-align: center;">
+      </div>
+    </section>
+
+    <!-- CALENDAR & CHECKLIST TAB -->
+    <section id="view-calendar" class="tab-view hidden">
+      <div class="calendar-container">
+        <div class="calendar-header">
+          <h2 class="section-title">Heatmap & Tasks</h2>
+          <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <button class="cal-nav-btn" id="cal-prev">&lt;</button>
+            <span id="cal-month-label" class="font-mono text-neon" style="font-weight:700; width:100px; text-align:center;"></span>
+            <button class="cal-nav-btn" id="cal-next">&gt;</button>
+          </div>
+        </div>
+        <div class="calendar-grid" id="calendar-grid-cells"></div>
+        
+        <div class="checklist-section">
+          <div class="checklist-header">
+            <div>
+              <h3 id="cal-inspect-date" class="font-mono" style="font-size: 1rem; color: #fff;">Selected Date</h3>
+              <div id="cal-inspect-total" class="font-mono text-neon" style="font-size: 0.8rem; font-weight: 700;">0 hrs logged</div>
+            </div>
+            <button class="btn-primary" id="btn-add-task" style="padding: 0.4rem 0.8rem; font-size: 0.75rem;">+ Task</button>
+          </div>
+          
+          <div class="checklist-progress-wrap">
+            <div class="checklist-progress-text">
+              <span>Daily Completion</span>
+              <span id="checklist-progress-ratio">0/0</span>
+            </div>
+            <div class="checklist-progress-bar"><div class="checklist-progress-fill" id="checklist-progress-fill"></div></div>
+          </div>
+
+          <div class="checklist-list" id="checklist-container"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PIPELINES TAB -->
+    <section id="view-pipelines" class="tab-view hidden">
+      <!-- Dashboard View -->
+      <div id="pipeline-dashboard" class="pipeline-dashboard">
+        <!-- Rendered via JS -->
+      </div>
+
+      <!-- Node Canvas View -->
+      <div id="pipeline-canvas-area" class="pipeline-canvas-area">
+        <div class="pipeline-canvas-header">
+          <button class="btn-secondary" id="btn-back-pipelines">← Back</button>
+          <h3 id="active-pipeline-title" class="font-mono" style="color: #fff;">Pipeline</h3>
+          <div style="display:flex; gap:0.5rem;">
+            <button class="btn-secondary" id="btn-reset-cam" title="Reset Camera"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></button>
+            <button class="btn-primary" id="btn-add-node">+ Add Node</button>
+          </div>
+        </div>
+        
+        <div id="pipeline-board" class="pipeline-board">
+          <div id="pipeline-canvas-layer" class="pipeline-canvas-layer">
+            <svg id="pipeline-svg" class="absolute inset-0 w-full h-full pointer-events-none z-10" style="overflow:visible;"></svg>
+            <div id="pipeline-nodes-container" class="absolute inset-0 z-20"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ANALYTICS TAB -->
+    <section id="view-analytics" class="tab-view hidden">
+      <div class="calendar-container">
+        <h2 class="section-title">Subject Time Distribution</h2>
+        <div id="analytics-distribution-list" style="margin-top:1rem;"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- MODALS -->
+  <!-- Profile Manager Modal -->
+  <div class="modal-backdrop" id="modal-profiles">
+    <div class="modal-box">
+      <h3 style="font-size: 1.1rem; font-weight: 800; color: #fff; margin-bottom: 1rem;">Manage Profiles</h3>
+      <div class="form-group">
+        <div id="profile-list-container" style="display:flex; flex-direction:column; gap:0.5rem; margin-bottom:1rem;"></div>
+        <div style="display:flex; gap:0.5rem;">
+          <input type="text" id="input-new-profile" class="form-input" placeholder="New profile name...">
+          <button class="btn-primary" id="btn-add-profile">Add</button>
+        </div>
+      </div>
+      <div style="display: flex; justify-content: flex-end;">
+        <button type="button" class="btn-secondary" id="btn-close-profiles">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Task Modal -->
+  <div class="modal-backdrop" id="modal-task">
+    <div class="modal-box">
+      <h3 style="font-size: 1.1rem; font-weight: 800; color: #fff; margin-bottom: 1rem;" id="modal-task-title">Add Task</h3>
+      <form id="form-task">
+        <input type="hidden" id="task-id">
+        <div class="form-group">
+          <label class="form-label">Task Title</label>
+          <input type="text" id="task-title" class="form-input" required placeholder="What needs to be done?">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Instructions / Note (Optional)</label>
+          <input type="text" id="task-desc" class="form-input" placeholder="Brief details...">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Recurrence</label>
+          <select id="task-type" class="form-input">
+            <option value="daily">Just Today (One-time)</option>
+            <option value="everyday">Everyday (Global Checklist)</option>
+          </select>
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 0.5rem;">
+          <button type="button" class="btn-secondary" onclick="document.getElementById('modal-task').classList.remove('open')">Cancel</button>
+          <button type="submit" class="btn-primary">Save Task</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const swCode = `
+      const CACHE_NAME = 'aether-focus-v6-zoom-pan';
+      self.addEventListener('install', (e) => {
+        self.skipWaiting();
+      });
+      self.addEventListener('activate', (e) => {
+        e.waitUntil(
+          caches.keys().then(keys => Promise.all(
+            keys.map(key => { if(key !== CACHE_NAME) return caches.delete(key); })
+          )).then(() => clients.claim())
+        );
+      });
+      self.addEventListener('fetch', (e) => {
+        e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
+      });
+    `;
+    if ('serviceWorker' in navigator) {
+      const blob = new Blob([swCode], { type: 'application/javascript' });
+      navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(()=>{});
+    }
+
+    // Audio & Wakelock
+    let soundMuted = false;
+    function playChime(f1=587.33, f2=880) {
+      if (soundMuted) return;
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator(); const gain = ctx.createGain();
+        osc.type = 'sine'; osc.frequency.setValueAtTime(f1, ctx.currentTime); osc.frequency.exponentialRampToValueAtTime(f2, ctx.currentTime + 0.18);
+        gain.gain.setValueAtTime(0.25, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.9);
+        osc.connect(gain); gain.connect(ctx.destination); osc.start(); osc.stop(ctx.currentTime + 0.9);
+      } catch(e){}
+    }
+    
+    let wakeLock = null, wakeLockRequested = false;
+    async function toggleWakeLock() {
+      wakeLockRequested = !wakeLockRequested;
+      if (wakeLockRequested && 'wakeLock' in navigator) {
+        try { wakeLock = await navigator.wakeLock.request('screen'); document.getElementById('wake-lock-badge').style.display='inline-flex'; document.getElementById('label-wakelock').textContent='Wakelock: Active'; document.getElementById('btn-toggle-wakelock').classList.add('active'); } catch(e){}
+      } else {
+        if(wakeLock) wakeLock.release(); wakeLock = null;
+        document.getElementById('wake-lock-badge').style.display='none'; document.getElementById('label-wakelock').textContent='Wakelock: Off'; document.getElementById('btn-toggle-wakelock').classList.remove('active');
+      }
+    }
+    document.getElementById('btn-toggle-wakelock').addEventListener('click', toggleWakeLock);
+
+    // Profile State
+    let profiles = JSON.parse(localStorage.getItem('aether_profiles') || '["M", "H"]');
+    let currentProfile = localStorage.getItem('aether_active_profile') || profiles[0];
+    function sKey(k) { return `${currentProfile}_${k}`; }
+
+    // Core Data
+    let subjects = [], studyLogs = [], tasks = [], pipelines = [];
+    let savedPomoMins = 25;
+    let selectedCalDayStr = new Date().toISOString().split('T')[0];
+
+    function loadProfileData() {
+      document.getElementById('active-profile-label').textContent = currentProfile;
+      subjects = JSON.parse(localStorage.getItem(sKey('subjects'))) || [{id:'s1', name:'Core Study', color:'#00f0ff'}];
+      studyLogs = JSON.parse(localStorage.getItem(sKey('logs'))) || [];
+      tasks = JSON.parse(localStorage.getItem(sKey('tasks'))) || [];
+      savedPomoMins = parseInt(localStorage.getItem(sKey('pomo'))) || 25;
+      
+      // Load Pipelines + Sanitize
+      let loadedPipes = JSON.parse(localStorage.getItem(sKey('pipelines'))) || [
+        { id: 'p1', title: 'Main Project', color: '#00f0ff', nodes: [], edges: [] }
+      ];
+      pipelines = loadedPipes.map(p => ({
+        ...p, nodes: Array.isArray(p.nodes) ? p.nodes : [], edges: Array.isArray(p.edges) ? p.edges : []
+      }));
+
+      renderDashboard();
+      renderCalendar();
+      renderPipelinesDashboard();
+      if(document.getElementById('pipeline-canvas-area').classList.contains('active') && activePipelineId) {
+        renderPipelineNodes();
+      }
+    }
+
+    function persistData() {
+      localStorage.setItem(sKey('subjects'), JSON.stringify(subjects));
+      localStorage.setItem(sKey('logs'), JSON.stringify(studyLogs));
+      localStorage.setItem(sKey('tasks'), JSON.stringify(tasks));
+      localStorage.setItem(sKey('pipelines'), JSON.stringify(pipelines));
+      localStorage.setItem(sKey('pomo'), savedPomoMins);
+      
+      renderDashboard();
+      renderCalendar();
+      
+      // Only render pipeline dashboard if we are NOT inside the canvas view
+      if (!document.getElementById('pipeline-canvas-area').classList.contains('active')) {
+        renderPipelinesDashboard();
+      }
+    }
+
+    // --- Profile Management ---
+    const modalProfiles = document.getElementById('modal-profiles');
+    document.getElementById('btn-open-profiles').addEventListener('click', () => {
+      renderProfileList();
+      modalProfiles.classList.add('open');
+    });
+    document.getElementById('btn-close-profiles').addEventListener('click', () => modalProfiles.classList.remove('open'));
+    
+    function renderProfileList() {
+      const container = document.getElementById('profile-list-container');
+      container.innerHTML = '';
+      profiles.forEach(p => {
+        const div = document.createElement('div');
+        div.style.display = 'flex'; div.style.justifyContent = 'space-between'; div.style.alignItems = 'center';
+        div.style.padding = '0.5rem'; div.style.background = 'var(--bg-card)'; div.style.border = '1px solid var(--border-subtle)'; div.style.borderRadius = '0.5rem';
+        
+        const isCurrent = p === currentProfile;
+        div.innerHTML = `
+          <div style="display:flex; align-items:center; gap:0.5rem; cursor:pointer;" class="prof-select">
+            <span style="width:10px;height:10px;border-radius:50%;background:${isCurrent ? 'var(--accent-neon)' : 'var(--text-dim)'}"></span>
+            <span style="color:${isCurrent ? '#fff' : 'var(--text-secondary)'}; font-weight:700;">${p}</span>
+          </div>
+          <div style="display:flex; gap:0.25rem;">
+            ${!isCurrent && profiles.length > 1 ? `<button class="task-btn delete prof-del" data-p="${p}">Delete</button>` : ''}
+          </div>
+        `;
+        div.querySelector('.prof-select').addEventListener('click', () => { switchProfile(p); });
+        
+        const delBtn = div.querySelector('.prof-del');
+        if(delBtn) {
+          delBtn.addEventListener('click', function() {
+            if(this.textContent === 'Sure?') {
+              deleteProfile(p);
+            } else {
+              this.textContent = 'Sure?';
+              this.style.color = 'var(--danger)';
+              setTimeout(() => { if(this) { this.textContent = 'Delete'; this.style.color = ''; } }, 3000);
+            }
+          });
+        }
+        container.appendChild(div);
+      });
+    }
+
+    function switchProfile(p) {
+      if(p === currentProfile) return;
+      currentProfile = p;
+      localStorage.setItem('aether_active_profile', currentProfile);
+      loadProfileData();
+      renderProfileList();
+    }
+    
+    document.getElementById('btn-add-profile').addEventListener('click', () => {
+      const name = document.getElementById('input-new-profile').value.trim();
+      if(name && !profiles.includes(name)) {
+        profiles.push(name);
+        localStorage.setItem('aether_profiles', JSON.stringify(profiles));
+        document.getElementById('input-new-profile').value = '';
+        switchProfile(name);
+      }
+    });
+
+    function deleteProfile(p) {
+      profiles = profiles.filter(x => x !== p);
+      localStorage.setItem('aether_profiles', JSON.stringify(profiles));
+      // Clean up keys
+      Object.keys(localStorage).forEach(k => { if(k.startsWith(p+'_')) localStorage.removeItem(k); });
+      renderProfileList();
+    }
+
+    // --- Calendar & Checklist Logic ---
+    function renderCalendar() {
+      const grid = document.getElementById('calendar-grid-cells');
+      grid.innerHTML = '';
+      const d = new Date(selectedCalDayStr + 'T00:00:00');
+      document.getElementById('cal-month-label').textContent = d.toLocaleString('default', { month: 'short', year: 'numeric' });
+      
+      const year = d.getFullYear(), month = d.getMonth();
+      const firstDay = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      
+      ['S','M','T','W','T','F','S'].forEach(day => {
+        const l = document.createElement('div'); l.className = 'calendar-day-label'; l.textContent = day; grid.appendChild(l);
+      });
+      for(let i=0; i<firstDay; i++) {
+        const b = document.createElement('div'); b.className = 'cal-day-empty'; grid.appendChild(b);
+      }
+      for(let day=1; day<=daysInMonth; day++) {
+        const ds = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+        const dayLogs = studyLogs.filter(l => l.dateString === ds);
+        const daySecs = dayLogs.reduce((sum, l) => sum + l.duration, 0);
+        const hrs = daySecs/3600;
+        let hc = 'heat-lvl-0';
+        if(daySecs>0) hc = hrs<0.75?'heat-lvl-1':hrs<1.75?'heat-lvl-2':hrs<3?'heat-lvl-3':'heat-lvl-4';
+        
+        const cell = document.createElement('div');
+        cell.className = `cal-day-cell ${hc} ${selectedCalDayStr===ds ? 'is-selected':''}`;
+        cell.textContent = day;
+        cell.onclick = () => { selectedCalDayStr = ds; renderCalendar(); };
+        grid.appendChild(cell);
+      }
+      
+      renderChecklist(selectedCalDayStr);
+    }
+    document.getElementById('cal-prev').onclick = () => { const d = new Date(selectedCalDayStr + 'T00:00:00'); d.setMonth(d.getMonth()-1); selectedCalDayStr = d.toISOString().split('T')[0]; renderCalendar(); };
+    document.getElementById('cal-next').onclick = () => { const d = new Date(selectedCalDayStr + 'T00:00:00'); d.setMonth(d.getMonth()+1); selectedCalDayStr = d.toISOString().split('T')[0]; renderCalendar(); };
+
+    // Checklist Drag State
+    let draggedTask = null;
+
+    function renderChecklist(dateStr) {
+      document.getElementById('cal-inspect-date').textContent = new Date(dateStr + 'T00:00:00').toLocaleDateString(undefined, { weekday:'short', month:'short', day:'numeric' });
+      const daySecs = studyLogs.filter(l => l.dateString === dateStr).reduce((s, l) => s + l.duration, 0);
+      document.getElementById('cal-inspect-total').textContent = (daySecs/3600).toFixed(1) + ' hrs logged';
+
+      const container = document.getElementById('checklist-container');
+      container.innerHTML = '';
+
+      let dayTasks = tasks.filter(t => t.type === 'everyday' || t.dateString === dateStr);
+      dayTasks.sort((a,b) => (a.order||0) - (b.order||0));
+
+      let completedCount = 0;
+      
+      dayTasks.forEach((task, index) => {
+        const isDone = task.completedOn && task.completedOn.includes(dateStr);
+        if(isDone) completedCount++;
+
+        const card = document.createElement('div');
+        card.className = `task-card ${isDone ? 'completed' : ''}`;
+        card.draggable = true;
+        
+        card.innerHTML = `
+          <div class="task-drag-handle"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg></div>
+          <span class="task-num">${index + 1}.</span>
+          <label class="task-checkbox-wrap">
+            <input type="checkbox" ${isDone ? 'checked' : ''}>
+            <svg class="task-checkbox-svg" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </label>
+          <div class="task-content">
+            <div style="display:flex; align-items:center;">
+              <span class="task-title">${task.title}</span>
+              <span class="task-badge ${task.type==='everyday'?'badge-everyday':'badge-once'}">${task.type==='everyday'?'Global':'Daily'}</span>
+            </div>
+            ${task.desc ? `<span class="task-desc">${task.desc}</span>` : ''}
+          </div>
+          <div class="task-actions">
+            <button class="task-btn edit"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+            <button class="task-btn delete"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+          </div>
+        `;
+
+        // Checkbox Toggle
+        card.querySelector('input').addEventListener('change', (e) => {
+          if(!task.completedOn) task.completedOn = [];
+          if(e.target.checked) task.completedOn.push(dateStr);
+          else task.completedOn = task.completedOn.filter(d => d !== dateStr);
+          persistData();
+        });
+
+        // Edit/Delete
+        card.querySelector('.edit').onclick = () => openTaskModal(task);
+        card.querySelector('.delete').onclick = () => { if(confirm('Delete task?')) { tasks = tasks.filter(t => t.id !== task.id); persistData(); } };
+
+        // Drag & Drop
+        card.addEventListener('dragstart', (e) => { draggedTask = task; card.classList.add('is-dragging'); });
+        card.addEventListener('dragend', () => { card.classList.remove('is-dragging'); draggedTask = null; });
+        card.addEventListener('dragover', (e) => { e.preventDefault(); });
+        card.addEventListener('drop', (e) => {
+          e.preventDefault();
+          if(draggedTask && draggedTask.id !== task.id) {
+            let dt = tasks.find(t => t.id === draggedTask.id);
+            let tt = tasks.find(t => t.id === task.id);
+            let temp = dt.order || 0; dt.order = tt.order || 0; tt.order = temp;
+            persistData();
+          }
+        });
+        
+        // Mobile touch drag polyfill
+        const handle = card.querySelector('.task-drag-handle');
+        handle.addEventListener('touchstart', (e) => { draggedTask = task; card.classList.add('is-dragging'); }, {passive:true});
+        handle.addEventListener('touchmove', (e) => { e.preventDefault(); const touch = e.touches[0]; const target = document.elementFromPoint(touch.clientX, touch.clientY); const dropCard = target?.closest('.task-card'); if(dropCard && dropCard !== card) { dropCard.style.borderTop = "2px solid var(--accent-neon)"; } });
+        handle.addEventListener('touchend', (e) => {
+          card.classList.remove('is-dragging');
+          const touch = e.changedTouches[0]; const target = document.elementFromPoint(touch.clientX, touch.clientY); const dropCard = target?.closest('.task-card');
+          document.querySelectorAll('.task-card').forEach(c => c.style.borderTop="");
+          if(dropCard && dropCard !== card && draggedTask) {
+             const dropIndex = Array.from(container.children).indexOf(dropCard);
+             if(dropIndex > -1) {
+                let dt = tasks.find(t => t.id === draggedTask.id);
+                let targetId = dayTasks[dropIndex].id;
+                let tt = tasks.find(t => t.id === targetId);
+                let temp = dt.order || 0; dt.order = tt.order || 0; tt.order = temp;
+                persistData();
+             }
+          }
+          draggedTask = null;
+        });
+
+        container.appendChild(card);
+      });
+
+      // Progress Bar Update
+      const total = dayTasks.length;
+      document.getElementById('checklist-progress-ratio').textContent = `${completedCount}/${total} Completed`;
+      document.getElementById('checklist-progress-fill').style.width = total === 0 ? '0%' : `${(completedCount/total)*100}%`;
+    }
+
+    const modalTask = document.getElementById('modal-task');
+    document.getElementById('btn-add-task').onclick = () => openTaskModal();
+    
+    function openTaskModal(t = null) {
+      document.getElementById('task-id').value = t ? t.id : '';
+      document.getElementById('task-title').value = t ? t.title : '';
+      document.getElementById('task-desc').value = t ? (t.desc||'') : '';
+      document.getElementById('task-type').value = t ? t.type : 'daily';
+      document.getElementById('modal-task-title').textContent = t ? 'Edit Task' : 'New Task';
+      modalTask.classList.add('open');
+    }
+
+    document.getElementById('form-task').onsubmit = (e) => {
+      e.preventDefault();
+      const id = document.getElementById('task-id').value;
+      const title = document.getElementById('task-title').value.trim();
+      const desc = document.getElementById('task-desc').value.trim();
+      const type = document.getElementById('task-type').value;
+      
+      if(id) {
+        tasks = tasks.map(t => t.id === id ? {...t, title, desc, type} : t);
+      } else {
+        tasks.push({ id: 't-'+Date.now(), title, desc, type, dateString: selectedCalDayStr, completedOn: [], order: tasks.length });
+      }
+      persistData();
+      modalTask.classList.remove('open');
+    };
+
+    // --- Visual Node Pipeline Planner ---
+    let activePipelineId = null;
+    let draggingNodeId = null;
+    let dragOffset = { x: 0, y: 0 };
+    let drawingEdge = null; // { sourceId, startX, startY, endX, endY }
+    
+    // Camera State
+    let camX = 0, camY = 0, camZoom = 1;
+    let isPanning = false, lastPanX = 0, lastPanY = 0;
+    let initialPinchDist = 0, initialCamZoom = 1, lastTouchCenter = null;
+
+    function renderPipelinesDashboard() {
+      const dash = document.getElementById('pipeline-dashboard');
+      dash.innerHTML = `
+        <div class="pipeline-card" style="border-style:dashed; display:flex; align-items:center; justify-content:center; color:var(--text-dim);" onclick="addPipeline()">
+          <div style="text-align:center;"><div style="font-size:2rem;">+</div><div style="font-size:0.8rem;">New Pipeline</div></div>
+        </div>
+      `;
+      pipelines.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'pipeline-card';
+        card.innerHTML = `
+          <div class="pipeline-card-header">
+            <span class="pipeline-color-dot" style="background:${p.color}"></span>
+            <span class="pipeline-title">${p.title}</span>
+          </div>
+          <div class="pipeline-meta">
+            <span>${p.nodes.length} Nodes</span>
+            <button class="task-btn delete" style="padding:0;" onclick="event.stopPropagation(); deletePipeline('${p.id}')"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+          </div>
+        `;
+        card.onclick = () => openPipeline(p.id);
+        dash.appendChild(card);
+      });
+    }
+
+    function addPipeline() {
+      const p = { id: 'pipe-'+Date.now(), title: 'New Pipeline', color: '#00f0ff', nodes: [], edges: [] };
+      pipelines.push(p); persistData(); openPipeline(p.id);
+    }
+    function deletePipeline(id) {
+      if(confirm('Delete pipeline?')) { pipelines = pipelines.filter(p => p.id !== id); persistData(); }
+    }
+
+    function openPipeline(id) {
+      activePipelineId = id;
+      document.getElementById('pipeline-dashboard').style.display = 'none';
+      document.getElementById('pipeline-canvas-area').classList.add('active');
+      const p = pipelines.find(x => x.id === id);
+      document.getElementById('active-pipeline-title').textContent = p.title;
+      document.getElementById('active-pipeline-title').style.color = p.color;
+      
+      // Reset Camera
+      camX = 0; camY = 0; camZoom = 1;
+      applyCamera();
+      renderPipelineNodes();
+    }
+    document.getElementById('btn-back-pipelines').onclick = () => {
+      activePipelineId = null;
+      document.getElementById('pipeline-canvas-area').classList.remove('active');
+      document.getElementById('pipeline-dashboard').style.display = 'grid';
+      renderPipelinesDashboard();
+    };
+    document.getElementById('btn-reset-cam').onclick = () => { camX = 0; camY = 0; camZoom = 1; applyCamera(); };
+
+    function applyCamera() {
+      document.getElementById('pipeline-canvas-layer').style.transform = `translate(${camX}px, ${camY}px) scale(${camZoom})`;
+    }
+    
+    // Coordinate converter
+    function getCanvasCoords(clientX, clientY) {
+      const rect = document.getElementById('pipeline-board').getBoundingClientRect();
+      return {
+        x: (clientX - rect.left - camX) / camZoom,
+        y: (clientY - rect.top - camY) / camZoom
+      };
+    }
+
+    function renderPipelineNodes() {
+      if(!activePipelineId) return;
+      const p = pipelines.find(x => x.id === activePipelineId);
+      if(!p) return;
+
+      const svg = document.getElementById('pipeline-svg');
+      const container = document.getElementById('pipeline-nodes-container');
+      svg.innerHTML = ''; container.innerHTML = '';
+
+      // Draw Edges
+      p.edges.forEach(edge => {
+        const src = p.nodes.find(n => n.id === edge.source);
+        const tgt = p.nodes.find(n => n.id === edge.target);
+        if(!src || !tgt) return;
+        
+        const startX = src.x + 240; // width
+        const startY = src.y + 36;  // height/2
+        const endX = tgt.x;
+        const endY = tgt.y + 36;
+        
+        const isCompleted = src.status === 'completed' && tgt.status === 'completed';
+        const color = isCompleted ? '#238636' : '#30363d';
+        const curv = Math.max(Math.abs(endX - startX) / 2, 40);
+        const d = `M ${startX} ${startY} C ${startX+curv} ${startY}, ${endX-curv} ${endY}, ${endX} ${endY}`;
+        
+        const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        g.style.cursor = 'pointer'; g.style.pointerEvents = 'stroke';
+        g.onclick = (e) => { e.stopPropagation(); p.edges = p.edges.filter(x => x.id !== edge.id); persistData(); renderPipelineNodes(); };
+        
+        const hitPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        hitPath.setAttribute('d', d); hitPath.setAttribute('stroke', 'transparent'); hitPath.setAttribute('stroke-width', '25'); hitPath.setAttribute('fill', 'none');
+        
+        const visPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        visPath.setAttribute('d', d); visPath.setAttribute('stroke', color); visPath.setAttribute('stroke-width', '2.5'); visPath.setAttribute('fill', 'none');
+        
+        g.onmouseenter = () => visPath.setAttribute('stroke', '#ef4444');
+        g.onmouseleave = () => visPath.setAttribute('stroke', color);
+        
+        g.appendChild(hitPath); g.appendChild(visPath); svg.appendChild(g);
+      });
+
+      // Draw active dragging edge
+      if(drawingEdge) {
+        const curv = Math.max(Math.abs(drawingEdge.endX - drawingEdge.startX) / 2, 40);
+        const d = `M ${drawingEdge.startX} ${drawingEdge.startY} C ${drawingEdge.startX+curv} ${drawingEdge.startY}, ${drawingEdge.endX-curv} ${drawingEdge.endY}, ${drawingEdge.endX} ${drawingEdge.endY}`;
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('d', d); path.setAttribute('stroke', '#8b949e'); path.setAttribute('stroke-width', '2'); path.setAttribute('stroke-dasharray', '5,5'); path.setAttribute('fill', 'none');
+        svg.appendChild(path);
+      }
+
+      // Draw Nodes
+      p.nodes.forEach(node => {
+        const div = document.createElement('div');
+        div.className = `node-element ${node.status==='completed'?'completed':''} ${draggingNodeId===node.id?'is-dragging':''}`;
+        div.style.transform = `translate(${node.x}px, ${node.y}px)`;
+        
+        div.innerHTML = `
+          <div class="node-drag-handle"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg></div>
+          <div class="node-port node-port-in"><div class="node-port-inner"></div></div>
+          <button class="node-status-btn">
+            ${node.status==='completed' 
+              ? `<svg width="18" height="18" fill="#238636" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>` 
+              : `<svg width="18" height="18" fill="#8b949e" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>`}
+          </button>
+          <div class="node-content">
+            <input type="text" class="node-title-input" value="${node.title}" style="display:none;">
+            <div class="node-title-display" title="Click to edit">${node.title}</div>
+            <span class="node-priority-badge" style="color:var(--accent-neon); border-color:var(--border-subtle);">${node.priority||'Med'}</span>
+          </div>
+          <div class="node-port node-port-out"><div class="node-port-inner"></div></div>
+          <button class="task-btn delete" style="position:absolute; right:8px; top:8px; padding:2px;"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+        `;
+
+        // Interaction Listeners
+        const titleDisp = div.querySelector('.node-title-display');
+        const titleInp = div.querySelector('.node-title-input');
+        titleDisp.onclick = (e) => { e.stopPropagation(); titleDisp.style.display='none'; titleInp.style.display='block'; titleInp.focus(); };
+        titleInp.onblur = () => { node.title = titleInp.value || 'Task'; persistData(); renderPipelineNodes(); };
+        titleInp.onkeydown = (e) => { if(e.key === 'Enter') titleInp.blur(); };
+        
+        div.querySelector('.node-status-btn').onclick = (e) => { e.stopPropagation(); node.status = node.status==='completed'?'pending':'completed'; persistData(); renderPipelineNodes(); };
+        div.querySelector('.node-priority-badge').onclick = (e) => { e.stopPropagation(); const p = ['Low','Med','High']; node.priority = p[(p.indexOf(node.priority)+1)%3]; persistData(); renderPipelineNodes(); };
+        div.querySelector('.delete').onclick = (e) => { e.stopPropagation(); p.nodes = p.nodes.filter(x => x.id !== node.id); p.edges = p.edges.filter(x => x.source !== node.id && x.target !== node.id); persistData(); renderPipelineNodes(); };
+        
+        // Node Dragging Pointer Events
+        div.onpointerdown = (e) => {
+          if(e.target.closest('button, input, .node-port')) return;
+          e.stopPropagation();
+          draggingNodeId = node.id;
+          const coords = getCanvasCoords(e.clientX, e.clientY);
+          dragOffset = { x: coords.x - node.x, y: coords.y - node.y };
+          renderPipelineNodes(); // for z-index styling
+        };
+        
+        // Edge Drawing
+        const outPort = div.querySelector('.node-port-out');
+        outPort.onpointerdown = (e) => {
+          e.stopPropagation(); e.preventDefault();
+          const coords = getCanvasCoords(e.clientX, e.clientY);
+          drawingEdge = { sourceId: node.id, startX: node.x + 240, startY: node.y + 36, endX: coords.x, endY: coords.y };
+          renderPipelineNodes();
+        };
+        
+        container.appendChild(div);
+      });
+    }
+
+    document.getElementById('btn-add-node').onclick = () => {
+      const p = pipelines.find(x => x.id === activePipelineId);
+      if(p) {
+        // Drop node at center of current view
+        const centerX = (-camX + 300) / camZoom;
+        const centerY = (-camY + 200) / camZoom;
+        p.nodes.push({ id: 'n-'+Date.now(), title: 'New Node', status: 'pending', priority: 'Med', x: centerX, y: centerY });
+        persistData(); renderPipelineNodes();
+      }
+    };
+
+    // --- Global Pan, Zoom & Interaction Handlers on the Board ---
+    const board = document.getElementById('pipeline-board');
+    
+    // Desktop Wheel Zoom
+    board.addEventListener('wheel', (e) => {
+      if (!activePipelineId) return;
+      e.preventDefault();
+      const zoomDelta = e.deltaY > 0 ? 0.9 : 1.1;
+      const newZoom = Math.min(Math.max(0.2, camZoom * zoomDelta), 3);
+      
+      const rect = board.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+
+      camX = mouseX - (mouseX - camX) * (newZoom / camZoom);
+      camY = mouseY - (mouseY - camY) * (newZoom / camZoom);
+      camZoom = newZoom;
+      applyCamera();
+    }, { passive: false });
+
+    // Touch & Pointer global handling
+    board.addEventListener('touchstart', (e) => {
+      if(e.touches.length === 2) {
+        isPanning = false;
+        initialPinchDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+        initialCamZoom = camZoom;
+        lastTouchCenter = { x: (e.touches[0].clientX + e.touches[1].clientX)/2, y: (e.touches[0].clientY + e.touches[1].clientY)/2 };
+      } else if (e.touches.length === 1 && !draggingNodeId && !drawingEdge) {
+        if(e.target === board || e.target.closest('#pipeline-svg')) {
+          isPanning = true; lastPanX = e.touches[0].clientX; lastPanY = e.touches[0].clientY;
+        }
+      }
+    }, { passive: false });
+
+    window.addEventListener('pointermove', (e) => {
+      if(!activePipelineId) return;
+      
+      // Handle node dragging
+      if(draggingNodeId) {
+        const p = pipelines.find(x => x.id === activePipelineId);
+        const node = p.nodes.find(n => n.id === draggingNodeId);
+        if(node) {
+          const coords = getCanvasCoords(e.clientX, e.clientY);
+          node.x = coords.x - dragOffset.x;
+          node.y = coords.y - dragOffset.y;
+          renderPipelineNodes(); // RequestAnimationFrame ideally, but fast enough here
+        }
+      } 
+      // Handle edge drawing
+      else if (drawingEdge) {
+        const coords = getCanvasCoords(e.clientX, e.clientY);
+        drawingEdge.endX = coords.x; drawingEdge.endY = coords.y;
+        renderPipelineNodes();
+      }
+    });
+
+    board.addEventListener('touchmove', (e) => {
+      if(e.touches.length === 2) {
+        e.preventDefault();
+        const currentDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+        const newZoom = Math.min(Math.max(0.2, initialCamZoom * (currentDist / initialPinchDist)), 3);
+        const currentCenter = { x: (e.touches[0].clientX + e.touches[1].clientX)/2, y: (e.touches[0].clientY + e.touches[1].clientY)/2 };
+        
+        const rect = board.getBoundingClientRect();
+        const mouseX = currentCenter.x - rect.left;
+        const mouseY = currentCenter.y - rect.top;
+
+        camX = mouseX - (mouseX - camX) * (newZoom / camZoom) + (currentCenter.x - lastTouchCenter.x);
+        camY = mouseY - (mouseY - camY) * (newZoom / camZoom) + (currentCenter.y - lastTouchCenter.y);
+        camZoom = newZoom; lastTouchCenter = currentCenter;
+        applyCamera();
+      } else if (isPanning && e.touches.length === 1) {
+        e.preventDefault();
+        camX += e.touches[0].clientX - lastPanX; camY += e.touches[0].clientY - lastPanY;
+        lastPanX = e.touches[0].clientX; lastPanY = e.touches[0].clientY;
+        applyCamera();
+      }
+    }, { passive: false });
+
+    // Desktop Mouse Panning
+    board.addEventListener('pointerdown', (e) => {
+      if(e.pointerType === 'mouse' && !draggingNodeId && !drawingEdge && (e.target === board || e.target.closest('#pipeline-svg'))) {
+        isPanning = true; lastPanX = e.clientX; lastPanY = e.clientY;
+      }
+    });
+    window.addEventListener('pointermove', (e) => {
+      if(isPanning && e.pointerType === 'mouse') {
+        camX += e.clientX - lastPanX; camY += e.clientY - lastPanY;
+        lastPanX = e.clientX; lastPanY = e.clientY;
+        applyCamera();
+      }
+    });
+
+    window.addEventListener('pointerup', (e) => {
+      isPanning = false;
+      if (draggingNodeId) { draggingNodeId = null; persistData(); renderPipelineNodes(); }
+      
+      if (drawingEdge) {
+        // --- MAGNETIC EDGE SNAPPING (MOBILE & DESKTOP) ---
+        const p = pipelines.find(x => x.id === activePipelineId);
+        let targetNodeId = null;
+        let closestDist = Infinity;
+        const snapRadius = 60 / camZoom; // Generous hit area scaled by zoom
+        const dropCoords = getCanvasCoords(e.clientX, e.clientY);
+        
+        p.nodes.forEach(n => {
+          if (n.id === drawingEdge.sourceId) return;
+          const portX = n.x; // Input port is on left edge
+          const portY = n.y + 36; // vertically centered
+          const dist = Math.hypot(dropCoords.x - portX, dropCoords.y - portY);
+          if (dist < snapRadius && dist < closestDist) {
+            closestDist = dist; targetNodeId = n.id;
+          }
+        });
+
+        if (targetNodeId) {
+          const exists = p.edges.some(x => (x.source===drawingEdge.sourceId && x.target===targetNodeId) || (x.target===drawingEdge.sourceId && x.source===targetNodeId));
+          if(!exists) p.edges.push({ id: 'edge-'+Date.now(), source: drawingEdge.sourceId, target: targetNodeId });
+        }
+        
+        drawingEdge = null; persistData(); renderPipelineNodes();
+      }
+    });
+
+    // --- Tab Switching ---
+    document.querySelectorAll('.nav-btn, .mobile-nav-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-view').forEach(v => v.classList.add('hidden'));
+        document.querySelectorAll('.nav-btn, .mobile-nav-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const tab = btn.getAttribute('data-tab');
+        document.getElementById('view-' + tab).classList.remove('hidden');
+        if(tab==='calendar') renderCalendar();
+        if(tab==='pipelines' && activePipelineId) renderPipelineNodes();
+      });
+    });
+
+    // Initialize
+    window.addEventListener('DOMContentLoaded', loadProfileData);
+  </script>
+</body>
+</html>
