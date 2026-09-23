@@ -1093,6 +1093,8 @@
       align-items: center; 
       justify-content: space-between; 
       z-index: 30; 
+      flex-wrap: wrap;
+      gap: 0.5rem;
     }
 
     .pipeline-canvas { 
@@ -1100,8 +1102,14 @@
       position: relative; 
       overflow: hidden; 
       background-color: #0d1117; 
-      cursor: crosshair; 
-      touch-action: none; /* Mobile fix: prevents screen from scrolling while interacting */
+      background-image: radial-gradient(circle, #23272e 1px, transparent 1px);
+      background-size: 22px 22px;
+      cursor: grab; 
+      touch-action: none; /* Mobile fix: prevents screen from scrolling while interacting; we implement our own pan/pinch */
+    }
+
+    .pipeline-canvas.is-panning {
+      cursor: grabbing;
     }
     
     .pipeline-svg-layer { 
@@ -1129,7 +1137,7 @@
 
     .pipeline-edge-drawing { 
       fill: none; 
-      stroke: #8b949e; 
+      stroke: #58a6ff; 
       stroke-width: 2.5px; 
       stroke-dasharray: 4; 
       pointer-events: none; 
@@ -1216,25 +1224,33 @@
       background: #f85149; 
       color: #fff; 
       border-radius: 50%; 
-      width: 18px; 
-      height: 18px; 
+      width: 22px; 
+      height: 22px; 
       display: none; 
       align-items: center; 
       justify-content: center; 
-      font-size: 10px; 
+      font-size: 11px; 
       cursor: pointer; 
       border: none; 
       z-index: 30; 
+      touch-action: none;
     }
 
     .gh-node:hover .gh-node-delete { 
       display: flex; 
     }
 
+    /* Always show delete button on touch devices, since there's no hover state */
+    @media (hover: none) and (pointer: coarse) {
+      .gh-node-delete {
+        display: flex;
+      }
+    }
+
     .gh-port { 
       position: absolute; 
-      width: 12px; 
-      height: 12px; 
+      width: 14px; 
+      height: 14px; 
       background: #30363d; 
       border: 2px solid #1c2128; 
       border-radius: 50%; 
@@ -1242,17 +1258,104 @@
       transform: translateY(-50%); 
       z-index: 22; 
       cursor: crosshair; 
-      transition: background 0.2s; 
+      transition: background 0.2s, transform 0.2s; 
       pointer-events: auto; 
     }
 
-    .gh-port:hover { 
-      background: #58a6ff; 
-      transform: translateY(-50%) scale(1.3); 
+    /* Invisible larger hit-area so ports are easy to grab on a touchscreen */
+    .gh-port::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 40px;
+      height: 40px;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
     }
 
-    .gh-port-in { left: -6px; }
-    .gh-port-out { right: -6px; }
+    .gh-port:hover, .gh-port.port-active { 
+      background: #58a6ff; 
+      transform: translateY(-50%) scale(1.35); 
+    }
+
+    .gh-port-in { left: -7px; }
+    .gh-port-out { right: -7px; }
+
+    @media (hover: none) and (pointer: coarse) {
+      .gh-port {
+        width: 20px;
+        height: 20px;
+        background: #58a6ff;
+        border-width: 3px;
+      }
+      .gh-port-in { left: -10px; }
+      .gh-port-out { right: -10px; }
+    }
+
+    .pipeline-zoom-controls {
+      position: absolute;
+      right: 14px;
+      bottom: 14px;
+      z-index: 40;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: rgba(22, 27, 34, 0.92);
+      border: 1px solid #30363d;
+      border-radius: 0.75rem;
+      overflow: hidden;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+    }
+
+    .zoom-ctrl-btn {
+      width: 2.75rem;
+      height: 2.75rem;
+      background: transparent;
+      border: none;
+      color: #c9d1d9;
+      font-size: 1.2rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      touch-action: manipulation;
+    }
+
+    .zoom-ctrl-btn:active {
+      background: rgba(0, 240, 255, 0.15);
+      color: var(--accent-neon);
+    }
+
+    .zoom-ctrl-divider {
+      width: 100%;
+      height: 1px;
+      background: #30363d;
+    }
+
+    .zoom-ctrl-level {
+      font-size: 0.65rem;
+      font-family: monospace;
+      color: #8b949e;
+      padding: 0.3rem 0;
+      text-align: center;
+      width: 100%;
+    }
+
+    .pipeline-canvas-hint {
+      position: absolute;
+      left: 14px;
+      bottom: 14px;
+      z-index: 40;
+      font-size: 0.68rem;
+      color: #8b949e;
+      background: rgba(22, 27, 34, 0.8);
+      border: 1px solid #30363d;
+      border-radius: 0.5rem;
+      padding: 0.35rem 0.6rem;
+      pointer-events: none;
+    }
 
     .modal-backdrop { 
       position: fixed; 
@@ -1406,6 +1509,7 @@
       .timer-digits { font-size: 2.7rem; }
       .pipeline-editor-wrapper { min-height: 80vh; }
       .hidden-mobile { display: none !important; }
+      .pipeline-canvas-hint { display: none; }
     }
 
     .hidden { display: none !important; }
@@ -1667,7 +1771,7 @@
             <h2 class="section-title" id="active-pipeline-title" style="margin: 0; font-family: monospace;">Pipeline</h2>
           </div>
           <div style="display: flex; align-items: center; gap: 0.75rem;">
-            <span style="font-size: 0.75rem; color: var(--text-dim); margin-right: 0.5rem;" class="hidden-mobile">Double-click canvas to add node</span>
+            <span style="font-size: 0.75rem; color: var(--text-dim); margin-right: 0.5rem;" class="hidden-mobile">Double-click canvas to add node · drag empty space to pan · pinch to zoom</span>
             <button class="btn-primary" onclick="addPipelineNode()" style="padding: 0.4rem 0.8rem; font-size: 0.75rem;">+ Node</button>
             <button class="icon-btn" style="color:var(--danger); border-color:rgba(239,68,68,0.3); width: 1.8rem; height: 1.8rem;" onclick="promptDeleteActivePipeline()" title="Delete Pipeline">
               <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
@@ -1676,13 +1780,25 @@
         </div>
         
         <div class="pipeline-canvas" id="pipeline-canvas">
-          <!-- SVG Layer for drawing connecting curves -->
+          <!-- SVG Layer for drawing connecting curves (kept in screen-space, unaffected by the nodes-layer zoom/pan transform) -->
           <svg class="pipeline-svg-layer" id="pipeline-svg">
             <g id="pipeline-edges-group"></g>
             <path id="pipeline-edge-preview" class="pipeline-edge-drawing" d="" style="display:none;"></path>
           </svg>
-          <!-- DOM Layer for Nodes -->
-          <div id="pipeline-nodes-layer" style="position: absolute; inset: 0; pointer-events: none;"></div>
+          <!-- DOM Layer for Nodes: this layer is scaled/panned for zoom -->
+          <div id="pipeline-nodes-layer" style="position: absolute; inset: 0; pointer-events: none; transform-origin: 0 0;"></div>
+
+          <!-- Zoom controls -->
+          <div class="pipeline-zoom-controls">
+            <button class="zoom-ctrl-btn" id="btn-zoom-in" title="Zoom in">+</button>
+            <div class="zoom-ctrl-divider"></div>
+            <span class="zoom-ctrl-level" id="zoom-level-label">100%</span>
+            <div class="zoom-ctrl-divider"></div>
+            <button class="zoom-ctrl-btn" id="btn-zoom-out" title="Zoom out">&minus;</button>
+            <div class="zoom-ctrl-divider"></div>
+            <button class="zoom-ctrl-btn" id="btn-zoom-reset" title="Reset view" style="font-size: 0.9rem;">⟲</button>
+          </div>
+          <div class="pipeline-canvas-hint">Drag empty space to pan · pinch to zoom · double-tap for new node</div>
         </div>
       </div>
     </section>
@@ -1824,7 +1940,7 @@
   </nav>
 
   <script>
-    const CACHE_NAME = 'aether-focus-v6-mobile-touch';
+    const CACHE_NAME = 'aether-focus-v7-mobile-zoom';
     const swCode = `
       self.addEventListener('install', (e) => {
         self.skipWaiting();
@@ -2805,15 +2921,167 @@
       renderChecklist(selectedCalDayStr);
     });
 
+    /* ================== PIPELINE NODE EDITOR (with mobile zoom/pan) ================== */
+
     let activePipelineId = null;
     let draggedGHNode = null; 
     let ghNodeOffset = { x: 0, y: 0 };
     let drawingEdgeSourceId = null;
+
+    // Zoom/Pan state for the nodes layer. The SVG edges layer stays in screen-space
+    // (it reads live getBoundingClientRect() positions) so it never needs its own transform.
+    let canvasScale = 1;
+    let canvasPanX = 0;
+    let canvasPanY = 0;
+    const MIN_SCALE = 0.3;
+    const MAX_SCALE = 2.5;
+
+    let isPanning = false;
+    let panStart = { x: 0, y: 0 };
+    let panStartOffset = { x: 0, y: 0 };
+
+    let pinchStartDist = null;
+    let pinchStartScale = 1;
+    let pinchStartPan = { x: 0, y: 0 };
+    let pinchMidpoint = { x: 0, y: 0 };
     
     const svgCanvas = document.getElementById('pipeline-svg');
     const edgesGroup = document.getElementById('pipeline-edges-group');
     const nodesLayer = document.getElementById('pipeline-nodes-layer');
     const edgePreview = document.getElementById('pipeline-edge-preview');
+    const editorCanvas = document.getElementById('pipeline-canvas');
+    const zoomLevelLabel = document.getElementById('zoom-level-label');
+
+    // Convert a point expressed relative to the canvas element (screen-space, post-transform)
+    // into "world" coordinates (the un-transformed coordinate space nodes are stored in).
+    function screenToWorld(canvasRelX, canvasRelY) {
+      return {
+        x: (canvasRelX - canvasPanX) / canvasScale,
+        y: (canvasRelY - canvasPanY) / canvasScale
+      };
+    }
+
+    function updateCanvasTransform() {
+      nodesLayer.style.transform = `translate(${canvasPanX}px, ${canvasPanY}px) scale(${canvasScale})`;
+      if (zoomLevelLabel) zoomLevelLabel.textContent = `${Math.round(canvasScale * 100)}%`;
+      updateAllEdges();
+    }
+
+    function zoomCanvasAt(factor, screenX, screenY) {
+      const rect = editorCanvas.getBoundingClientRect();
+      const cx = screenX - rect.left;
+      const cy = screenY - rect.top;
+      const world = screenToWorld(cx, cy);
+      canvasScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, canvasScale * factor));
+      canvasPanX = cx - world.x * canvasScale;
+      canvasPanY = cy - world.y * canvasScale;
+      updateCanvasTransform();
+    }
+
+    function resetCanvasView() {
+      canvasScale = 1;
+      canvasPanX = 0;
+      canvasPanY = 0;
+      updateCanvasTransform();
+    }
+
+    document.getElementById('btn-zoom-in').addEventListener('click', () => {
+      const rect = editorCanvas.getBoundingClientRect();
+      zoomCanvasAt(1.25, rect.left + rect.width / 2, rect.top + rect.height / 2);
+    });
+    document.getElementById('btn-zoom-out').addEventListener('click', () => {
+      const rect = editorCanvas.getBoundingClientRect();
+      zoomCanvasAt(0.8, rect.left + rect.width / 2, rect.top + rect.height / 2);
+    });
+    document.getElementById('btn-zoom-reset').addEventListener('click', resetCanvasView);
+
+    // Desktop: mouse wheel to zoom
+    editorCanvas.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const factor = e.deltaY < 0 ? 1.1 : 0.9;
+      zoomCanvasAt(factor, e.clientX, e.clientY);
+    }, { passive: false });
+
+    // Desktop: click-drag on empty canvas to pan
+    editorCanvas.addEventListener('mousedown', (e) => {
+      if (e.target !== editorCanvas && e.target !== svgCanvas && e.target.tagName !== 'svg') return;
+      if (e.button !== 0) return;
+      isPanning = true;
+      editorCanvas.classList.add('is-panning');
+      panStart = { x: e.clientX, y: e.clientY };
+      panStartOffset = { x: canvasPanX, y: canvasPanY };
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isPanning) return;
+      canvasPanX = panStartOffset.x + (e.clientX - panStart.x);
+      canvasPanY = panStartOffset.y + (e.clientY - panStart.y);
+      updateCanvasTransform();
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (isPanning) {
+        isPanning = false;
+        editorCanvas.classList.remove('is-panning');
+      }
+    });
+
+    // Mobile: pinch-to-zoom and single-finger pan on empty canvas.
+    // Touches that start on a node or port are stopped from propagating here
+    // (see handleNodeStart / handlePortStart), so this only fires on empty space.
+    editorCanvas.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        isPanning = false;
+        draggedGHNode = null;
+        drawingEdgeSourceId = null;
+        edgePreview.style.display = 'none';
+        const [t1, t2] = e.touches;
+        pinchStartDist = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+        pinchStartScale = canvasScale;
+        pinchStartPan = { x: canvasPanX, y: canvasPanY };
+        pinchMidpoint = { x: (t1.clientX + t2.clientX) / 2, y: (t1.clientY + t2.clientY) / 2 };
+      } else if (e.touches.length === 1 && !draggedGHNode && !drawingEdgeSourceId) {
+        const t = e.touches[0];
+        isPanning = true;
+        editorCanvas.classList.add('is-panning');
+        panStart = { x: t.clientX, y: t.clientY };
+        panStartOffset = { x: canvasPanX, y: canvasPanY };
+      }
+    }, { passive: false });
+
+    editorCanvas.addEventListener('touchmove', (e) => {
+      if (e.touches.length === 2 && pinchStartDist) {
+        e.preventDefault();
+        const [t1, t2] = e.touches;
+        const dist = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+        const newScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, pinchStartScale * (dist / pinchStartDist)));
+        const rect = editorCanvas.getBoundingClientRect();
+        const cx = pinchMidpoint.x - rect.left;
+        const cy = pinchMidpoint.y - rect.top;
+        const world = { x: (cx - pinchStartPan.x) / pinchStartScale, y: (cy - pinchStartPan.y) / pinchStartScale };
+        canvasScale = newScale;
+        canvasPanX = cx - world.x * canvasScale;
+        canvasPanY = cy - world.y * canvasScale;
+        updateCanvasTransform();
+      } else if (isPanning && e.touches.length === 1) {
+        e.preventDefault();
+        const t = e.touches[0];
+        canvasPanX = panStartOffset.x + (t.clientX - panStart.x);
+        canvasPanY = panStartOffset.y + (t.clientY - panStart.y);
+        updateCanvasTransform();
+      }
+    }, { passive: false });
+
+    const endCanvasTouch = (e) => {
+      if (e.touches.length < 2) pinchStartDist = null;
+      if (e.touches.length === 0) {
+        isPanning = false;
+        editorCanvas.classList.remove('is-panning');
+      }
+    };
+    editorCanvas.addEventListener('touchend', endCanvasTouch);
+    editorCanvas.addEventListener('touchcancel', endCanvasTouch);
 
     function renderPipelinesDashboard() {
       document.getElementById('pipelines-dashboard').classList.remove('hidden');
@@ -2853,6 +3121,9 @@
       activePipelineId = id;
       document.getElementById('pipelines-dashboard').classList.add('hidden');
       document.getElementById('pipelines-active').classList.remove('hidden');
+      canvasScale = 1;
+      canvasPanX = 0;
+      canvasPanY = 0;
       renderNodeGraph();
     }
     
@@ -2914,7 +3185,7 @@
 
         const handleNodeStart = (e) => {
           if (e.target.classList.contains('gh-port') || e.target.tagName === 'A' || e.target.tagName === 'BUTTON') return;
-          if (e.type === 'touchstart' && e.touches.length > 1) return; // ignore multi-touch
+          if (e.type === 'touchstart' && e.touches.length > 1) return; // ignore multi-touch (let canvas handle pinch)
           if (e.type !== 'touchstart') e.preventDefault(); // allow mobile double-tap
           e.stopPropagation(); 
           const rect = div.getBoundingClientRect();
@@ -2932,6 +3203,7 @@
           e.preventDefault();
           e.stopPropagation();
           drawingEdgeSourceId = node.id;
+          portOut.classList.add('port-active');
           edgePreview.style.display = 'block';
         };
 
@@ -2945,6 +3217,9 @@
           persistData(); 
           renderNodeGraph();
         });
+        div.querySelector('.gh-node-delete').addEventListener('touchstart', (e) => {
+          e.stopPropagation();
+        }, {passive: true});
 
         div.addEventListener('dblclick', async (e) => {
           e.stopPropagation();
@@ -2968,6 +3243,7 @@
         nodesLayer.appendChild(div);
       });
 
+      updateCanvasTransform();
       setTimeout(() => updateAllEdges(), 0);
     }
 
@@ -2976,7 +3252,7 @@
       const pipe = pipelines.find(p => p.id === activePipelineId);
       if(!pipe) return;
       
-      const canvasRect = document.getElementById('pipeline-canvas').getBoundingClientRect();
+      const canvasRect = editorCanvas.getBoundingClientRect();
       edgesGroup.innerHTML = '';
 
       pipe.edges.forEach(edge => {
@@ -3018,9 +3294,19 @@
       updateAllEdges();
     }
 
-    async function addPipelineNode(clientX = 100, clientY = 100) {
+    async function addPipelineNode(worldX, worldY) {
       if (!activePipelineId) return;
       const pipe = pipelines.find(p => p.id === activePipelineId);
+
+      // If no explicit world position was given (e.g. the toolbar "+ Node" button),
+      // place the new node at the center of the current viewport.
+      if (typeof worldX !== 'number' || typeof worldY !== 'number') {
+        const rect = editorCanvas.getBoundingClientRect();
+        const center = screenToWorld(rect.width / 2, rect.height / 2);
+        worldX = center.x - 110;
+        worldY = center.y - 40;
+      }
+
       const val = await promptUser("New Node", "Enter title, duration (optional) (comma separated)", true, "build, 10s");
       
       if (val) {
@@ -3030,8 +3316,8 @@
           title: parts[0]?.trim() || 'Node', 
           duration: parts[1]?.trim() || '', 
           link: '', 
-          x: clientX, 
-          y: clientY 
+          x: worldX, 
+          y: worldY 
         });
         persistData(); 
         renderNodeGraph();
@@ -3042,9 +3328,6 @@
       if (!activePipelineId) return;
       if (!draggedGHNode && !drawingEdgeSourceId) return;
 
-      const editorCanvas = document.getElementById('pipeline-canvas');
-      if(!editorCanvas) return;
-      
       if (e.type === 'touchmove') {
         e.preventDefault(); // crucial for mobile dragging
       }
@@ -3055,8 +3338,13 @@
       const mouseY = coords.clientY - rect.top;
 
       if (draggedGHNode) {
-        draggedGHNode.x = mouseX - ghNodeOffset.x;
-        draggedGHNode.y = mouseY - ghNodeOffset.y;
+        // mouseX/mouseY and ghNodeOffset are both in screen-space (post-zoom),
+        // so convert the resulting screen position back into world coordinates.
+        const desiredScreenX = mouseX - ghNodeOffset.x;
+        const desiredScreenY = mouseY - ghNodeOffset.y;
+        const world = screenToWorld(desiredScreenX, desiredScreenY);
+        draggedGHNode.x = world.x;
+        draggedGHNode.y = world.y;
         updateNodePosition(draggedGHNode);
       } 
       else if (drawingEdgeSourceId) {
@@ -3100,6 +3388,7 @@
             }
           }
         }
+        document.querySelectorAll('.gh-port.port-active').forEach(p => p.classList.remove('port-active'));
         drawingEdgeSourceId = null;
         edgePreview.style.display = 'none';
       }
@@ -3109,15 +3398,17 @@
     window.addEventListener('touchend', handleGlobalEnd);
     window.addEventListener('touchcancel', handleGlobalEnd);
 
-    const editorCanvas = document.getElementById('pipeline-canvas');
     if (editorCanvas) {
       editorCanvas.addEventListener('dblclick', (e) => {
         if (e.target.id === 'pipeline-canvas' || e.target.tagName === 'svg') {
-          const rect = svgCanvas.getBoundingClientRect();
-          addPipelineNode(e.clientX - rect.left, e.clientY - rect.top);
+          const rect = editorCanvas.getBoundingClientRect();
+          const world = screenToWorld(e.clientX - rect.left, e.clientY - rect.top);
+          addPipelineNode(world.x, world.y);
         }
       });
     }
+
+    /* ================== END PIPELINE NODE EDITOR ================== */
 
 
     function switchTab(tabId) {
