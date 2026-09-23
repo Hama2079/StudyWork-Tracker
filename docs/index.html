@@ -946,60 +946,52 @@
       margin-top: 1.25rem; 
     }
 
-    /* Enhanced Checklist CSS */
+    /* ========== ENHANCED CHECKLIST UX ========== */
     .checklist-task-item { 
       display: flex; 
       align-items: center; 
-      gap: 0.75rem; 
+      gap: 0.65rem; 
       background: var(--bg-surface); 
-      padding: 0.75rem; 
-      border-radius: 0.5rem; 
-      border: 1px solid rgba(255,255,255,0.05); 
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
-      margin-bottom: 0.5rem; 
+      padding: 0.7rem 0.75rem; 
+      border-radius: 0.65rem; 
+      border: 1px solid rgba(255,255,255,0.06); 
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.25s, opacity 0.25s, transform 0.2s; 
+      margin-bottom: 0.45rem; 
       touch-action: pan-y;
-      transform-origin: top;
-      opacity: 1;
-    }
-
-    .checklist-task-item.removing {
-      transform: scale(0.95);
-      opacity: 0;
-      margin-bottom: -0.5rem;
-      padding-top: 0;
-      padding-bottom: 0;
-      height: 0;
-      border-width: 0;
-      overflow: hidden;
+      position: relative;
     }
 
     .checklist-task-item.done {
-      background: rgba(52, 211, 153, 0.05);
-      border-color: rgba(52, 211, 153, 0.15);
+      background: rgba(52, 211, 153, 0.06);
+      border-color: rgba(52, 211, 153, 0.18);
+      opacity: 0.78;
     }
 
     .checklist-task-item.dragging { 
       border-color: var(--accent-neon); 
-      box-shadow: 0 10px 24px rgba(0,0,0,0.5), 0 0 0 1px var(--accent-neon); 
+      box-shadow: 0 12px 28px rgba(0,0,0,0.55), 0 0 0 1.5px var(--accent-neon); 
       background: var(--bg-card-hover);
       cursor: grabbing;
+      opacity: 0.95;
+      z-index: 20;
     }
 
     .checklist-drag-handle { 
       cursor: grab; 
       color: var(--text-dim); 
       touch-action: none;
-      padding: 0.5rem 0.25rem;
-      margin: -0.5rem -0.25rem;
+      padding: 0.45rem 0.3rem;
+      margin: -0.45rem -0.15rem;
       display: flex;
       align-items: center;
-      border-radius: 0.35rem;
+      border-radius: 0.4rem;
       transition: color 0.2s, background 0.2s;
+      flex-shrink: 0;
     }
 
     .checklist-drag-handle:hover {
       color: var(--accent-neon);
-      background: rgba(0, 240, 255, 0.08);
+      background: rgba(0, 240, 255, 0.1);
     }
 
     .checklist-drag-handle:active { 
@@ -1008,11 +1000,12 @@
     }
 
     .checklist-checkbox {
-      transition: transform 0.15s ease;
+      transition: transform 0.15s ease, border-color 0.2s, background 0.2s;
+      flex-shrink: 0;
     }
 
     .checklist-checkbox:active {
-      transform: scale(0.85);
+      transform: scale(0.88);
     }
 
     .checklist-empty-state {
@@ -1020,32 +1013,43 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 0.5rem;
-      padding: 1.75rem 1rem;
+      gap: 0.55rem;
+      padding: 2rem 1rem;
       color: var(--text-dim);
       text-align: center;
+      border: 1px dashed rgba(255,255,255,0.08);
+      border-radius: 0.75rem;
+      background: rgba(14, 20, 36, 0.35);
     }
 
     .checklist-empty-state svg {
-      opacity: 0.5;
+      opacity: 0.45;
     }
 
     .checklist-empty-state span {
-      font-size: 0.8rem;
+      font-size: 0.82rem;
+      max-width: 260px;
+      line-height: 1.4;
     }
 
     .checklist-complete-banner {
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      background: rgba(52, 211, 153, 0.1);
-      border: 1px solid rgba(52, 211, 153, 0.3);
+      background: rgba(52, 211, 153, 0.12);
+      border: 1px solid rgba(52, 211, 153, 0.32);
       color: var(--break-green);
       font-size: 0.78rem;
       font-weight: 700;
-      padding: 0.55rem 0.8rem;
-      border-radius: 0.6rem;
+      padding: 0.55rem 0.85rem;
+      border-radius: 0.65rem;
       margin-bottom: 0.85rem;
+      animation: checklistPop 0.35s ease;
+    }
+
+    @keyframes checklistPop {
+      from { opacity: 0; transform: translateY(-6px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     #btn-clear-completed {
@@ -1058,22 +1062,24 @@
 
     .checklist-task-num { 
       font-family: monospace; 
-      font-size: 0.75rem; 
+      font-size: 0.72rem; 
       color: var(--text-dim); 
-      min-width: 20px; 
+      min-width: 22px; 
       text-align: right; 
+      flex-shrink: 0;
     }
 
     .checklist-checkbox { 
       appearance: none; 
-      width: 1.2rem; 
-      height: 1.2rem; 
-      border: 1px solid var(--text-dim); 
-      border-radius: 0.25rem; 
+      width: 1.25rem; 
+      height: 1.25rem; 
+      border: 1.5px solid var(--text-dim); 
+      border-radius: 0.3rem; 
       cursor: pointer; 
       position: relative; 
       transition: 0.2s; 
       flex-shrink: 0; 
+      background: transparent;
     }
 
     .checklist-checkbox:checked { 
@@ -1085,28 +1091,28 @@
       content: '✓'; 
       position: absolute; 
       color: #000; 
-      font-size: 0.85rem; 
+      font-size: 0.9rem; 
       font-weight: bold; 
       top: -2px; 
-      left: 3px; 
+      left: 2px; 
     }
 
     .checklist-task-text { 
       flex: 1; 
-      font-size: 0.85rem; 
+      font-size: 0.875rem; 
       color: var(--text-main); 
       word-break: break-word; 
       outline: none; 
-      padding: 0.3rem 0.4rem;
-      border-radius: 0.35rem;
-      border: 1px solid transparent;
-      transition: background 0.2s, border-color 0.2s;
+      min-height: 1.3em;
+      line-height: 1.35;
+      padding: 0.1rem 0;
+      border-radius: 0.25rem;
+      transition: color 0.2s;
     }
-    
-    .checklist-task-text:hover,
+
     .checklist-task-text:focus {
-      background: rgba(255, 255, 255, 0.05);
-      border-color: rgba(255, 255, 255, 0.1);
+      background: rgba(0, 240, 255, 0.06);
+      box-shadow: 0 0 0 1px rgba(0, 240, 255, 0.25);
     }
 
     .checklist-task-item.done .checklist-task-text { 
@@ -1115,20 +1121,58 @@
     }
 
     .checklist-progress-bg { 
-      background: rgba(255, 255, 255, 0.05); 
+      background: rgba(255, 255, 255, 0.06); 
       border-radius: 9999px; 
-      height: 8px; 
+      height: 9px; 
       overflow: hidden; 
       margin-bottom: 1rem; 
+      position: relative;
     }
 
     .checklist-progress-fill { 
       height: 100%; 
       border-radius: 9999px; 
       background: var(--accent-neon); 
-      transition: width 0.4s ease, background-color 0.3s ease; 
-      box-shadow: 0 0 8px var(--accent-glow); 
+      transition: width 0.45s cubic-bezier(0.16, 1, 0.3, 1), background 0.3s; 
+      box-shadow: 0 0 10px var(--accent-glow); 
     }
+
+    .checklist-actions-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.75rem;
+    }
+
+    .checklist-quick-btn {
+      background: rgba(14, 20, 36, 0.8);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 0.28rem 0.6rem;
+      border-radius: 0.45rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .checklist-quick-btn:hover {
+      border-color: var(--accent-neon);
+      color: var(--accent-neon);
+    }
+
+    .checklist-input-row {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.35rem;
+    }
+
+    .checklist-input-row .form-input {
+      flex: 1;
+    }
+
+    /* ========== END ENHANCED CHECKLIST ========== */
 
     .analytics-section { 
       background: var(--bg-card); 
@@ -1219,7 +1263,7 @@
       background-image: radial-gradient(circle, #23272e 1px, transparent 1px);
       background-size: 22px 22px;
       cursor: grab; 
-      touch-action: none; 
+      touch-action: none;
     }
 
     .pipeline-canvas.is-panning {
@@ -1273,7 +1317,7 @@
       user-select: none; 
       transition: box-shadow 0.2s, border-color 0.2s; 
       pointer-events: auto; 
-      touch-action: none; 
+      touch-action: none;
     }
 
     .gh-node:hover { 
@@ -1862,10 +1906,14 @@
             <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
             All tasks complete for this day
           </div>
+
+          <div class="checklist-actions-row" id="checklist-quick-actions">
+            <button class="checklist-quick-btn" id="btn-complete-all" title="Mark every task done">Complete all</button>
+          </div>
           
           <div id="checklist-tasks" style="display: flex; flex-direction: column; min-height: 20px; padding-bottom: 0.5rem;"></div>
           
-          <div style="display: flex; gap: 0.5rem;">
+          <div class="checklist-input-row">
             <input type="text" id="checklist-input" class="form-input" placeholder="Add a new task for this day...">
             <button class="btn-primary" id="btn-add-checklist-task">Add</button>
           </div>
@@ -2061,7 +2109,7 @@
   </nav>
 
   <script>
-    const CACHE_NAME = 'aether-focus-v8-mobile-zoom';
+    const CACHE_NAME = 'aether-focus-v8-checklist-ux';
     const swCode = `
       self.addEventListener('install', (e) => {
         self.skipWaiting();
@@ -2229,6 +2277,15 @@
       document.getElementById('btn-toggle-sound').style.opacity = soundMuted ? '0.4' : '1'; 
     });
 
+    // Keep timer accurate when tab is backgrounded / restored
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        syncTimeDelta();
+        if (wakeLockRequestedByUser && isRunning) {
+          requestScreenWakeLock();
+        }
+      }
+    });
 
     let profiles = JSON.parse(localStorage.getItem('aether_profiles') || '["Main"]');
     let currentProfile = localStorage.getItem('aether_profile') || profiles[0];
@@ -2385,8 +2442,9 @@
       renderCalendar(); 
       renderAnalytics(); 
       
-      const pipelineCanvasActive = document.getElementById('pipelines-active').classList.contains('active') || !document.getElementById('pipelines-active').classList.contains('hidden');
-      if (activePipelineId === null && !pipelineCanvasActive) { 
+      // Only redraw dashboard if pipeline editor is NOT open
+      const pipelineEditorOpen = !document.getElementById('pipelines-active').classList.contains('hidden');
+      if (activePipelineId === null && !pipelineEditorOpen) { 
         renderPipelinesDashboard(); 
       }
     }
@@ -2396,6 +2454,7 @@
       studyLogs = JSON.parse(localStorage.getItem(sKey('aether_logs')) || 'null') || [];
       checklists = JSON.parse(localStorage.getItem(sKey('aether_checklists')) || 'null') || {};
       
+      // Sanitization: Guarantee pipelines is properly structured
       let loadedPipelines = JSON.parse(localStorage.getItem(sKey('aether_pipelines')) || 'null');
       if (loadedPipelines && Array.isArray(loadedPipelines)) {
         pipelines = loadedPipelines.map(p => ({
@@ -2487,13 +2546,6 @@
         resetTimerState(); 
       }
     }
-
-    // Handle Page Visibility API to sync active background timers reliably
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible' && isRunning && startTimestamp) {
-        syncTimeDelta();
-      }
-    });
 
     function syncTimeDelta() { 
       if (!isRunning || !startTimestamp) return; 
@@ -2787,7 +2839,7 @@
             </div>
           </div>
           <button class="subject-btn-launch">
-            <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg Launch Timer
+            <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg> Launch Timer
           </button>
         `;
         
@@ -2819,6 +2871,19 @@
       });
     }
 
+    function openSubjectModal(sub) {
+      document.getElementById('sub-id').value = sub.id;
+      document.getElementById('sub-name').value = sub.name;
+      document.getElementById('sub-tag').value = sub.tag || '';
+      document.getElementById('sub-goal').value = sub.goalMinutes || 60;
+      document.getElementById('modal-subject-title').textContent = 'Edit Study Subject';
+      selectedColor = sub.color || '#00f0ff';
+      document.querySelectorAll('.color-option').forEach(o => {
+        o.classList.toggle('selected', o.getAttribute('data-color') === selectedColor);
+      });
+      openModal('modal-subject');
+    }
+
     function renderAnalytics() {
       const cont = document.getElementById('analytics-distribution-list'); 
       cont.innerHTML = '';
@@ -2847,6 +2912,7 @@
         `;
       });
     }
+
 
     let currentCalDate = new Date();
     let selectedCalDayStr = getTodayString();
@@ -2963,11 +3029,17 @@
       renderChecklist(dateStr);
     }
 
-    let checklistDrag = null; 
+    // Pointer-based drag reorder state
+    let checklistDrag = null;
 
     function renderChecklist(dateStr) {
-      const tasks = checklists[dateStr] || [];
+      let tasks = checklists[dateStr] || [];
+      // Defensive: legacy/imported tasks may be missing an id.
       tasks.forEach(t => { if (!t.id) t.id = generateId(); });
+
+      // UX: keep incomplete tasks at top, completed at bottom
+      tasks = [...tasks.filter(t => !t.done), ...tasks.filter(t => t.done)];
+      checklists[dateStr] = tasks;
 
       const container = document.getElementById('checklist-tasks'); 
       container.innerHTML = '';
@@ -2982,12 +3054,13 @@
 
       document.getElementById('btn-clear-completed').classList.toggle('hidden', completed === 0);
       document.getElementById('checklist-complete-banner').classList.toggle('hidden', !(total > 0 && completed === total));
+      document.getElementById('checklist-quick-actions').classList.toggle('hidden', total === 0);
 
       if (total === 0) {
         container.innerHTML = `
           <div class="checklist-empty-state">
-            <svg width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            <span>No tasks yet for this day. Add one below.</span>
+            <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <span>No tasks yet for this day.<br>Type below and press Enter or Add.</span>
           </div>
         `;
         return;
@@ -3006,7 +3079,7 @@
           <input type="checkbox" class="checklist-checkbox" ${t.done ? 'checked' : ''}>
           <div class="checklist-task-text" contenteditable="true" title="Click to edit">${t.text}</div>
           <div style="display:flex; gap:0.4rem; margin-left:auto;">
-            <button class="icon-btn del-task-btn" style="width:1.5rem; height:1.5rem; color:var(--danger); border-color:rgba(239,68,68,0.2);">
+            <button class="icon-btn del-task-btn" style="width:1.55rem; height:1.55rem; color:var(--danger); border-color:rgba(239,68,68,0.2);">
               <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6"/></svg>
             </button>
           </div>
@@ -3038,12 +3111,9 @@
         });
         
         item.querySelector('.del-task-btn').addEventListener('click', () => { 
-          item.classList.add('removing');
-          setTimeout(() => {
-            checklists[dateStr] = (checklists[dateStr] || []).filter(x => x.id !== t.id); 
-            persistData(); 
-            renderChecklist(dateStr); 
-          }, 300);
+          checklists[dateStr] = (checklists[dateStr] || []).filter(x => x.id !== t.id); 
+          persistData(); 
+          renderChecklist(dateStr); 
         });
 
         attachChecklistDragHandlers(item, container, dateStr);
@@ -3121,15 +3191,19 @@
       const removing = (checklists[selectedCalDayStr] || []).length - remaining;
       const res = await promptUser('Clear Completed', `Remove ${removing} completed task${removing === 1 ? '' : 's'} from this day?`);
       if (res) {
-        const completedItems = Array.from(document.querySelectorAll('.checklist-task-item.done'));
-        completedItems.forEach(el => el.classList.add('removing'));
-        
-        setTimeout(() => {
-          checklists[selectedCalDayStr] = (checklists[selectedCalDayStr] || []).filter(t => !t.done);
-          persistData();
-          renderChecklist(selectedCalDayStr);
-        }, 300);
+        checklists[selectedCalDayStr] = (checklists[selectedCalDayStr] || []).filter(t => !t.done);
+        persistData();
+        renderChecklist(selectedCalDayStr);
       }
+    });
+
+    document.getElementById('btn-complete-all').addEventListener('click', () => {
+      const tasks = checklists[selectedCalDayStr] || [];
+      if (tasks.length === 0) return;
+      tasks.forEach(t => t.done = true);
+      persistData();
+      renderChecklist(selectedCalDayStr);
+      playChime(523.25, 659.25);
     });
 
     function addChecklistTaskFromInput() {
@@ -3164,6 +3238,8 @@
     let ghNodeOffset = { x: 0, y: 0 };
     let drawingEdgeSourceId = null;
 
+    // Zoom/Pan state for the nodes layer. The SVG edges layer stays in screen-space
+    // (it reads live getBoundingClientRect() positions) so it never needs its own transform.
     let canvasScale = 1;
     let canvasPanX = 0;
     let canvasPanY = 0;
@@ -3186,6 +3262,8 @@
     const editorCanvas = document.getElementById('pipeline-canvas');
     const zoomLevelLabel = document.getElementById('zoom-level-label');
 
+    // Convert a point expressed relative to the canvas element (screen-space, post-transform)
+    // into "world" coordinates (the un-transformed coordinate space nodes are stored in).
     function screenToWorld(canvasRelX, canvasRelY) {
       return {
         x: (canvasRelX - canvasPanX) / canvasScale,
@@ -3227,12 +3305,14 @@
     });
     document.getElementById('btn-zoom-reset').addEventListener('click', resetCanvasView);
 
+    // Desktop: mouse wheel to zoom
     editorCanvas.addEventListener('wheel', (e) => {
       e.preventDefault();
       const factor = e.deltaY < 0 ? 1.1 : 0.9;
       zoomCanvasAt(factor, e.clientX, e.clientY);
     }, { passive: false });
 
+    // Desktop: click-drag on empty canvas to pan
     editorCanvas.addEventListener('mousedown', (e) => {
       if (e.target !== editorCanvas && e.target !== svgCanvas && e.target.tagName !== 'svg') return;
       if (e.button !== 0) return;
@@ -3256,8 +3336,7 @@
       }
     });
 
-    let lastTapTime = 0;
-
+    // Mobile: pinch-to-zoom and single-finger pan on empty canvas.
     editorCanvas.addEventListener('touchstart', (e) => {
       if (e.touches.length === 2) {
         e.preventDefault();
@@ -3308,19 +3387,6 @@
         isPanning = false;
         editorCanvas.classList.remove('is-panning');
       }
-      
-      const currentTime = Date.now();
-      const tapLen = currentTime - lastTapTime;
-      if (tapLen < 300 && tapLen > 0 && !draggedGHNode && !drawingEdgeSourceId && !isPanning) {
-         if (e.target === editorCanvas || e.target === svgCanvas || e.target.tagName === 'svg') {
-             const rect = editorCanvas.getBoundingClientRect();
-             const coords = getEventCoords(e);
-             const world = screenToWorld(coords.clientX - rect.left, coords.clientY - rect.top);
-             addPipelineNode(world.x, world.y);
-             e.preventDefault();
-         }
-      }
-      lastTapTime = currentTime;
     };
     editorCanvas.addEventListener('touchend', endCanvasTouch);
     editorCanvas.addEventListener('touchcancel', endCanvasTouch);
@@ -3427,8 +3493,8 @@
 
         const handleNodeStart = (e) => {
           if (e.target.classList.contains('gh-port') || e.target.tagName === 'A' || e.target.tagName === 'BUTTON') return;
-          if (e.type === 'touchstart' && e.touches.length > 1) return; 
-          if (e.type !== 'touchstart') e.preventDefault(); 
+          if (e.type === 'touchstart' && e.touches.length > 1) return;
+          if (e.type !== 'touchstart') e.preventDefault();
           e.stopPropagation(); 
           const rect = div.getBoundingClientRect();
           const coords = getEventCoords(e);
@@ -3569,7 +3635,7 @@
       if (!draggedGHNode && !drawingEdgeSourceId) return;
 
       if (e.type === 'touchmove') {
-        e.preventDefault(); 
+        e.preventDefault();
       }
 
       const rect = editorCanvas.getBoundingClientRect();
@@ -3647,6 +3713,7 @@
     }
 
     /* ================== END PIPELINE NODE EDITOR ================== */
+
 
     function switchTab(tabId) {
       document.querySelectorAll('.tab-view').forEach(v => v.classList.add('hidden'));
