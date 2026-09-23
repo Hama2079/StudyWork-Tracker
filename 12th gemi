@@ -1,0 +1,3313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>AetherFocus - Precision AI Study Engine</title>
+  <meta name="theme-color" content="#05070c">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="AetherFocus">
+  <meta name="description" content="Offline-first high-precision study timer, Kanban pipelines, and heatmap calendar">
+
+  <link rel="manifest" id="pwa-manifest">
+
+  <style>
+    :root {
+      --bg-primary: #04060a;
+      --bg-surface: #090d18;
+      --bg-card: #0e1424;
+      --bg-card-hover: #131b30;
+      --border-subtle: rgba(0, 240, 255, 0.12);
+      --border-active: rgba(0, 240, 255, 0.45);
+      --accent-neon: #00f0ff;
+      --accent-blue: #0070f3;
+      --accent-indigo: #6366f1;
+      --accent-glow: rgba(0, 240, 255, 0.35);
+      --text-main: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-dim: #64748b;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --success: #10b981;
+      --break-green: #34d399;
+      --break-purple: #c084fc;
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      font-family: var(--font-family);
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* Ambient neon halo */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -160px;
+      right: -120px;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(0, 240, 255, 0.08) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(9, 13, 24, 0.88);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 0.75rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand-icon {
+      width: 2.25rem;
+      height: 2.25rem;
+      border-radius: 0.75rem;
+      background: linear-gradient(135deg, var(--accent-neon), var(--accent-blue));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 16px var(--accent-glow);
+      color: #04060a;
+    }
+
+    .brand-icon svg {
+      width: 1.25rem;
+      height: 1.25rem;
+    }
+
+    .brand-text h1 {
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: linear-gradient(90deg, #ffffff, var(--accent-neon));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Profile Switcher Styles */
+    .profile-switch {
+      display: flex;
+      align-items: center;
+      background: rgba(14, 20, 36, 0.8);
+      border: 1px solid var(--border-subtle);
+      border-radius: 0.6rem;
+      padding: 0.15rem;
+      gap: 0.15rem;
+      margin-left: 0.5rem;
+    }
+
+    .manage-profiles-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-dim);
+      padding: 0.25rem 0.4rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      border-radius: 0.4rem;
+      transition: all 0.2s ease;
+    }
+
+    .manage-profiles-btn:hover {
+      color: var(--accent-neon);
+      background: rgba(0, 240, 255, 0.1);
+    }
+
+    .nav-tabs {
+      display: flex;
+      background: rgba(14, 20, 36, 0.8);
+      border: 1px solid var(--border-subtle);
+      border-radius: 0.75rem;
+      padding: 0.25rem;
+      gap: 0.25rem;
+    }
+
+    .nav-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      padding: 0.5rem 0.9rem;
+      border-radius: 0.5rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.2s ease;
+    }
+
+    .nav-btn.active {
+      background: rgba(0, 240, 255, 0.15);
+      color: var(--accent-neon);
+      border: 1px solid rgba(0, 240, 255, 0.35);
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.15);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    .icon-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      width: 2.25rem;
+      height: 2.25rem;
+      border-radius: 0.65rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .icon-btn:hover {
+      color: var(--accent-neon);
+      border-color: var(--accent-neon);
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-neon), var(--accent-blue));
+      color: #04060a;
+      font-weight: 700;
+      font-size: 0.8rem;
+      padding: 0.55rem 1rem;
+      border-radius: 0.65rem;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      box-shadow: 0 0 16px var(--accent-glow);
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary:hover {
+      box-shadow: 0 0 24px rgba(0, 240, 255, 0.5);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-main);
+      font-weight: 600;
+      font-size: 0.8rem;
+      padding: 0.55rem 1rem;
+      border-radius: 0.65rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.2s ease;
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--accent-neon);
+    }
+
+    main {
+      flex: 1;
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 1.25rem;
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Engine Status Banner */
+    .banner-engine {
+      background: linear-gradient(90deg, #0d1527, #09101f);
+      border: 1px solid var(--border-subtle);
+      border-radius: 1rem;
+      padding: 0.9rem 1.25rem;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    }
+
+    .engine-pills {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .chip-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: 9999px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      font-family: monospace;
+      background: rgba(0, 240, 255, 0.08);
+      border: 1px solid rgba(0, 240, 255, 0.25);
+      color: var(--accent-neon);
+    }
+
+    .chip-badge.active-green {
+      background: rgba(16, 185, 129, 0.12);
+      border-color: rgba(16, 185, 129, 0.35);
+      color: #34d399;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 1rem;
+      padding: 1.2rem;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.25s ease;
+    }
+
+    .stat-card:hover {
+      border-color: var(--border-active);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 240, 255, 0.08);
+    }
+
+    .stat-card-stripe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: var(--accent-neon);
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-dim);
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .stat-value {
+      font-size: 1.6rem;
+      font-weight: 800;
+      font-family: monospace;
+      color: #ffffff;
+      letter-spacing: -0.02em;
+    }
+
+    .stat-subtext {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      margin-top: 0.3rem;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .section-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .subject-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .subject-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 1.1rem;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      overflow: hidden;
+    }
+
+    .subject-card:hover {
+      border-color: var(--accent-neon);
+      box-shadow: 0 8px 24px rgba(0, 240, 255, 0.12);
+      transform: translateY(-2px);
+    }
+
+    .subject-card.is-active-subject {
+      border-color: var(--accent-neon);
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.25);
+    }
+
+    .subject-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.75rem;
+    }
+
+    .subject-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: 0.5rem;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 0.7rem;
+      font-family: monospace;
+      color: var(--text-secondary);
+    }
+
+    .subject-color-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .subject-name {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 0.25rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .subject-time-summary {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.6rem 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      margin-top: 0.75rem;
+      font-size: 0.75rem;
+    }
+
+    .subject-time-summary div span {
+      display: block;
+      color: var(--text-dim);
+      font-size: 0.65rem;
+      text-transform: uppercase;
+    }
+
+    .subject-time-summary div strong {
+      font-family: monospace;
+      font-size: 0.85rem;
+      color: var(--accent-neon);
+    }
+
+    .subject-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .subject-btn-launch {
+      width: 100%;
+      margin-top: 0.75rem;
+      background: rgba(0, 240, 255, 0.08);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      color: var(--accent-neon);
+      padding: 0.6rem;
+      border-radius: 0.65rem;
+      font-weight: 700;
+      font-size: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .subject-btn-launch:hover {
+      background: var(--accent-neon);
+      color: #04060a;
+      box-shadow: 0 0 16px var(--accent-glow);
+    }
+
+    /* Timer Area */
+    .timer-container {
+      max-width: 640px;
+      margin: 0 auto;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 1.5rem;
+      padding: 1.75rem 1.25rem;
+      text-align: center;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.6);
+      position: relative;
+    }
+
+    .mode-switch {
+      display: inline-flex;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 0.75rem;
+      padding: 0.25rem;
+      gap: 0.25rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .mode-switch button {
+      background: transparent;
+      border: none;
+      color: var(--text-dim);
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.45rem 0.9rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .mode-switch button.active {
+      background: var(--accent-neon);
+      color: #04060a;
+      font-weight: 700;
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+    }
+
+    .pomo-stage-bar {
+      display: flex;
+      justify-content: center;
+      gap: 0.4rem;
+      margin-bottom: 0.9rem;
+    }
+
+    .pomo-stage-btn {
+      background: rgba(14, 20, 36, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--text-secondary);
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 0.3rem 0.7rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .pomo-stage-btn.active[data-stage="focus"] { background: rgba(0, 240, 255, 0.2); border-color: var(--accent-neon); color: var(--accent-neon); }
+    .pomo-stage-btn.active[data-stage="shortBreak"] { background: rgba(52, 211, 153, 0.2); border-color: var(--break-green); color: var(--break-green); }
+    .pomo-stage-btn.active[data-stage="longBreak"] { background: rgba(192, 132, 252, 0.2); border-color: var(--break-purple); color: var(--break-purple); }
+
+    .pomo-customizer-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 0.9rem;
+      padding: 0.75rem 1rem;
+      margin: 0.5rem auto 1rem auto;
+      max-width: 520px;
+    }
+
+    .pomo-customizer-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.6rem;
+    }
+
+    .pomo-customizer-title {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-dim);
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .pomo-presets-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.35rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .preset-chip {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--text-secondary);
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.3rem 0.6rem;
+      border-radius: 0.45rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .preset-chip:hover {
+      border-color: var(--accent-neon);
+      color: #fff;
+    }
+
+    .preset-chip.active {
+      background: rgba(0, 240, 255, 0.2);
+      border-color: var(--accent-neon);
+      color: var(--accent-neon);
+      font-weight: 700;
+    }
+
+    .custom-input-stepper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+    }
+
+    .stepper-btn {
+      width: 1.85rem;
+      height: 1.85rem;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-main);
+      border-radius: 0.45rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .stepper-btn:hover { border-color: var(--accent-neon); color: var(--accent-neon); }
+
+    .stepper-input {
+      width: 4.2rem;
+      text-align: center;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--accent-neon);
+      font-family: monospace;
+      font-weight: 700;
+      font-size: 0.85rem;
+      border-radius: 0.45rem;
+      padding: 0.3rem 0.35rem;
+      outline: none;
+    }
+
+    .stepper-input:focus { border-color: var(--accent-neon); box-shadow: 0 0 8px var(--accent-glow); }
+
+    .controls-aux-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      margin: 0.5rem auto 1rem auto;
+      flex-wrap: wrap;
+    }
+
+    .aux-toggle-btn {
+      background: rgba(14, 20, 36, 0.7);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      border-radius: 0.65rem;
+      padding: 0.35rem 0.75rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .aux-toggle-btn.active {
+      color: var(--accent-neon);
+      border-color: var(--accent-neon);
+      background: rgba(0, 240, 255, 0.12);
+    }
+
+    .timer-dial-wrapper {
+      position: relative;
+      width: 270px;
+      height: 270px;
+      margin: 0.75rem auto 1.25rem auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .timer-svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+    .timer-track { fill: none; stroke: rgba(255, 255, 255, 0.05); stroke-width: 5.5; }
+    .timer-progress {
+      fill: none; stroke: var(--accent-neon); stroke-width: 5.5; stroke-linecap: round;
+      stroke-dasharray: 283; stroke-dashoffset: 0; transition: stroke-dashoffset 0.4s ease, stroke 0.3s ease;
+      filter: drop-shadow(0 0 8px var(--accent-neon));
+    }
+
+    .timer-content {
+      position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    }
+
+    .timer-digits {
+      font-size: 3.1rem; font-weight: 800; font-family: monospace; color: #ffffff;
+      text-shadow: 0 0 20px rgba(0, 240, 255, 0.35); line-height: 1.05; margin: 0.25rem 0;
+    }
+
+    .timer-mode-tag {
+      font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent-neon);
+    }
+
+    .timer-subject-name {
+      font-size: 0.85rem; color: var(--text-secondary); max-width: 190px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+
+    .timer-controls { display: flex; align-items: center; justify-content: center; gap: 0.75rem; margin-top: 1rem; }
+
+    .btn-ctrl {
+      padding: 0.75rem 1.5rem; border-radius: 0.75rem; font-size: 0.9rem; font-weight: 700;
+      display: flex; align-items: center; gap: 0.4rem; cursor: pointer; border: none; transition: all 0.2s ease;
+    }
+
+    .btn-ctrl-primary { background: linear-gradient(135deg, var(--accent-neon), var(--accent-blue)); color: #04060a; box-shadow: 0 0 16px var(--accent-glow); }
+    .btn-ctrl-primary:hover { box-shadow: 0 0 24px rgba(0, 240, 255, 0.6); transform: scale(1.02); }
+    .btn-ctrl-pause { background: var(--warning); color: #04060a; box-shadow: 0 0 16px rgba(245, 158, 11, 0.3); }
+    .btn-ctrl-stop { background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171; }
+    .btn-ctrl-stop:hover { background: var(--danger); color: #fff; }
+
+    /* Calendar & Heatmap */
+    .calendar-container {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 1.25rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .calendar-header {
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;
+    }
+
+    .cal-nav-btn {
+      background: var(--bg-card); border: 1px solid var(--border-subtle); color: var(--text-secondary);
+      padding: 0.4rem 0.8rem; border-radius: 0.5rem; font-size: 0.8rem; cursor: pointer;
+    }
+    .cal-nav-btn:hover { color: var(--accent-neon); border-color: var(--accent-neon); }
+
+    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.4rem; }
+    .calendar-day-label { text-align: center; font-size: 0.7rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; padding-bottom: 0.5rem; }
+
+    .cal-day-cell {
+      aspect-ratio: 1; border-radius: 0.5rem; border: 1px solid rgba(255, 255, 255, 0.05); background: rgba(14, 20, 36, 0.5);
+      display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer;
+      position: relative; transition: all 0.2s ease; font-size: 0.75rem; color: var(--text-secondary); font-family: monospace;
+    }
+    .cal-day-cell:hover { border-color: var(--accent-neon); transform: scale(1.05); z-index: 2; }
+    .cal-day-cell.is-selected { border-color: var(--accent-neon); box-shadow: 0 0 12px var(--accent-glow); }
+
+    .heat-lvl-0 { background: rgba(14, 20, 36, 0.5); }
+    .heat-lvl-1 { background: rgba(0, 240, 255, 0.15); border-color: rgba(0, 240, 255, 0.25); color: #7dd3fc; }
+    .heat-lvl-2 { background: rgba(0, 240, 255, 0.35); border-color: rgba(0, 240, 255, 0.5); color: #e0f2fe; }
+    .heat-lvl-3 { background: rgba(0, 240, 255, 0.65); border-color: var(--accent-neon); color: #04060a; font-weight: 800; }
+    .heat-lvl-4 { background: #00f0ff; border-color: #ffffff; color: #000; font-weight: 900; box-shadow: 0 0 10px var(--accent-glow); }
+    .cal-day-empty { aspect-ratio: 1; visibility: hidden; }
+
+    /* Modern Checklist System */
+    .checklist-section {
+      margin-top: 1.5rem;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      padding-top: 1.5rem;
+    }
+
+    .checklist-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .checklist-progress-wrap {
+      margin-bottom: 1.25rem;
+    }
+
+    .checklist-progress-text {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.4rem;
+      font-weight: 600;
+    }
+
+    .checklist-progress-bar {
+      width: 100%;
+      height: 6px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .checklist-progress-fill {
+      height: 100%;
+      background: var(--accent-neon);
+      width: 0%;
+      transition: width 0.4s ease;
+      box-shadow: 0 0 8px var(--accent-glow);
+    }
+    
+    .checklist-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .task-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 0.75rem;
+      padding: 0.75rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .task-card.is-dragging {
+      opacity: 0.5;
+      background: var(--bg-card-hover);
+      border-color: var(--accent-neon);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+      z-index: 100;
+    }
+
+    .task-card.completed {
+      background: rgba(14, 20, 36, 0.4);
+      border-color: rgba(255,255,255,0.05);
+    }
+
+    .task-card.completed .task-title {
+      color: var(--text-dim);
+      text-decoration: line-through;
+    }
+
+    .task-drag-handle {
+      color: var(--text-dim);
+      cursor: grab;
+      display: flex;
+      align-items: center;
+      padding: 0.5rem;
+      margin: -0.5rem;
+      touch-action: none;
+    }
+
+    .task-drag-handle:active {
+      cursor: grabbing;
+      color: var(--accent-neon);
+    }
+
+    .task-num {
+      font-family: monospace;
+      font-size: 0.75rem;
+      color: var(--accent-indigo);
+      font-weight: 800;
+      min-width: 1.2rem;
+    }
+    
+    /* Animated Checkbox */
+    .task-checkbox-wrap {
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.5rem;
+      height: 1.5rem;
+      position: relative;
+    }
+
+    .task-checkbox-wrap input { display: none; }
+
+    .task-checkbox-svg {
+      width: 1.25rem;
+      height: 1.25rem;
+      border: 2px solid var(--border-active);
+      border-radius: 0.35rem;
+      transition: all 0.2s;
+      fill: none;
+      stroke: #04060a;
+      stroke-width: 3;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-dasharray: 20;
+      stroke-dashoffset: 20;
+    }
+
+    .task-checkbox-wrap input:checked + .task-checkbox-svg {
+      background: var(--accent-neon);
+      border-color: var(--accent-neon);
+      stroke-dashoffset: 0;
+      transition: stroke-dashoffset 0.3s ease-in-out, background 0.2s, border-color 0.2s;
+    }
+    
+    .task-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+      overflow: hidden;
+    }
+
+    .task-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-main);
+      transition: all 0.2s;
+    }
+
+    .task-desc {
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .task-badge {
+      font-size: 0.6rem;
+      font-weight: 700;
+      padding: 0.1rem 0.4rem;
+      border-radius: 0.25rem;
+      text-transform: uppercase;
+      font-family: monospace;
+      letter-spacing: 0.05em;
+      margin-left: 0.5rem;
+    }
+
+    .badge-everyday {
+      background: rgba(99, 102, 241, 0.15);
+      color: #818cf8;
+      border: 1px solid rgba(99, 102, 241, 0.3);
+    }
+
+    .badge-once {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    
+    .task-actions {
+      display: flex;
+      gap: 0.3rem;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .task-card:hover .task-actions {
+      opacity: 1;
+    }
+
+    .task-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-dim);
+      padding: 0.3rem;
+      border-radius: 0.3rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .task-btn:hover {
+      background: rgba(255,255,255,0.05);
+      color: var(--accent-neon);
+    }
+
+    .task-btn.delete:hover {
+      color: var(--danger);
+      background: rgba(239,68,68,0.1);
+    }
+
+    /* Analytics Tab */
+    .analytics-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .breakdown-row { margin-bottom: 1.25rem; }
+    .breakdown-info { display: flex; justify-content: space-between; font-size: 0.825rem; margin-bottom: 0.35rem; }
+    .progress-bar-bg { background: rgba(255, 255, 255, 0.05); border-radius: 9999px; height: 8px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; border-radius: 9999px; background: var(--accent-neon); transition: width 0.4s ease; box-shadow: 0 0 8px var(--accent-glow); }
+
+    /* Visual Node Pipelines */
+    #view-pipelines {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      min-height: 80vh;
+    }
+
+    .pipeline-dashboard {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .pipeline-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .pipeline-card:hover {
+      border-color: var(--accent-neon);
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px rgba(0,240,255,0.1);
+    }
+
+    .pipeline-card-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .pipeline-color-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+
+    .pipeline-title {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: #fff;
+    }
+
+    .pipeline-meta {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      display: flex;
+      justify-content: space-between;
+    }
+    
+    .pipeline-canvas-area {
+      flex: 1;
+      display: none;
+      flex-direction: column;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 1rem;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .pipeline-canvas-area.active {
+      display: flex;
+    }
+
+    .pipeline-canvas-header {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(14,20,36,0.8);
+      z-index: 10;
+      backdrop-filter: blur(8px);
+    }
+
+    .pipeline-board {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      touch-action: none; /* Crucial for custom touch panning/zooming */
+      background: #060913;
+      cursor: grab;
+    }
+
+    .pipeline-board:active {
+      cursor: grabbing;
+    }
+
+    .pipeline-canvas-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      transform-origin: 0 0;
+    }
+    
+    .node-element {
+      position: absolute;
+      width: 240px;
+      height: 72px;
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      user-select: none;
+      transition: box-shadow 0.2s, border-color 0.2s;
+      z-index: 20;
+    }
+
+    .node-element:hover {
+      border-color: #8b949e;
+    }
+
+    .node-element.completed {
+      border-color: rgba(35,134,54,0.5);
+    }
+
+    .node-element.is-dragging {
+      z-index: 100;
+      border-color: #58a6ff;
+      box-shadow: 0 12px 24px rgba(0,0,0,0.8), 0 0 0 1px #58a6ff;
+    }
+    
+    .node-status-btn {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 8px;
+      margin-left: -8px;
+      margin-right: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .node-content {
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .node-title-input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      color: #c9d1d9;
+      font-size: 0.85rem;
+      outline: none;
+    }
+
+    .node-title-display {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #c9d1d9;
+      cursor: text;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .node-element.completed .node-title-display {
+      color: #8b949e;
+      text-decoration: line-through;
+    }
+
+    .node-priority-badge {
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      border: 1px solid;
+      cursor: pointer;
+      display: inline-block;
+      margin-top: 4px;
+    }
+    
+    /* Edge Routing Ports */
+    .node-port {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: crosshair;
+      z-index: 25;
+      touch-action: none;
+    }
+
+    .node-port-in { left: -12px; }
+    .node-port-out { right: -12px; }
+
+    .node-port-inner {
+      width: 12px;
+      height: 12px;
+      background: #0d1117;
+      border: 2px solid #30363d;
+      border-radius: 50%;
+      transition: all 0.2s;
+      pointer-events: none;
+    }
+
+    .node-port:hover .node-port-inner {
+      border-color: #58a6ff;
+      transform: scale(1.3);
+      background: #58a6ff;
+    }
+    
+    .node-drag-handle {
+      position: absolute;
+      top: -14px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #8b949e;
+      opacity: 0;
+      transition: opacity 0.2s;
+      pointer-events: none;
+    }
+
+    .node-element:hover .node-drag-handle {
+      opacity: 1;
+    }
+
+    /* Modals & Forms */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .modal-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 1.25rem;
+      padding: 1.75rem;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+      position: relative;
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-dim);
+      margin-bottom: 0.4rem;
+    }
+
+    .form-input {
+      width: 100%;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 0.65rem;
+      padding: 0.65rem 0.9rem;
+      color: #fff;
+      font-size: 0.85rem;
+      outline: none;
+    }
+
+    .form-input:focus {
+      border-color: var(--accent-neon);
+      box-shadow: 0 0 10px var(--accent-glow);
+    }
+
+    .color-picker-grid { display: flex; gap: 0.5rem; }
+    .color-option { width: 2rem; height: 2rem; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
+    .color-option.selected { border-color: #fff; transform: scale(1.15); }
+
+    .mobile-nav {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(9, 13, 24, 0.95);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-top: 1px solid var(--border-subtle);
+      padding: 0.5rem;
+      justify-content: space-around;
+      z-index: 50;
+    }
+
+    .mobile-nav-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25rem;
+      background: transparent;
+      border: none;
+      color: var(--text-dim);
+      font-size: 0.65rem;
+      font-weight: 600;
+      padding: 0.35rem 0.75rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+    }
+
+    .mobile-nav-btn.active {
+      color: var(--accent-neon);
+    }
+
+    .mobile-nav-btn svg {
+      width: 1.25rem;
+      height: 1.25rem;
+    }
+
+    @media (max-width: 768px) {
+      .nav-tabs { display: none; }
+      .mobile-nav { display: flex; }
+      main { padding-bottom: 5rem; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .timer-dial-wrapper { width: 230px; height: 230px; }
+      .timer-digits { font-size: 2.7rem; }
+      .task-actions { opacity: 1; }
+    }
+
+    .hidden { display: none !important; }
+    .text-neon { color: var(--accent-neon); }
+    .font-mono { font-family: monospace; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand-group">
+      <div class="brand-icon">
+        <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+      </div>
+      <div class="brand-text">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <h1>AetherFocus</h1>
+        </div>
+      </div>
+      
+      <!-- Profile Management Header -->
+      <div class="profile-switch" title="Active Profile">
+        <span id="active-profile-label" style="font-size:0.75rem; font-weight:700; padding: 0 0.5rem; color: var(--accent-neon);">M</span>
+        <button class="manage-profiles-btn" id="btn-open-profiles" title="Manage Profiles">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Desktop Navigation Tabs -->
+    <nav class="nav-tabs" id="desktop-tabs">
+      <button class="nav-btn active" data-tab="dashboard">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg> Overview
+      </button>
+      <button class="nav-btn" data-tab="timer">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Timer
+      </button>
+      <button class="nav-btn" data-tab="calendar">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg> Calendar & Tasks
+      </button>
+      <button class="nav-btn" data-tab="pipelines">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg> Pipelines
+      </button>
+      <button class="nav-btn" data-tab="analytics">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg> Analytics
+      </button>
+    </nav>
+
+    <!-- Top Action Buttons -->
+    <div class="header-actions">
+      <!-- Clear Data -->
+      <button class="icon-btn" id="btn-open-clear-data" title="Clear / Reset All Study Times" style="color: #f87171; border-color: rgba(239, 68, 68, 0.3);">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/>
+        </svg>
+      </button>
+      <!-- Data backup modal button -->
+      <button class="icon-btn" id="btn-open-sync" title="Export / Import Data Backup">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+        </svg>
+      </button>
+      <!-- Sound toggle -->
+      <button class="icon-btn" id="btn-toggle-sound" title="Toggle Synthesizer Sound">
+        <svg id="sound-icon-on" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+      </button>
+      <!-- Add Subject Button -->
+      <button class="btn-primary" id="btn-add-subject">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <span>Subject</span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <!-- Background Clock & Wake Lock Engine Status Bar -->
+    <div class="banner-engine">
+      <div class="engine-pills">
+        <span class="chip-badge active-green" id="sync-engine-badge">
+          <svg width="10" height="10" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg> Delta Sync Active
+        </span>
+        <span class="chip-badge" id="wake-lock-badge" style="display: none;">
+          <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg> Display Sleep Prevented
+        </span>
+      </div>
+      <button class="aux-toggle-btn" id="btn-toggle-wakelock" title="Keep screen turned on while studying">
+        <span id="label-wakelock">Wakelock: Off</span>
+      </button>
+    </div>
+
+    <!-- TAB 1: OVERVIEW & ALL-IN-ONE DASHBOARD -->
+    <section id="view-dashboard" class="tab-view">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-card-stripe"></div>
+          <div class="stat-label">
+            <span>Today's Total</span>
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div class="stat-value" id="stat-today">00:00:00</div>
+          <div class="stat-subtext" id="stat-today-sub">0 sessions logged today</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-card-stripe" style="background: var(--accent-blue);"></div>
+          <div class="stat-label">
+            <span>Past 7 Days</span>
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+          </div>
+          <div class="stat-value" id="stat-week">0.0 hrs</div>
+          <div class="stat-subtext">Weekly focus volume</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-card-stripe" style="background: #f59e0b;"></div>
+          <div class="stat-label">
+            <span>Focus Streak</span>
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"/></svg>
+          </div>
+          <div class="stat-value" id="stat-streak" style="color: #fcd34d;">0 Days</div>
+          <div class="stat-subtext">Daily consistency score</div>
+        </div>
+      </div>
+
+      <!-- Study Subjects List -->
+      <div class="section-header">
+        <h2 class="section-title">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          Study Topics Overview
+        </h2>
+        <span style="font-size: 0.75rem; color: var(--text-dim);">Tap subject to launch timer</span>
+      </div>
+
+      <div class="subject-grid" id="subjects-container">
+        <!-- Injected via JavaScript -->
+      </div>
+    </section>
+
+    <!-- TAB 2: INTERACTIVE TIMER VIEW -->
+    <section id="view-timer" class="tab-view hidden">
+      <div class="timer-container">
+        <!-- Primary Mode Switcher: Stopwatch vs Pomodoro -->
+        <div class="mode-switch">
+          <button class="active" id="btn-mode-stopwatch">Stopwatch</button>
+          <button id="btn-mode-pomodoro">Pomodoro Focus</button>
+        </div>
+
+        <!-- Pomodoro Intervals Bar -->
+        <div class="pomo-stage-bar hidden" id="pomo-stage-bar">
+          <button class="pomo-stage-btn active" data-stage="focus">Focus Interval</button>
+          <button class="pomo-stage-btn" data-stage="shortBreak">Short Break (5m)</button>
+          <button class="pomo-stage-btn" data-stage="longBreak">Long Break (15m)</button>
+        </div>
+
+        <!-- Pomodoro Duration Customizer Box -->
+        <div class="pomo-customizer-box hidden" id="pomo-customizer-box">
+          <div class="pomo-customizer-header">
+            <span class="pomo-customizer-title">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Customize Duration
+            </span>
+            <span style="font-size: 0.7rem; color: var(--text-secondary);" id="pomo-selected-label">25 Minutes</span>
+          </div>
+
+          <div class="pomo-presets-grid" id="pomo-presets-container">
+            <button class="preset-chip" data-mins="15">15m</button>
+            <button class="preset-chip active" data-mins="25">25m</button>
+            <button class="preset-chip" data-mins="45">45m</button>
+            <button class="preset-chip" data-mins="50">50m</button>
+            <button class="preset-chip" data-mins="60">60m</button>
+            <button class="preset-chip" data-mins="90">90m</button>
+          </div>
+
+          <div class="custom-input-stepper">
+            <span style="font-size: 0.72rem; color: var(--text-dim);">Custom:</span>
+            <button class="stepper-btn" id="btn-step-dec">-</button>
+            <input type="number" id="input-pomo-minutes" class="stepper-input" min="1" max="180" value="25">
+            <button class="stepper-btn" id="btn-step-inc">+</button>
+            <span style="font-size: 0.72rem; color: var(--text-dim);">mins</span>
+          </div>
+        </div>
+
+        <!-- Subject selector inside timer -->
+        <div style="margin-bottom: 0.5rem;">
+          <select id="timer-subject-select" class="form-input" style="max-width: 280px; margin: 0 auto; display: block; text-align: center;">
+            <!-- Injected -->
+          </select>
+        </div>
+
+        <!-- SVG Radial Ring & Time Output -->
+        <div class="timer-dial-wrapper">
+          <svg class="timer-svg" viewBox="0 0 100 100">
+            <circle class="timer-track" cx="50" cy="50" r="45" />
+            <circle class="timer-progress" id="timer-ring" cx="50" cy="50" r="45" />
+          </svg>
+          <div class="timer-content">
+            <span class="timer-mode-tag" id="timer-status-badge">Ready</span>
+            <div class="timer-digits" id="timer-display">00:00:00</div>
+            <div class="timer-subject-name" id="timer-selected-title">Subject</div>
+          </div>
+        </div>
+
+        <!-- Timer Controls -->
+        <div class="timer-controls">
+          <button class="btn-ctrl btn-ctrl-primary" id="btn-timer-toggle">
+            <svg id="timer-toggle-icon" width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            <span id="timer-toggle-text">Start Focus</span>
+          </button>
+          <button class="btn-ctrl btn-ctrl-stop" id="btn-timer-stop">
+            <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+            <span>Stop & Log</span>
+          </button>
+        </div>
+
+        <!-- Session Note -->
+        <div style="margin-top: 1.25rem;">
+          <input type="text" id="timer-session-note" class="form-input" placeholder="Optional session note (e.g. Solved chapter 4)..." style="font-size: 0.8rem; text-align: center;">
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: HEATMAP CALENDAR & CHECKLIST VIEW -->
+    <section id="view-calendar" class="tab-view hidden">
+      <div class="calendar-container">
+        <div class="calendar-header">
+          <div>
+            <h2 class="section-title">Heatmap & Tasks</h2>
+            <p style="font-size: 0.75rem; color: var(--text-dim);">Inspect daily study volume & task completion</p>
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <button class="cal-nav-btn" id="cal-prev">&lt;</button>
+            <span id="cal-month-label" class="font-mono text-neon" style="font-size: 0.85rem; font-weight: 700; min-width: 110px; text-align: center;"></span>
+            <button class="cal-nav-btn" id="cal-next">&gt;</button>
+          </div>
+        </div>
+
+        <div class="calendar-grid" id="calendar-grid-cells">
+          <!-- Populated via script -->
+        </div>
+
+        <!-- Legend -->
+        <div style="display: flex; align-items: center; justify-content: flex-end; gap: 0.4rem; margin-top: 1rem; font-size: 0.7rem; color: var(--text-dim);">
+          <span>0h</span>
+          <div style="width: 10px; height: 10px; border-radius: 2px;" class="heat-lvl-0"></div>
+          <div style="width: 10px; height: 10px; border-radius: 2px;" class="heat-lvl-1"></div>
+          <div style="width: 10px; height: 10px; border-radius: 2px;" class="heat-lvl-2"></div>
+          <div style="width: 10px; height: 10px; border-radius: 2px;" class="heat-lvl-3"></div>
+          <div style="width: 10px; height: 10px; border-radius: 2px;" class="heat-lvl-4"></div>
+          <span>3h+</span>
+        </div>
+
+        <!-- Checklist Section -->
+        <div class="checklist-section">
+          <div class="checklist-header">
+            <div>
+              <h3 id="cal-inspect-date" class="font-mono" style="font-size: 1rem; color: #fff;">Selected Date</h3>
+              <div id="cal-inspect-total" class="font-mono text-neon" style="font-size: 0.8rem; font-weight: 800;">0 hrs logged</div>
+            </div>
+            <button class="btn-primary" id="btn-add-task" style="padding: 0.4rem 0.8rem; font-size: 0.75rem;">+ Add Task</button>
+          </div>
+
+          <div class="checklist-progress-wrap">
+            <div class="checklist-progress-text">
+              <span>Daily Task Completion</span>
+              <span id="checklist-progress-ratio">0/0 Completed</span>
+            </div>
+            <div class="checklist-progress-bar">
+              <div class="checklist-progress-fill" id="checklist-progress-fill"></div>
+            </div>
+          </div>
+
+          <div class="checklist-list" id="checklist-container">
+            <!-- Checklist items populated via script -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: PIPELINES VIEW (Dashboard + Node Canvas) -->
+    <section id="view-pipelines" class="tab-view hidden">
+      <!-- Dashboard View -->
+      <div id="pipeline-dashboard" class="pipeline-dashboard">
+        <!-- Rendered via JS -->
+      </div>
+
+      <!-- Node Canvas View -->
+      <div id="pipeline-canvas-area" class="pipeline-canvas-area">
+        <div class="pipeline-canvas-header">
+          <button class="btn-secondary" id="btn-back-pipelines">← Back to Plans</button>
+          <h3 id="active-pipeline-title" class="font-mono" style="color: #fff; margin: 0;">Pipeline</h3>
+          <div style="display:flex; gap:0.5rem;">
+            <button class="btn-secondary" id="btn-reset-cam" title="Reset Camera">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+            </button>
+            <button class="btn-primary" id="btn-add-node">+ Add Node</button>
+          </div>
+        </div>
+        
+        <div id="pipeline-board" class="pipeline-board">
+          <div id="pipeline-canvas-layer" class="pipeline-canvas-layer">
+            <svg id="pipeline-svg" class="absolute inset-0 w-full h-full pointer-events-none z-10" style="overflow:visible;"></svg>
+            <div id="pipeline-nodes-container" class="absolute inset-0 z-20"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 5: DETAILED ANALYTICS VIEW -->
+    <section id="view-analytics" class="tab-view hidden">
+      <div class="analytics-section">
+        <h2 class="section-title" style="margin-bottom: 0.5rem;">Subject Time Distribution</h2>
+        <p style="font-size: 0.75rem; color: var(--text-dim); margin-bottom: 1.5rem;">Total accumulated study volume per subject title.</p>
+        <div id="analytics-distribution-list">
+          <!-- Populated -->
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- MODALS -->
+
+  <!-- Manage Profiles Modal -->
+  <div class="modal-backdrop" id="modal-profiles">
+    <div class="modal-box">
+      <h3 style="font-size: 1.1rem; font-weight: 800; color: #fff; margin-bottom: 1rem;">Manage Profiles</h3>
+      <p style="font-size: 0.75rem; color: var(--text-dim); margin-bottom: 1.25rem;">Create completely separate offline environments for different users or contexts (e.g., Work vs Study).</p>
+
+      <div class="form-group">
+        <div id="profile-list-container" style="display:flex; flex-direction:column; gap:0.5rem; margin-bottom:1rem;"></div>
+        
+        <div style="display:flex; gap:0.5rem; align-items:center;">
+          <input type="text" id="input-new-profile" class="form-input" placeholder="New profile name...">
+          <button class="btn-primary" id="btn-add-profile" style="padding: 0.65rem 1rem;">Add</button>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; margin-top: 1.5rem;">
+        <button type="button" class="btn-secondary" id="btn-close-profiles">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add/Edit Subject Modal -->
+  <div class="modal-backdrop" id="modal-subject">
+    <div class="modal-box">
+      <h3 style="font-size: 1.1rem; font-weight: 800; color: #fff; margin-bottom: 0.25rem;" id="modal-subject-title">Add Study Subject</h3>
+      <p style="font-size: 0.75rem; color: var(--text-dim); margin-bottom: 1.25rem;">Create a focused topic with custom neon hue.</p>
+
+      <form id="form-subject">
+        <input type="hidden" id="sub-id">
+        <div class="form-group">
+          <label class="form-label">Subject Name</label>
+          <input type="text" id="sub-name" class="form-input" required placeholder="e.g. Distributed Systems Architecture">
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;" class="form-group">
+          <div>
+            <label class="form-label">Tag / Domain</label>
+            <input type="text" id="sub-tag" class="form-input" placeholder="e.g. Computer Science">
+          </div>
+          <div>
+            <label class="form-label">Target (Mins/Day)</label>
+            <input type="number" id="sub-goal" class="form-input" value="60" min="5" max="720">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Color Theme</label>
+          <div class="color-picker-grid" id="color-options">
+            <div class="color-option selected" data-color="#00f0ff" style="background: #00f0ff;"></div>
+            <div class="color-option" data-color="#0070f3" style="background: #0070f3;"></div>
+            <div class="color-option" data-color="#6366f1" style="background: #6366f1;"></div>
+            <div class="color-option" data-color="#10b981" style="background: #10b981;"></div>
+            <div class="color-option" data-color="#f59e0b" style="background: #f59e0b;"></div>
+            <div class="color-option" data-color="#ec4899" style="background: #ec4899;"></div>
+          </div>
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1.5rem;">
+          <button type="button" class="btn-secondary" id="btn-cancel-subject">Cancel</button>
+          <button type="submit" class="btn-primary">Save Subject</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Add/Edit Task Modal -->
+  <div class="modal-backdrop" id="modal-task">
+    <div class="modal-box">
+      <h3 style="font-size: 1.1rem; font-weight: 800; color: #fff; margin-bottom: 0.25rem;" id="modal-task-title">Add Task</h3>
+      <p style="font-size: 0.75rem; color: var(--text-dim); margin-bottom: 1.25rem;">Add a task to the calendar checklist.</p>
+      
+      <form id="form-task">
+        <input type="hidden" id="task-id">
+        <div class="form-group">
+          <label class="form-label">Task Title</label>
+          <input type="text" id="task-title" class="form-input" required placeholder="What needs to be done?">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Instructions / Note (Optional)</label>
+          <input type="text" id="task-desc" class="form-input" placeholder="Brief details...">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Recurrence Type</label>
+          <select id="task-type" class="form-input">
+            <option value="daily">Just Today (One-time task)</option>
+            <option value="everyday">Everyday (Global Checklist)</option>
+          </select>
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1.5rem;">
+          <button type="button" class="btn-secondary" onclick="document.getElementById('modal-task').classList.remove('open')">Cancel</button>
+          <button type="submit" class="btn-primary">Save Task</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Data Sync Modal -->
+  <div class="modal-backdrop" id="modal-sync">
+    <div class="modal-box">
+      <h3 style="font-size: 1.1rem; font-weight: 800; color: #fff; margin-bottom: 0.25rem;">Data Portability (100% Offline)</h3>
+      <p style="font-size: 0.75rem; color: var(--text-dim); margin-bottom: 1.25rem;">
+        Export your complete study database as a JSON file to transfer between your laptop and phone, or restore anytime. Applies to the current active profile.
+      </p>
+      <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+        <button class="btn-primary" id="btn-export-json" style="justify-content: center; width: 100%;">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+          Export Study Database (JSON)
+        </button>
+        <label class="btn-secondary" style="justify-content: center; width: 100%; cursor: pointer;">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+          Import JSON Backup File
+          <input type="file" id="input-import-json" accept=".json" style="display: none;">
+        </label>
+      </div>
+      <div style="display: flex; justify-content: flex-end; margin-top: 1.5rem;">
+        <button type="button" class="btn-secondary" id="btn-close-sync">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirm Reset Data Modal -->
+  <div class="modal-backdrop" id="modal-clear-data">
+    <div class="modal-box" style="border-color: rgba(239, 68, 68, 0.4);">
+      <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+        <div style="width: 2rem; height: 2rem; border-radius: 0.5rem; background: rgba(239, 68, 68, 0.15); display: flex; align-items: center; justify-content: center; color: #f87171;">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <h3 style="font-size: 1.1rem; font-weight: 800; color: #fff;">Clear Study Times & Data</h3>
+      </div>
+      <p style="font-size: 0.775rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
+        Choose what you would like to reset for the <strong>current profile</strong>.
+      </p>
+      <div style="display: flex; flex-direction: column; gap: 0.65rem;">
+        <button class="btn-secondary" id="btn-action-wipe-logs-only" style="justify-content: center; border-color: rgba(245, 158, 11, 0.4); color: #fbbf24;">
+          Clear All Logged Study Times
+        </button>
+        <button class="btn-ctrl-stop" id="btn-action-wipe-all" style="justify-content: center; padding: 0.65rem; border-radius: 0.65rem; font-size: 0.8rem; font-weight: 700; cursor: pointer;">
+          Factory Reset (Wipe All Data)
+        </button>
+      </div>
+      <div style="display: flex; justify-content: flex-end; margin-top: 1.25rem;">
+        <button type="button" class="btn-secondary" id="btn-close-clear-data">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Bottom Navigation Bar -->
+  <nav class="mobile-nav" id="mobile-tabs">
+    <button class="mobile-nav-btn active" data-tab="dashboard">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+      <span>Overview</span>
+    </button>
+    <button class="mobile-nav-btn" data-tab="timer">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span>Timer</span>
+    </button>
+    <button class="mobile-nav-btn" data-tab="calendar">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+      <span>Calendar</span>
+    </button>
+    <button class="mobile-nav-btn" data-tab="pipelines">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+      <span>Pipelines</span>
+    </button>
+    <button class="mobile-nav-btn" data-tab="analytics">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+      <span>Stats</span>
+    </button>
+  </nav>
+
+  <script>
+    // --- 1. Service Worker (Offline Support) ---
+    const swCode = `
+      const CACHE_NAME = 'aether-focus-v7-complete';
+      self.addEventListener('install', (e) => {
+        self.skipWaiting();
+      });
+      self.addEventListener('activate', (e) => {
+        e.waitUntil(
+          caches.keys().then(keys => Promise.all(
+            keys.map(key => {
+              if (key !== CACHE_NAME) return caches.delete(key);
+            })
+          )).then(() => clients.claim())
+        );
+      });
+      self.addEventListener('fetch', (e) => {
+        e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
+      });
+    `;
+    if ('serviceWorker' in navigator) {
+      try {
+        const swBlob = new Blob([swCode], { type: 'application/javascript' });
+        navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(err => console.warn(err));
+      } catch (e) {}
+    }
+
+    // Manifest injection
+    const manifestJson = {
+      name: "AetherFocus Study Engine",
+      short_name: "AetherFocus",
+      start_url: window.location.href,
+      display: "standalone",
+      background_color: "#04060a",
+      theme_color: "#04060a",
+      icons: [{
+        src: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%2304060a'/><path d='M55 20L25 55h25v25l30-35H55z' fill='%2300f0ff'/></svg>",
+        sizes: "192x192 512x512",
+        type: "image/svg+xml"
+      }]
+    };
+    const manifestBlob = new Blob([JSON.stringify(manifestJson)], { type: 'application/json' });
+    document.getElementById('pwa-manifest').setAttribute('href', URL.createObjectURL(manifestBlob));
+
+    // --- 2. System Utilities (Audio & Wakelock) ---
+    let soundMuted = false;
+    function playChime(freq = 587.33, freq2 = 880) {
+      if (soundMuted) return;
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        const ctx = new AudioContext();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(freq2, ctx.currentTime + 0.18);
+        gain.gain.setValueAtTime(0.25, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.9);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.9);
+      } catch (e) { console.warn('Audio error', e); }
+    }
+
+    document.getElementById('btn-toggle-sound').addEventListener('click', () => {
+      soundMuted = !soundMuted;
+      document.getElementById('btn-toggle-sound').style.opacity = soundMuted ? '0.4' : '1';
+    });
+
+    let wakeLockSentinel = null;
+    let wakeLockRequestedByUser = false;
+    async function requestScreenWakeLock() {
+      if ('wakeLock' in navigator) {
+        try {
+          wakeLockSentinel = await navigator.wakeLock.request('screen');
+          document.getElementById('btn-toggle-wakelock').classList.add('active');
+          document.getElementById('label-wakelock').textContent = 'Wakelock: ACTIVE';
+          document.getElementById('wake-lock-badge').style.display = 'inline-flex';
+        } catch (err) { console.warn('Wake Lock error:', err); }
+      }
+    }
+    function releaseScreenWakeLock() {
+      if (wakeLockSentinel) {
+        wakeLockSentinel.release().then(() => {
+          wakeLockSentinel = null;
+          document.getElementById('btn-toggle-wakelock').classList.remove('active');
+          document.getElementById('label-wakelock').textContent = 'Wakelock: Off';
+          document.getElementById('wake-lock-badge').style.display = 'none';
+        }).catch(() => {});
+      }
+    }
+    document.getElementById('btn-toggle-wakelock').addEventListener('click', () => {
+      wakeLockRequestedByUser = !wakeLockRequestedByUser;
+      if (wakeLockRequestedByUser) requestScreenWakeLock();
+      else releaseScreenWakeLock();
+    });
+    document.addEventListener('visibilitychange', () => {
+      if (wakeLockRequestedByUser && document.visibilityState === 'visible' && !wakeLockSentinel) {
+        requestScreenWakeLock();
+      }
+    });
+
+    function triggerNativeNotification(title, body) {
+      if ('Notification' in window && Notification.permission === 'granted') {
+        try {
+          new Notification(title, {
+            body: body,
+            icon: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%2304060a'/><path d='M55 20L25 55h25v25l30-35H55z' fill='%2300f0ff'/></svg>"
+          });
+        } catch (err) {}
+      }
+    }
+    // Ask permission on load if not determined
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+
+    // --- 3. Profile & Core Data Management ---
+    const DEFAULT_SUBJECTS = [
+      { id: 'sub-1', name: 'Machine Learning', color: '#00f0ff', tag: 'Tech', goalMinutes: 60 },
+      { id: 'sub-2', name: 'Electronics', color: '#0070f3', tag: 'Engineering', goalMinutes: 45 }
+    ];
+
+    let profiles = JSON.parse(localStorage.getItem('aether_profiles') || '["M", "H"]');
+    let currentProfile = localStorage.getItem('aether_active_profile') || profiles[0];
+    function sKey(key) { return `${currentProfile}_${key}`; }
+
+    let subjects = [];
+    let studyLogs = [];
+    let tasks = [];
+    let pipelines = [];
+    let savedPomoMinutes = 25;
+
+    function loadProfileData() {
+      // Update UI Header
+      document.getElementById('active-profile-label').textContent = currentProfile;
+
+      // Load Data
+      subjects = JSON.parse(localStorage.getItem(sKey('subjects')) || 'null') || DEFAULT_SUBJECTS;
+      studyLogs = JSON.parse(localStorage.getItem(sKey('logs')) || 'null') || [];
+      tasks = JSON.parse(localStorage.getItem(sKey('tasks')) || 'null') || [];
+      
+      let loadedPipes = JSON.parse(localStorage.getItem(sKey('pipelines')) || 'null') || [
+        { id: 'pipe-1', title: 'Main Project Planner', color: '#00f0ff', nodes: [], edges: [] }
+      ];
+      // Sanitize pipelines in case of old data formats
+      pipelines = loadedPipes.map(p => ({
+        ...p,
+        nodes: Array.isArray(p.nodes) ? p.nodes : [],
+        edges: Array.isArray(p.edges) ? p.edges : []
+      }));
+
+      savedPomoMinutes = parseInt(localStorage.getItem(sKey('pomo')) || '25', 10);
+      if (isNaN(savedPomoMinutes) || savedPomoMinutes < 1) savedPomoMinutes = 25;
+
+      // Ensure active subject exists
+      if (!activeSubjectId || !subjects.find(s => s.id === activeSubjectId)) {
+        activeSubjectId = subjects.length > 0 ? subjects[0].id : null;
+      }
+
+      // Timer UI init
+      updatePomoDuration(savedPomoMinutes);
+      populateTimerSubjectSelect();
+      restoreActiveSessionState(); // Crucial for background timer
+
+      // Render Views
+      updateOverviewStats();
+      renderSubjectsList();
+      renderCalendar();
+      renderAnalytics();
+      
+      // If we are looking at the pipeline canvas, re-render it, else render dashboard
+      if(document.getElementById('pipeline-canvas-area').classList.contains('active') && activePipelineId) {
+        renderPipelineNodes();
+      } else {
+        renderPipelinesDashboard();
+      }
+    }
+
+    function persistData() {
+      localStorage.setItem(sKey('subjects'), JSON.stringify(subjects));
+      localStorage.setItem(sKey('logs'), JSON.stringify(studyLogs));
+      localStorage.setItem(sKey('tasks'), JSON.stringify(tasks));
+      localStorage.setItem(sKey('pipelines'), JSON.stringify(pipelines));
+      localStorage.setItem(sKey('pomo'), savedPomoMinutes.toString());
+
+      updateOverviewStats();
+      renderSubjectsList();
+      renderCalendar();
+      renderAnalytics();
+
+      // Only re-render dashboard if we are NOT in the active visual canvas
+      // This prevents the visual canvas from collapsing when editing/dragging nodes
+      if (!document.getElementById('pipeline-canvas-area').classList.contains('active')) {
+        renderPipelinesDashboard();
+      }
+    }
+
+    // --- Profile Modal Logic ---
+    const modalProfiles = document.getElementById('modal-profiles');
+    document.getElementById('btn-open-profiles').addEventListener('click', () => {
+      renderProfileList();
+      modalProfiles.classList.add('open');
+    });
+    document.getElementById('btn-close-profiles').addEventListener('click', () => {
+      modalProfiles.classList.remove('open');
+    });
+
+    function renderProfileList() {
+      const container = document.getElementById('profile-list-container');
+      container.innerHTML = '';
+      profiles.forEach(p => {
+        const div = document.createElement('div');
+        div.style.display = 'flex';
+        div.style.justifyContent = 'space-between';
+        div.style.alignItems = 'center';
+        div.style.padding = '0.75rem';
+        div.style.background = 'var(--bg-card)';
+        div.style.border = '1px solid var(--border-subtle)';
+        div.style.borderRadius = '0.5rem';
+        
+        const isCurrent = p === currentProfile;
+        
+        div.innerHTML = `
+          <div style="display:flex; align-items:center; gap:0.5rem; cursor:pointer;" class="prof-select">
+            <span style="width:12px;height:12px;border-radius:50%;background:${isCurrent ? 'var(--accent-neon)' : 'var(--text-dim)'}"></span>
+            <span style="color:${isCurrent ? '#fff' : 'var(--text-secondary)'}; font-weight:700;">${p}</span>
+          </div>
+          <div style="display:flex; gap:0.5rem;">
+            ${!isCurrent && profiles.length > 1 ? `<button class="task-btn delete prof-del" data-p="${p}">Delete</button>` : ''}
+          </div>
+        `;
+
+        div.querySelector('.prof-select').addEventListener('click', () => switchProfile(p));
+        
+        const delBtn = div.querySelector('.prof-del');
+        if (delBtn) {
+          delBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if(this.textContent === 'Sure?') {
+              deleteProfile(p);
+            } else {
+              this.textContent = 'Sure?';
+              this.style.color = 'var(--danger)';
+              this.style.background = 'rgba(239,68,68,0.1)';
+              setTimeout(() => { 
+                if(this) { 
+                  this.textContent = 'Delete'; 
+                  this.style.color = ''; 
+                  this.style.background = '';
+                } 
+              }, 3000);
+            }
+          });
+        }
+        container.appendChild(div);
+      });
+    }
+
+    function switchProfile(p) {
+      if(p === currentProfile) return;
+      // Pause timer to save delta to old profile before switching
+      if (isRunning) pauseTimer();
+      
+      currentProfile = p;
+      localStorage.setItem('aether_active_profile', currentProfile);
+      
+      loadProfileData();
+      renderProfileList();
+    }
+
+    document.getElementById('btn-add-profile').addEventListener('click', () => {
+      const name = document.getElementById('input-new-profile').value.trim();
+      if(name && !profiles.includes(name)) {
+        profiles.push(name);
+        localStorage.setItem('aether_profiles', JSON.stringify(profiles));
+        document.getElementById('input-new-profile').value = '';
+        switchProfile(name);
+      }
+    });
+
+    function deleteProfile(p) {
+      profiles = profiles.filter(x => x !== p);
+      localStorage.setItem('aether_profiles', JSON.stringify(profiles));
+      // Wipe all localStorage keys belonging to this profile
+      Object.keys(localStorage).forEach(key => {
+        if(key.startsWith(p + '_')) localStorage.removeItem(key);
+      });
+      renderProfileList();
+    }
+
+    // --- 4. Utilities ---
+    function formatTime(seconds) {
+      const h = Math.floor(seconds / 3600);
+      const m = Math.floor((seconds % 3600) / 60);
+      const s = seconds % 60;
+      return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+    function formatTimeMinSec(seconds) {
+      const m = Math.floor(seconds / 60);
+      const s = seconds % 60;
+      return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+    function formatHours(seconds) {
+      return (seconds / 3600).toFixed(1) + ' hrs';
+    }
+    function getTodayString() {
+      return new Date().toISOString().split('T')[0];
+    }
+
+    // --- 5. High-Precision Background-Immune Timer ---
+    let timerMode = 'stopwatch'; // 'stopwatch' | 'pomodoro'
+    let pomoStage = 'focus';     // 'focus' | 'shortBreak' | 'longBreak'
+    let timerTargetSeconds = savedPomoMinutes * 60;
+    let activeSubjectId = null;
+
+    let isRunning = false;
+    let startTimestamp = null;
+    let accumulatedSeconds = 0;
+    let totalElapsedSeconds = 0;
+    let timerTickInterval = null;
+
+    const timerDisplay = document.getElementById('timer-display');
+    const timerStatusBadge = document.getElementById('timer-status-badge');
+    const timerSelectedTitle = document.getElementById('timer-selected-title');
+    const timerToggleBtn = document.getElementById('btn-timer-toggle');
+    const timerToggleText = document.getElementById('timer-toggle-text');
+    const timerRing = document.getElementById('timer-ring');
+    const timerSubjectSelect = document.getElementById('timer-subject-select');
+    const sessionNoteInput = document.getElementById('timer-session-note');
+
+    function saveActiveSessionState() {
+      const state = {
+        isRunning, timerMode, pomoStage, startTimestamp,
+        accumulatedSeconds, timerTargetSeconds, activeSubjectId, savedPomoMinutes
+      };
+      localStorage.setItem(sKey('active_session'), JSON.stringify(state));
+    }
+
+    function clearActiveSessionState() {
+      localStorage.removeItem(sKey('active_session'));
+    }
+
+    function restoreActiveSessionState() {
+      const raw = localStorage.getItem(sKey('active_session'));
+      if (!raw) {
+        resetTimerState();
+        return;
+      }
+      try {
+        const state = JSON.parse(raw);
+        timerMode = state.timerMode || 'stopwatch';
+        pomoStage = state.pomoStage || 'focus';
+        timerTargetSeconds = state.timerTargetSeconds || (savedPomoMinutes * 60);
+        activeSubjectId = state.activeSubjectId || (subjects.length > 0 ? subjects[0].id : null);
+        accumulatedSeconds = state.accumulatedSeconds || 0;
+        isRunning = state.isRunning || false;
+        startTimestamp = state.startTimestamp || null;
+
+        // UI Sync
+        if (timerMode === 'pomodoro') {
+          document.getElementById('btn-mode-pomodoro').classList.add('active');
+          document.getElementById('btn-mode-stopwatch').classList.remove('active');
+          document.getElementById('pomo-customizer-box').classList.remove('hidden');
+          document.getElementById('pomo-stage-bar').classList.remove('hidden');
+          document.querySelectorAll('.pomo-stage-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.getAttribute('data-stage') === pomoStage);
+          });
+        } else {
+          document.getElementById('btn-mode-stopwatch').classList.add('active');
+          document.getElementById('btn-mode-pomodoro').classList.remove('active');
+          document.getElementById('pomo-customizer-box').classList.add('hidden');
+          document.getElementById('pomo-stage-bar').classList.add('hidden');
+        }
+        populateTimerSubjectSelect();
+
+        // Calculate exact time elapsed while app was closed
+        if (isRunning && startTimestamp) {
+          const delta = Math.floor((Date.now() - startTimestamp) / 1000);
+          totalElapsedSeconds = accumulatedSeconds + Math.max(0, delta);
+
+          if (timerMode === 'pomodoro' && totalElapsedSeconds >= timerTargetSeconds) {
+            handlePomodoroCompletedInAbsence();
+          } else {
+            resumeFromPersistedTimestamp();
+          }
+        } else {
+          totalElapsedSeconds = accumulatedSeconds;
+          updateTimerDial();
+          updateDynamicTitle();
+        }
+      } catch (err) {
+        resetTimerState();
+      }
+    }
+
+    function syncTimeDelta() {
+      if (!isRunning || !startTimestamp) return;
+      const delta = Math.floor((Date.now() - startTimestamp) / 1000);
+      totalElapsedSeconds = accumulatedSeconds + Math.max(0, delta);
+
+      if (timerMode === 'pomodoro' && totalElapsedSeconds >= timerTargetSeconds) {
+        handleTimerCompletion();
+        return;
+      }
+      updateTimerDial();
+      updateDynamicTitle();
+    }
+
+    function updateDynamicTitle() {
+      const sub = subjects.find(s => s.id === activeSubjectId);
+      const subTitle = sub ? sub.name : 'Focus';
+
+      if (!isRunning) {
+        document.title = 'AetherFocus - Precision AI Study Engine';
+        return;
+      }
+      if (timerMode === 'pomodoro') {
+        const remaining = Math.max(0, timerTargetSeconds - totalElapsedSeconds);
+        document.title = `[${formatTimeMinSec(remaining)}] ${subTitle} - AetherFocus`;
+      } else {
+        document.title = `[${formatTime(totalElapsedSeconds)}] ${subTitle} - AetherFocus`;
+      }
+    }
+
+    function updateTimerDial() {
+      if (timerMode === 'pomodoro') {
+        const remaining = Math.max(0, timerTargetSeconds - totalElapsedSeconds);
+        timerDisplay.textContent = formatTime(remaining);
+        const percent = Math.min(totalElapsedSeconds / timerTargetSeconds, 1);
+        timerRing.style.strokeDashoffset = 283 - (percent * 283);
+      } else {
+        timerDisplay.textContent = formatTime(totalElapsedSeconds);
+        const percent = (totalElapsedSeconds % 3600) / 3600;
+        timerRing.style.strokeDashoffset = 283 - (percent * 283);
+      }
+    }
+
+    function startOrResumeTimer() {
+      if (isRunning) return;
+      isRunning = true;
+      startTimestamp = Date.now();
+      saveActiveSessionState();
+
+      timerStatusBadge.textContent = (timerMode === 'pomodoro' && pomoStage !== 'focus') ? 'Resting...' : 'Session Active';
+      timerToggleText.textContent = 'Pause';
+      timerToggleBtn.classList.remove('btn-ctrl-primary');
+      timerToggleBtn.classList.add('btn-ctrl-pause');
+
+      if (wakeLockRequestedByUser) requestScreenWakeLock();
+
+      clearInterval(timerTickInterval);
+      timerTickInterval = setInterval(syncTimeDelta, 500);
+      syncTimeDelta();
+    }
+
+    function resumeFromPersistedTimestamp() {
+      isRunning = true;
+      timerStatusBadge.textContent = 'Session Active';
+      timerToggleText.textContent = 'Pause';
+      timerToggleBtn.classList.remove('btn-ctrl-primary');
+      timerToggleBtn.classList.add('btn-ctrl-pause');
+      clearInterval(timerTickInterval);
+      timerTickInterval = setInterval(syncTimeDelta, 500);
+      syncTimeDelta();
+    }
+
+    function pauseTimer() {
+      if (!isRunning) return;
+      const delta = Math.floor((Date.now() - startTimestamp) / 1000);
+      accumulatedSeconds += Math.max(0, delta);
+      totalElapsedSeconds = accumulatedSeconds;
+      startTimestamp = null;
+      isRunning = false;
+
+      clearInterval(timerTickInterval);
+      saveActiveSessionState();
+
+      timerStatusBadge.textContent = 'Paused';
+      timerToggleText.textContent = 'Resume';
+      timerToggleBtn.classList.remove('btn-ctrl-pause');
+      timerToggleBtn.classList.add('btn-ctrl-primary');
+      updateTimerDial();
+      updateDynamicTitle();
+    }
+
+    function handleTimerCompletion() {
+      pauseTimer();
+      playChime(659.25, 880);
+      const subName = subjects.find(s => s.id === activeSubjectId)?.name || 'Focus Session';
+
+      triggerNativeNotification(
+        pomoStage === 'focus' ? "Time's Up! Focus Complete" : "Break Over!",
+        pomoStage === 'focus' ? `Great work! Your session on "${subName}" has been logged.` : "Ready to jump back into focus?"
+      );
+
+      timerStatusBadge.textContent = pomoStage === 'focus' ? 'Session Complete!' : 'Break Finished!';
+      if (pomoStage === 'focus') stopAndLogTimer();
+    }
+
+    function handlePomodoroCompletedInAbsence() {
+      if (pomoStage === 'focus' && timerTargetSeconds >= 10) {
+        studyLogs.unshift({
+          id: 'log-' + Date.now(),
+          subjectId: activeSubjectId,
+          duration: timerTargetSeconds,
+          timestamp: new Date().toISOString(),
+          dateString: getTodayString(),
+          note: 'Completed Pomodoro session (reconciled after sleep/background).'
+        });
+        persistData();
+      }
+      resetTimerState();
+      timerStatusBadge.textContent = 'Completed (While Away)';
+      const subName = subjects.find(s => s.id === activeSubjectId)?.name || 'Session';
+      triggerNativeNotification('Session Finished While Away', `Your study block for "${subName}" was logged.`);
+    }
+
+    function stopAndLogTimer() {
+      if (isRunning) {
+        const delta = Math.floor((Date.now() - startTimestamp) / 1000);
+        totalElapsedSeconds = accumulatedSeconds + Math.max(0, delta);
+      }
+      const durationToLog = (timerMode === 'pomodoro') ? Math.min(totalElapsedSeconds, timerTargetSeconds) : totalElapsedSeconds;
+
+      if (durationToLog >= 5 && (timerMode === 'stopwatch' || pomoStage === 'focus')) {
+        studyLogs.unshift({
+          id: 'log-' + Date.now(),
+          subjectId: activeSubjectId,
+          duration: durationToLog,
+          timestamp: new Date().toISOString(),
+          dateString: getTodayString(),
+          note: sessionNoteInput.value.trim() || 'Focused study session completed.'
+        });
+        persistData();
+        playChime(523.25, 783.99);
+      }
+      resetTimerState();
+      sessionNoteInput.value = '';
+    }
+
+    function resetTimerState() {
+      clearInterval(timerTickInterval);
+      isRunning = false;
+      startTimestamp = null;
+      accumulatedSeconds = 0;
+      totalElapsedSeconds = 0;
+      clearActiveSessionState();
+
+      timerStatusBadge.textContent = 'Ready';
+      timerToggleText.textContent = 'Start Focus';
+      timerToggleBtn.classList.remove('btn-ctrl-pause');
+      timerToggleBtn.classList.add('btn-ctrl-primary');
+      updateTimerDial();
+      updateDynamicTitle();
+    }
+
+    // Visibility handlers to ensure delta sync is exact
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') syncTimeDelta(); });
+    window.addEventListener('focus', syncTimeDelta);
+    window.addEventListener('pageshow', syncTimeDelta);
+
+    timerToggleBtn.addEventListener('click', () => { if (isRunning) pauseTimer(); else startOrResumeTimer(); });
+    document.getElementById('btn-timer-stop').addEventListener('click', stopAndLogTimer);
+
+    // --- 6. Timer Configuration & Modes ---
+    function updatePomoDuration(minutes) {
+      const mins = Math.max(1, Math.min(180, parseInt(minutes, 10) || 25));
+      savedPomoMinutes = mins;
+      localStorage.setItem(sKey('pomo'), mins.toString());
+
+      document.getElementById('input-pomo-minutes').value = mins;
+      document.getElementById('pomo-selected-label').textContent = `${mins} Minutes`;
+
+      document.querySelectorAll('#pomo-presets-container .preset-chip').forEach(chip => {
+        if (parseInt(chip.getAttribute('data-mins'), 10) === mins) chip.classList.add('active');
+        else chip.classList.remove('active');
+      });
+
+      if (timerMode === 'pomodoro' && pomoStage === 'focus') {
+        timerTargetSeconds = mins * 60;
+        if (!isRunning) resetTimerState();
+        else { saveActiveSessionState(); updateTimerDial(); }
+      }
+    }
+
+    function setPomoStage(stage) {
+      pomoStage = stage;
+      document.querySelectorAll('.pomo-stage-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-stage') === stage);
+      });
+
+      if (stage === 'focus') {
+        timerTargetSeconds = savedPomoMinutes * 60;
+        timerStatusBadge.textContent = 'Focus Session';
+        syncActiveSubjectUI();
+      } else if (stage === 'shortBreak') {
+        timerTargetSeconds = 5 * 60;
+        timerStatusBadge.textContent = 'Short Break (5m)';
+        timerRing.style.stroke = 'var(--break-green)';
+      } else if (stage === 'longBreak') {
+        timerTargetSeconds = 15 * 60;
+        timerStatusBadge.textContent = 'Long Break (15m)';
+        timerRing.style.stroke = 'var(--break-purple)';
+      }
+      resetTimerState();
+    }
+
+    document.querySelectorAll('#pomo-presets-container .preset-chip').forEach(chip => {
+      chip.addEventListener('click', () => updatePomoDuration(parseInt(chip.getAttribute('data-mins'), 10)));
+    });
+    document.getElementById('btn-step-dec').addEventListener('click', () => updatePomoDuration(savedPomoMinutes - 5));
+    document.getElementById('btn-step-inc').addEventListener('click', () => updatePomoDuration(savedPomoMinutes + 5));
+    document.getElementById('input-pomo-minutes').addEventListener('change', (e) => updatePomoDuration(e.target.value));
+
+    document.querySelectorAll('.pomo-stage-btn').forEach(btn => {
+      btn.addEventListener('click', () => setPomoStage(btn.getAttribute('data-stage')));
+    });
+
+    document.getElementById('btn-mode-stopwatch').addEventListener('click', function() {
+      this.classList.add('active');
+      document.getElementById('btn-mode-pomodoro').classList.remove('active');
+      document.getElementById('pomo-customizer-box').classList.add('hidden');
+      document.getElementById('pomo-stage-bar').classList.add('hidden');
+      timerMode = 'stopwatch';
+      syncActiveSubjectUI();
+      resetTimerState();
+    });
+
+    document.getElementById('btn-mode-pomodoro').addEventListener('click', function() {
+      this.classList.add('active');
+      document.getElementById('btn-mode-stopwatch').classList.remove('active');
+      document.getElementById('pomo-customizer-box').classList.remove('hidden');
+      document.getElementById('pomo-stage-bar').classList.remove('hidden');
+      timerMode = 'pomodoro';
+      setPomoStage('focus');
+      resetTimerState();
+    });
+
+    function populateTimerSubjectSelect() {
+      timerSubjectSelect.innerHTML = '';
+      subjects.forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s.id;
+        opt.textContent = `${s.name} (${s.tag || 'General'})`;
+        if (s.id === activeSubjectId) opt.selected = true;
+        timerSubjectSelect.appendChild(opt);
+      });
+      syncActiveSubjectUI();
+    }
+
+    function syncActiveSubjectUI() {
+      const sub = subjects.find(s => s.id === activeSubjectId) || subjects[0];
+      if (sub) {
+        timerSelectedTitle.textContent = sub.name;
+        if (timerMode === 'pomodoro') {
+          if (pomoStage === 'shortBreak') timerRing.style.stroke = 'var(--break-green)';
+          else if (pomoStage === 'longBreak') timerRing.style.stroke = 'var(--break-purple)';
+          else timerRing.style.stroke = sub.color;
+        } else {
+          timerRing.style.stroke = sub.color;
+        }
+      }
+    }
+
+    timerSubjectSelect.addEventListener('change', (e) => {
+      activeSubjectId = e.target.value;
+      syncActiveSubjectUI();
+      saveActiveSessionState();
+    });
+
+    // --- 7. Overview & Analytics Data ---
+    function updateOverviewStats() {
+      const today = getTodayString();
+      const pastWeek = new Date(); pastWeek.setDate(pastWeek.getDate() - 7);
+      let todaySecs = 0, todayCount = 0, weekSecs = 0;
+
+      studyLogs.forEach(log => {
+        if (log.dateString === today) { todaySecs += log.duration; todayCount++; }
+        if (new Date(log.dateString) >= pastWeek) weekSecs += log.duration;
+      });
+
+      document.getElementById('stat-today').textContent = formatTime(todaySecs);
+      document.getElementById('stat-today-sub').textContent = `${todayCount} sessions logged today`;
+      document.getElementById('stat-week').textContent = formatHours(weekSecs);
+
+      // Streak calculation
+      const activeDays = new Set(studyLogs.map(l => l.dateString));
+      let streak = 0; let check = new Date();
+      while (true) {
+        const dStr = check.toISOString().split('T')[0];
+        if (activeDays.has(dStr)) {
+          streak++; check.setDate(check.getDate() - 1);
+        } else {
+          if (streak === 0) {
+            check.setDate(check.getDate() - 1);
+            if (activeDays.has(check.toISOString().split('T')[0])) {
+              streak++; check.setDate(check.getDate() - 1); continue;
+            }
+          }
+          break;
+        }
+      }
+      document.getElementById('stat-streak').textContent = `${streak} Days`;
+    }
+
+    function renderSubjectsList() {
+      const container = document.getElementById('subjects-container');
+      container.innerHTML = '';
+      const today = getTodayString();
+
+      subjects.forEach(sub => {
+        const subLogs = studyLogs.filter(l => l.subjectId === sub.id);
+        const totalSecs = subLogs.reduce((acc, curr) => acc + curr.duration, 0);
+        const todaySecs = subLogs.filter(l => l.dateString === today).reduce((acc, curr) => acc + curr.duration, 0);
+        const isCurrentActive = (activeSubjectId === sub.id && isRunning);
+
+        const card = document.createElement('div');
+        card.className = `subject-card ${isCurrentActive ? 'is-active-subject' : ''}`;
+        card.innerHTML = `
+          <div>
+            <div class="subject-head">
+              <span class="subject-pill"><span class="subject-color-dot" style="background: ${sub.color};"></span> ${sub.tag || 'General'}</span>
+              <div class="subject-actions">
+                <button class="icon-btn edit-sub" style="width:1.75rem; height:1.75rem;" title="Edit"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+                <button class="icon-btn del-sub" style="width:1.75rem; height:1.75rem;" title="Delete"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+              </div>
+            </div>
+            <h3 class="subject-name">${sub.name}</h3>
+            <div class="subject-time-summary">
+              <div><span>Today</span><strong>${formatTime(todaySecs)}</strong></div>
+              <div><span>Total</span><strong style="color:#f8fafc;">${formatHours(totalSecs)}</strong></div>
+            </div>
+          </div>
+          <button class="subject-btn-launch launch-timer"><svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg> ${isCurrentActive ? 'Timer Active' : 'Launch Study Timer'}</button>
+        `;
+
+        card.querySelector('.launch-timer').addEventListener('click', (e) => {
+          e.stopPropagation(); activeSubjectId = sub.id; populateTimerSubjectSelect();
+          switchTab('timer'); startOrResumeTimer();
+        });
+        card.querySelector('.edit-sub').addEventListener('click', (e) => { e.stopPropagation(); openSubjectModal(sub); });
+        card.querySelector('.del-sub').addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (confirm(`Delete "${sub.name}" and its logs?`)) {
+            subjects = subjects.filter(s => s.id !== sub.id);
+            studyLogs = studyLogs.filter(l => l.subjectId !== sub.id);
+            if (activeSubjectId === sub.id) activeSubjectId = subjects[0]?.id || null;
+            persistData(); populateTimerSubjectSelect();
+          }
+        });
+        card.addEventListener('click', () => {
+          activeSubjectId = sub.id; populateTimerSubjectSelect(); switchTab('timer');
+        });
+        container.appendChild(card);
+      });
+    }
+
+    function renderAnalytics() {
+      const container = document.getElementById('analytics-distribution-list');
+      container.innerHTML = '';
+      const totalAllTime = studyLogs.reduce((acc, curr) => acc + curr.duration, 0) || 1;
+
+      subjects.forEach(sub => {
+        const subSecs = studyLogs.filter(l => l.subjectId === sub.id).reduce((acc, curr) => acc + curr.duration, 0);
+        const pct = ((subSecs / totalAllTime) * 100).toFixed(1);
+
+        const row = document.createElement('div');
+        row.className = 'breakdown-row';
+        row.innerHTML = `
+          <div class="breakdown-info">
+            <div style="display:flex; align-items:center; gap: 0.4rem;">
+              <span style="width:8px; height:8px; border-radius:50%; background:${sub.color};"></span>
+              <span style="font-weight:600; color:#fff;">${sub.name}</span>
+            </div>
+            <div>
+              <span class="font-mono" style="color:var(--text-secondary); margin-right: 0.5rem;">${formatHours(subSecs)}</span>
+              <span class="font-mono text-neon" style="font-weight:700;">${pct}%</span>
+            </div>
+          </div>
+          <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: ${pct}%; background: ${sub.color};"></div></div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    // --- 8. Heatmap Calendar & Checklist ---
+    function renderCalendar() {
+      const grid = document.getElementById('calendar-grid-cells');
+      grid.innerHTML = '';
+      const d = new Date(selectedCalDayStr + 'T00:00:00');
+      document.getElementById('cal-month-label').textContent = d.toLocaleString('default', { month: 'short', year: 'numeric' });
+      
+      const year = d.getFullYear(), month = d.getMonth();
+      const firstDay = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      
+      ['S','M','T','W','T','F','S'].forEach(day => {
+        const l = document.createElement('div'); l.className = 'calendar-day-label'; l.textContent = day; grid.appendChild(l);
+      });
+      for(let i=0; i<firstDay; i++) {
+        const b = document.createElement('div'); b.className = 'cal-day-empty'; grid.appendChild(b);
+      }
+      for(let day=1; day<=daysInMonth; day++) {
+        const ds = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+        const dayLogs = studyLogs.filter(l => l.dateString === ds);
+        const daySecs = dayLogs.reduce((sum, l) => sum + l.duration, 0);
+        const hrs = daySecs/3600;
+        let hc = 'heat-lvl-0';
+        if(daySecs>0) hc = hrs<0.75?'heat-lvl-1':hrs<1.75?'heat-lvl-2':hrs<3?'heat-lvl-3':'heat-lvl-4';
+        
+        const cell = document.createElement('div');
+        cell.className = `cal-day-cell ${hc} ${selectedCalDayStr===ds ? 'is-selected':''}`;
+        cell.textContent = day;
+        cell.onclick = () => { selectedCalDayStr = ds; renderCalendar(); };
+        grid.appendChild(cell);
+      }
+      renderChecklist(selectedCalDayStr);
+    }
+
+    document.getElementById('cal-prev').onclick = () => { const d = new Date(selectedCalDayStr + 'T00:00:00'); d.setMonth(d.getMonth()-1); selectedCalDayStr = d.toISOString().split('T')[0]; renderCalendar(); };
+    document.getElementById('cal-next').onclick = () => { const d = new Date(selectedCalDayStr + 'T00:00:00'); d.setMonth(d.getMonth()+1); selectedCalDayStr = d.toISOString().split('T')[0]; renderCalendar(); };
+
+    // Checklist Logic
+    let draggedTask = null;
+
+    function renderChecklist(dateStr) {
+      document.getElementById('cal-inspect-date').textContent = new Date(dateStr + 'T00:00:00').toLocaleDateString(undefined, { weekday:'short', month:'short', day:'numeric' });
+      const daySecs = studyLogs.filter(l => l.dateString === dateStr).reduce((s, l) => s + l.duration, 0);
+      document.getElementById('cal-inspect-total').textContent = (daySecs/3600).toFixed(1) + ' hrs logged';
+
+      const container = document.getElementById('checklist-container');
+      container.innerHTML = '';
+
+      let dayTasks = tasks.filter(t => t.type === 'everyday' || t.dateString === dateStr);
+      dayTasks.sort((a,b) => (a.order||0) - (b.order||0));
+
+      let completedCount = 0;
+      
+      dayTasks.forEach((task, index) => {
+        const isDone = task.completedOn && task.completedOn.includes(dateStr);
+        if(isDone) completedCount++;
+
+        const card = document.createElement('div');
+        card.className = `task-card ${isDone ? 'completed' : ''}`;
+        card.draggable = true;
+        
+        card.innerHTML = `
+          <div class="task-drag-handle"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg></div>
+          <span class="task-num">${index + 1}.</span>
+          <label class="task-checkbox-wrap">
+            <input type="checkbox" ${isDone ? 'checked' : ''}>
+            <svg class="task-checkbox-svg" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </label>
+          <div class="task-content">
+            <div style="display:flex; align-items:center;">
+              <span class="task-title">${task.title}</span>
+              <span class="task-badge ${task.type==='everyday'?'badge-everyday':'badge-once'}">${task.type==='everyday'?'Global':'Daily'}</span>
+            </div>
+            ${task.desc ? `<span class="task-desc">${task.desc}</span>` : ''}
+          </div>
+          <div class="task-actions">
+            <button class="task-btn edit" title="Edit"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+            <button class="task-btn delete" title="Delete"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+          </div>
+        `;
+
+        // Checkbox Toggle
+        card.querySelector('input').addEventListener('change', (e) => {
+          if(!task.completedOn) task.completedOn = [];
+          if(e.target.checked) task.completedOn.push(dateStr);
+          else task.completedOn = task.completedOn.filter(d => d !== dateStr);
+          persistData(); // re-renders UI instantly
+        });
+
+        // Edit/Delete
+        card.querySelector('.edit').onclick = () => openTaskModal(task);
+        card.querySelector('.delete').onclick = () => { 
+          // Custom confirm UI not strictly needed here, standard confirm is fast, but we'll use standard for simplicity 
+          if(confirm('Delete this task?')) { tasks = tasks.filter(t => t.id !== task.id); persistData(); } 
+        };
+
+        // Desktop Drag & Drop
+        card.addEventListener('dragstart', (e) => { draggedTask = task; card.classList.add('is-dragging'); });
+        card.addEventListener('dragend', () => { card.classList.remove('is-dragging'); draggedTask = null; });
+        card.addEventListener('dragover', (e) => { e.preventDefault(); });
+        card.addEventListener('drop', (e) => {
+          e.preventDefault();
+          if(draggedTask && draggedTask.id !== task.id) {
+            let dt = tasks.find(t => t.id === draggedTask.id);
+            let tt = tasks.find(t => t.id === task.id);
+            let temp = dt.order || 0; dt.order = tt.order || 0; tt.order = temp;
+            persistData();
+          }
+        });
+        
+        // Mobile Touch Drag Polyfill
+        const handle = card.querySelector('.task-drag-handle');
+        handle.addEventListener('touchstart', (e) => { draggedTask = task; card.classList.add('is-dragging'); }, {passive:true});
+        handle.addEventListener('touchmove', (e) => { 
+          e.preventDefault(); 
+          const touch = e.touches[0]; 
+          const target = document.elementFromPoint(touch.clientX, touch.clientY); 
+          const dropCard = target?.closest('.task-card'); 
+          if(dropCard && dropCard !== card) { 
+            dropCard.style.borderTop = "2px solid var(--accent-neon)"; 
+          } 
+        });
+        handle.addEventListener('touchend', (e) => {
+          card.classList.remove('is-dragging');
+          const touch = e.changedTouches[0]; 
+          const target = document.elementFromPoint(touch.clientX, touch.clientY); 
+          const dropCard = target?.closest('.task-card');
+          document.querySelectorAll('.task-card').forEach(c => c.style.borderTop="");
+          if(dropCard && dropCard !== card && draggedTask) {
+             const dropIndex = Array.from(container.children).indexOf(dropCard);
+             if(dropIndex > -1) {
+                let dt = tasks.find(t => t.id === draggedTask.id);
+                let targetId = dayTasks[dropIndex].id;
+                let tt = tasks.find(t => t.id === targetId);
+                let temp = dt.order || 0; dt.order = tt.order || 0; tt.order = temp;
+                persistData();
+             }
+          }
+          draggedTask = null;
+        });
+
+        container.appendChild(card);
+      });
+
+      // Progress Bar Update
+      const total = dayTasks.length;
+      document.getElementById('checklist-progress-ratio').textContent = `${completedCount}/${total} Completed`;
+      document.getElementById('checklist-progress-fill').style.width = total === 0 ? '0%' : `${(completedCount/total)*100}%`;
+    }
+
+    // --- 9. Visual Node Pipeline Planner ---
+    let activePipelineId = null;
+    let draggingNodeId = null;
+    let dragOffset = { x: 0, y: 0 };
+    let drawingEdge = null; // { sourceId, startX, startY, endX, endY }
+    
+    // Camera State
+    let camX = 0, camY = 0, camZoom = 1;
+    let isPanning = false, lastPanX = 0, lastPanY = 0;
+    let initialPinchDist = 0, initialCamZoom = 1, lastTouchCenter = null;
+
+    function renderPipelinesDashboard() {
+      const dash = document.getElementById('pipeline-dashboard');
+      dash.innerHTML = `
+        <div class="pipeline-card" style="border-style:dashed; display:flex; align-items:center; justify-content:center; color:var(--text-dim);" onclick="addPipeline()">
+          <div style="text-align:center;"><div style="font-size:2rem;">+</div><div style="font-size:0.8rem; font-weight:700;">New Pipeline</div></div>
+        </div>
+      `;
+      pipelines.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'pipeline-card';
+        card.innerHTML = `
+          <div class="pipeline-card-header">
+            <span class="pipeline-color-dot" style="background:${p.color}"></span>
+            <span class="pipeline-title">${p.title}</span>
+          </div>
+          <div class="pipeline-meta">
+            <span>${p.nodes.length} Nodes &bull; Visual Planner</span>
+            <button class="task-btn delete" style="padding:0;" onclick="event.stopPropagation(); deletePipeline('${p.id}')">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            </button>
+          </div>
+        `;
+        card.onclick = () => openPipeline(p.id);
+        dash.appendChild(card);
+      });
+    }
+
+    function addPipeline() {
+      const p = { id: 'pipe-'+Date.now(), title: 'New Pipeline Plan', color: '#00f0ff', nodes: [], edges: [] };
+      pipelines.push(p); 
+      persistData(); 
+      openPipeline(p.id);
+    }
+    
+    function deletePipeline(id) {
+      if(confirm('Delete this pipeline and all its nodes?')) { 
+        pipelines = pipelines.filter(p => p.id !== id); 
+        persistData(); 
+      }
+    }
+
+    function openPipeline(id) {
+      activePipelineId = id;
+      document.getElementById('pipeline-dashboard').style.display = 'none';
+      document.getElementById('pipeline-canvas-area').classList.add('active');
+      const p = pipelines.find(x => x.id === id);
+      document.getElementById('active-pipeline-title').textContent = p.title;
+      document.getElementById('active-pipeline-title').style.color = p.color;
+      
+      // Reset Camera
+      camX = 0; camY = 0; camZoom = 1;
+      applyCamera();
+      renderPipelineNodes();
+    }
+    
+    document.getElementById('btn-back-pipelines').onclick = () => {
+      activePipelineId = null;
+      document.getElementById('pipeline-canvas-area').classList.remove('active');
+      document.getElementById('pipeline-dashboard').style.display = 'grid';
+      renderPipelinesDashboard();
+    };
+    
+    document.getElementById('btn-reset-cam').onclick = () => { 
+      camX = 0; camY = 0; camZoom = 1; applyCamera(); 
+    };
+
+    function applyCamera() {
+      document.getElementById('pipeline-canvas-layer').style.transform = `translate(${camX}px, ${camY}px) scale(${camZoom})`;
+    }
+    
+    // Coordinate converter
+    function getCanvasCoords(clientX, clientY) {
+      const rect = document.getElementById('pipeline-board').getBoundingClientRect();
+      return {
+        x: (clientX - rect.left - camX) / camZoom,
+        y: (clientY - rect.top - camY) / camZoom
+      };
+    }
+
+    function renderPipelineNodes() {
+      if(!activePipelineId) return;
+      const p = pipelines.find(x => x.id === activePipelineId);
+      if(!p) return;
+
+      const svg = document.getElementById('pipeline-svg');
+      const container = document.getElementById('pipeline-nodes-container');
+      svg.innerHTML = ''; container.innerHTML = '';
+
+      // Draw Edges
+      p.edges.forEach(edge => {
+        const src = p.nodes.find(n => n.id === edge.source);
+        const tgt = p.nodes.find(n => n.id === edge.target);
+        if(!src || !tgt) return;
+        
+        const startX = src.x + 240; // width
+        const startY = src.y + 36;  // height/2
+        const endX = tgt.x;
+        const endY = tgt.y + 36;
+        
+        const isCompleted = src.status === 'completed' && tgt.status === 'completed';
+        const color = isCompleted ? '#238636' : '#30363d';
+        const curv = Math.max(Math.abs(endX - startX) / 2, 40);
+        const d = `M ${startX} ${startY} C ${startX+curv} ${startY}, ${endX-curv} ${endY}, ${endX} ${endY}`;
+        
+        const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        g.style.cursor = 'pointer'; g.style.pointerEvents = 'stroke';
+        g.onclick = (e) => { e.stopPropagation(); p.edges = p.edges.filter(x => x.id !== edge.id); persistData(); renderPipelineNodes(); };
+        
+        const hitPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        hitPath.setAttribute('d', d); hitPath.setAttribute('stroke', 'transparent'); hitPath.setAttribute('stroke-width', '25'); hitPath.setAttribute('fill', 'none');
+        
+        const visPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        visPath.setAttribute('d', d); visPath.setAttribute('stroke', color); visPath.setAttribute('stroke-width', '2.5'); visPath.setAttribute('fill', 'none');
+        
+        g.onmouseenter = () => visPath.setAttribute('stroke', '#ef4444');
+        g.onmouseleave = () => visPath.setAttribute('stroke', color);
+        
+        g.appendChild(hitPath); g.appendChild(visPath); svg.appendChild(g);
+      });
+
+      // Draw active dragging edge
+      if(drawingEdge) {
+        const curv = Math.max(Math.abs(drawingEdge.endX - drawingEdge.startX) / 2, 40);
+        const d = `M ${drawingEdge.startX} ${drawingEdge.startY} C ${drawingEdge.startX+curv} ${drawingEdge.startY}, ${drawingEdge.endX-curv} ${drawingEdge.endY}, ${drawingEdge.endX} ${drawingEdge.endY}`;
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('d', d); path.setAttribute('stroke', '#8b949e'); path.setAttribute('stroke-width', '2'); path.setAttribute('stroke-dasharray', '5,5'); path.setAttribute('fill', 'none');
+        svg.appendChild(path);
+      }
+
+      // Draw Nodes
+      p.nodes.forEach(node => {
+        const div = document.createElement('div');
+        div.className = `node-element ${node.status==='completed'?'completed':''} ${draggingNodeId===node.id?'is-dragging':''}`;
+        div.style.transform = `translate(${node.x}px, ${node.y}px)`;
+        
+        div.innerHTML = `
+          <div class="node-drag-handle"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg></div>
+          <div class="node-port node-port-in"><div class="node-port-inner"></div></div>
+          <button class="node-status-btn">
+            ${node.status==='completed' 
+              ? `<svg width="18" height="18" fill="#238636" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>` 
+              : `<svg width="18" height="18" fill="#8b949e" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>`}
+          </button>
+          <div class="node-content">
+            <input type="text" class="node-title-input" value="${node.title}" style="display:none;">
+            <div class="node-title-display" title="Click to edit">${node.title}</div>
+            <span class="node-priority-badge" style="color:var(--accent-neon); border-color:var(--border-subtle);">${node.priority||'Med'}</span>
+          </div>
+          <div class="node-port node-port-out"><div class="node-port-inner"></div></div>
+          <button class="task-btn delete" style="position:absolute; right:8px; top:8px; padding:2px;"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+        `;
+
+        // Interaction Listeners
+        const titleDisp = div.querySelector('.node-title-display');
+        const titleInp = div.querySelector('.node-title-input');
+        titleDisp.onclick = (e) => { e.stopPropagation(); titleDisp.style.display='none'; titleInp.style.display='block'; titleInp.focus(); };
+        titleInp.onblur = () => { node.title = titleInp.value || 'Task'; persistData(); renderPipelineNodes(); };
+        titleInp.onkeydown = (e) => { if(e.key === 'Enter') titleInp.blur(); };
+        
+        div.querySelector('.node-status-btn').onclick = (e) => { e.stopPropagation(); node.status = node.status==='completed'?'pending':'completed'; persistData(); renderPipelineNodes(); };
+        div.querySelector('.node-priority-badge').onclick = (e) => { e.stopPropagation(); const p = ['Low','Med','High']; node.priority = p[(p.indexOf(node.priority)+1)%3]; persistData(); renderPipelineNodes(); };
+        div.querySelector('.delete').onclick = (e) => { e.stopPropagation(); p.nodes = p.nodes.filter(x => x.id !== node.id); p.edges = p.edges.filter(x => x.source !== node.id && x.target !== node.id); persistData(); renderPipelineNodes(); };
+        
+        // Node Dragging Pointer Events
+        div.onpointerdown = (e) => {
+          if(e.target.closest('button, input, .node-port')) return;
+          e.stopPropagation();
+          draggingNodeId = node.id;
+          const coords = getCanvasCoords(e.clientX, e.clientY);
+          dragOffset = { x: coords.x - node.x, y: coords.y - node.y };
+          renderPipelineNodes(); // for z-index styling bump
+        };
+        
+        // Edge Drawing
+        const outPort = div.querySelector('.node-port-out');
+        outPort.onpointerdown = (e) => {
+          e.stopPropagation(); e.preventDefault();
+          const coords = getCanvasCoords(e.clientX, e.clientY);
+          drawingEdge = { sourceId: node.id, startX: node.x + 240, startY: node.y + 36, endX: coords.x, endY: coords.y };
+          renderPipelineNodes();
+        };
+        
+        container.appendChild(div);
+      });
+    }
+
+    document.getElementById('btn-add-node').onclick = () => {
+      const p = pipelines.find(x => x.id === activePipelineId);
+      if(p) {
+        // Drop node near center of current view
+        const centerX = (-camX + 300) / camZoom;
+        const centerY = (-camY + 200) / camZoom;
+        p.nodes.push({ id: 'n-'+Date.now(), title: 'New Plan Node', status: 'pending', priority: 'Med', x: centerX, y: centerY });
+        persistData(); renderPipelineNodes();
+      }
+    };
+
+    // Global Pan, Zoom & Drag Handlers on the Board
+    const board = document.getElementById('pipeline-board');
+    
+    // Desktop Wheel Zoom
+    board.addEventListener('wheel', (e) => {
+      if (!activePipelineId) return;
+      e.preventDefault();
+      const zoomDelta = e.deltaY > 0 ? 0.9 : 1.1;
+      const newZoom = Math.min(Math.max(0.2, camZoom * zoomDelta), 3);
+      
+      const rect = board.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+
+      camX = mouseX - (mouseX - camX) * (newZoom / camZoom);
+      camY = mouseY - (mouseY - camY) * (newZoom / camZoom);
+      camZoom = newZoom;
+      applyCamera();
+    }, { passive: false });
+
+    // Touch & Pointer global handling
+    board.addEventListener('touchstart', (e) => {
+      if(e.touches.length === 2) {
+        isPanning = false;
+        initialPinchDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+        initialCamZoom = camZoom;
+        lastTouchCenter = { x: (e.touches[0].clientX + e.touches[1].clientX)/2, y: (e.touches[0].clientY + e.touches[1].clientY)/2 };
+      } else if (e.touches.length === 1 && !draggingNodeId && !drawingEdge) {
+        if(e.target === board || e.target.closest('#pipeline-svg')) {
+          isPanning = true; lastPanX = e.touches[0].clientX; lastPanY = e.touches[0].clientY;
+        }
+      }
+    }, { passive: false });
+
+    window.addEventListener('pointermove', (e) => {
+      if(!activePipelineId) return;
+      
+      // Handle node dragging
+      if(draggingNodeId) {
+        const p = pipelines.find(x => x.id === activePipelineId);
+        const node = p.nodes.find(n => n.id === draggingNodeId);
+        if(node) {
+          const coords = getCanvasCoords(e.clientX, e.clientY);
+          node.x = coords.x - dragOffset.x;
+          node.y = coords.y - dragOffset.y;
+          renderPipelineNodes(); 
+        }
+      } 
+      // Handle edge drawing
+      else if (drawingEdge) {
+        const coords = getCanvasCoords(e.clientX, e.clientY);
+        drawingEdge.endX = coords.x; drawingEdge.endY = coords.y;
+        renderPipelineNodes();
+      }
+    });
+
+    board.addEventListener('touchmove', (e) => {
+      if(e.touches.length === 2) {
+        e.preventDefault();
+        const currentDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+        const newZoom = Math.min(Math.max(0.2, initialCamZoom * (currentDist / initialPinchDist)), 3);
+        const currentCenter = { x: (e.touches[0].clientX + e.touches[1].clientX)/2, y: (e.touches[0].clientY + e.touches[1].clientY)/2 };
+        
+        const rect = board.getBoundingClientRect();
+        const mouseX = currentCenter.x - rect.left;
+        const mouseY = currentCenter.y - rect.top;
+
+        camX = mouseX - (mouseX - camX) * (newZoom / camZoom) + (currentCenter.x - lastTouchCenter.x);
+        camY = mouseY - (mouseY - camY) * (newZoom / camZoom) + (currentCenter.y - lastTouchCenter.y);
+        camZoom = newZoom; lastTouchCenter = currentCenter;
+        applyCamera();
+      } else if (isPanning && e.touches.length === 1) {
+        e.preventDefault();
+        camX += e.touches[0].clientX - lastPanX; camY += e.touches[0].clientY - lastPanY;
+        lastPanX = e.touches[0].clientX; lastPanY = e.touches[0].clientY;
+        applyCamera();
+      }
+    }, { passive: false });
+
+    // Desktop Mouse Panning
+    board.addEventListener('pointerdown', (e) => {
+      if(e.pointerType === 'mouse' && !draggingNodeId && !drawingEdge && (e.target === board || e.target.closest('#pipeline-svg'))) {
+        isPanning = true; lastPanX = e.clientX; lastPanY = e.clientY;
+      }
+    });
+    window.addEventListener('pointermove', (e) => {
+      if(isPanning && e.pointerType === 'mouse') {
+        camX += e.clientX - lastPanX; camY += e.clientY - lastPanY;
+        lastPanX = e.clientX; lastPanY = e.clientY;
+        applyCamera();
+      }
+    });
+
+    window.addEventListener('pointerup', (e) => {
+      isPanning = false;
+      if (draggingNodeId) { draggingNodeId = null; persistData(); renderPipelineNodes(); }
+      
+      if (drawingEdge) {
+        // --- MAGNETIC EDGE SNAPPING ---
+        const p = pipelines.find(x => x.id === activePipelineId);
+        let targetNodeId = null;
+        let closestDist = Infinity;
+        const snapRadius = 60 / camZoom; // Generous drop area scaled by zoom
+        const dropCoords = getCanvasCoords(e.clientX, e.clientY);
+        
+        p.nodes.forEach(n => {
+          if (n.id === drawingEdge.sourceId) return;
+          const portX = n.x; // Input port is left edge
+          const portY = n.y + 36; // vertically centered
+          const dist = Math.hypot(dropCoords.x - portX, dropCoords.y - portY);
+          if (dist < snapRadius && dist < closestDist) {
+            closestDist = dist; targetNodeId = n.id;
+          }
+        });
+
+        if (targetNodeId) {
+          const exists = p.edges.some(x => (x.source===drawingEdge.sourceId && x.target===targetNodeId) || (x.target===drawingEdge.sourceId && x.source===targetNodeId));
+          if(!exists) p.edges.push({ id: 'edge-'+Date.now(), source: drawingEdge.sourceId, target: targetNodeId });
+        }
+        
+        drawingEdge = null; persistData(); renderPipelineNodes();
+      }
+    });
+
+    // --- 10. Forms, Modals & Navigation logic ---
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-view').forEach(view => view.classList.add('hidden'));
+      const activeView = document.getElementById(`view-${tabId}`);
+      if (activeView) activeView.classList.remove('hidden');
+
+      document.querySelectorAll('#desktop-tabs .nav-btn, #mobile-tabs .mobile-nav-btn').forEach(btn => {
+        if (btn.getAttribute('data-tab') === tabId) btn.classList.add('active');
+        else btn.classList.remove('active');
+      });
+
+      if (tabId === 'calendar') renderCalendar();
+      if (tabId === 'analytics') renderAnalytics();
+      if (tabId === 'timer') syncActiveSubjectUI();
+      if (tabId === 'pipelines') {
+        if (activePipelineId) renderPipelineNodes();
+        else renderPipelinesDashboard();
+      }
+    }
+
+    document.querySelectorAll('#desktop-tabs .nav-btn, #mobile-tabs .mobile-nav-btn').forEach(btn => {
+      btn.addEventListener('click', () => switchTab(btn.getAttribute('data-tab')));
+    });
+
+    // Modals
+    const modalTask = document.getElementById('modal-task');
+    const modalSubject = document.getElementById('modal-subject');
+    const formSubject = document.getElementById('form-subject');
+    const formTask = document.getElementById('form-task');
+    let selectedColor = '#00f0ff';
+
+    // Subject Logic
+    function openSubjectModal(editSub = null) {
+      document.getElementById('sub-id').value = editSub ? editSub.id : '';
+      document.getElementById('sub-name').value = editSub ? editSub.name : '';
+      document.getElementById('sub-tag').value = editSub ? editSub.tag : '';
+      document.getElementById('sub-goal').value = editSub ? editSub.goalMinutes : 60;
+      document.getElementById('modal-subject-title').textContent = editSub ? 'Edit Study Subject' : 'Add Study Subject';
+
+      selectedColor = editSub ? editSub.color : '#00f0ff';
+      document.querySelectorAll('.color-option').forEach(opt => {
+        opt.classList.toggle('selected', opt.getAttribute('data-color') === selectedColor);
+      });
+      modalSubject.classList.add('open');
+    }
+
+    document.getElementById('btn-add-subject').addEventListener('click', () => openSubjectModal());
+    document.getElementById('btn-cancel-subject').addEventListener('click', () => modalSubject.classList.remove('open'));
+
+    document.querySelectorAll('.color-option').forEach(opt => {
+      opt.addEventListener('click', () => {
+        document.querySelectorAll('.color-option').forEach(o => o.classList.remove('selected'));
+        opt.classList.add('selected');
+        selectedColor = opt.getAttribute('data-color');
+      });
+    });
+
+    formSubject.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const id = document.getElementById('sub-id').value;
+      const name = document.getElementById('sub-name').value.trim();
+      const tag = document.getElementById('sub-tag').value.trim() || 'Core';
+      const goalMinutes = parseInt(document.getElementById('sub-goal').value, 10) || 60;
+
+      if (!name) return;
+
+      if (id) {
+        subjects = subjects.map(s => s.id === id ? { ...s, name, tag, goalMinutes, color: selectedColor } : s);
+      } else {
+        const newSub = { id: 'sub-' + Date.now(), name, tag, goalMinutes, color: selectedColor };
+        subjects.push(newSub);
+        if (!activeSubjectId) activeSubjectId = newSub.id;
+      }
+      persistData();
+      populateTimerSubjectSelect();
+      modalSubject.classList.remove('open');
+    });
+
+    // Task Logic
+    document.getElementById('btn-add-task').addEventListener('click', () => openTaskModal());
+
+    function openTaskModal(t = null) {
+      document.getElementById('task-id').value = t ? t.id : '';
+      document.getElementById('task-title').value = t ? t.title : '';
+      document.getElementById('task-desc').value = t ? (t.desc || '') : '';
+      document.getElementById('task-type').value = t ? t.type : 'daily';
+      document.getElementById('modal-task-title').textContent = t ? 'Edit Task' : 'New Task';
+      modalTask.classList.add('open');
+    }
+
+    formTask.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const id = document.getElementById('task-id').value;
+      const title = document.getElementById('task-title').value.trim();
+      const desc = document.getElementById('task-desc').value.trim();
+      const type = document.getElementById('task-type').value;
+
+      if (id) {
+        tasks = tasks.map(t => t.id === id ? { ...t, title, desc, type } : t);
+      } else {
+        tasks.push({ id: 't-' + Date.now(), title, desc, type, dateString: selectedCalDayStr, completedOn: [], order: tasks.length });
+      }
+      persistData();
+      modalTask.classList.remove('open');
+    });
+
+    // Data Clear / Reset
+    const clearDataModal = document.getElementById('modal-clear-data');
+    document.getElementById('btn-open-clear-data').addEventListener('click', () => clearDataModal.classList.add('open'));
+    document.getElementById('btn-close-clear-data').addEventListener('click', () => clearDataModal.classList.remove('open'));
+
+    document.getElementById('btn-action-wipe-logs-only').addEventListener('click', () => {
+      studyLogs = [];
+      resetTimerState();
+      persistData();
+      clearDataModal.classList.remove('open');
+      playChime(440, 587.33);
+    });
+
+    document.getElementById('btn-action-wipe-all').addEventListener('click', () => {
+      localStorage.removeItem(sKey('subjects'));
+      localStorage.removeItem(sKey('logs'));
+      localStorage.removeItem(sKey('tasks'));
+      localStorage.removeItem(sKey('pipelines'));
+      localStorage.removeItem(sKey('pomo'));
+      clearActiveSessionState();
+
+      subjects = [
+        { id: 'sub-1', name: 'Core Subject', color: '#00f0ff', tag: 'Start', goalMinutes: 60 }
+      ];
+      studyLogs = [];
+      tasks = [];
+      pipelines = [];
+      activeSubjectId = subjects[0].id;
+      savedPomoMinutes = 25;
+      
+      updatePomoDuration(25);
+      resetTimerState();
+      persistData();
+      populateTimerSubjectSelect();
+      clearDataModal.classList.remove('open');
+      playChime(440, 330);
+    });
+
+    // JSON Sync Tools
+    const syncModal = document.getElementById('modal-sync');
+    document.getElementById('btn-open-sync').addEventListener('click', () => syncModal.classList.add('open'));
+    document.getElementById('btn-close-sync').addEventListener('click', () => syncModal.classList.remove('open'));
+
+    document.getElementById('btn-export-json').addEventListener('click', () => {
+      const backupData = {
+        exportDate: new Date().toISOString(),
+        version: "7.0",
+        profile: currentProfile,
+        pomoMinutes: savedPomoMinutes,
+        subjects: subjects,
+        studyLogs: studyLogs,
+        tasks: tasks,
+        pipelines: pipelines
+      };
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `aetherfocus_${currentProfile}_backup_${getTodayString()}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    });
+
+    document.getElementById('input-import-json').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const imported = JSON.parse(event.target.result);
+          if (Array.isArray(imported.subjects)) {
+            subjects = imported.subjects;
+            studyLogs = imported.studyLogs || [];
+            tasks = imported.tasks || [];
+            pipelines = imported.pipelines || [];
+            if (imported.pomoMinutes) updatePomoDuration(imported.pomoMinutes);
+            
+            // Clean active selection
+            activeSubjectId = subjects.length > 0 ? subjects[0].id : null;
+            activePipelineId = null; 
+
+            persistData();
+            populateTimerSubjectSelect();
+            syncModal.classList.remove('open');
+            switchTab('dashboard'); // reset view to avoid undefined active states
+            playChime(659.25, 880);
+          }
+        } catch (err) {
+          console.error('Error parsing JSON backup file', err);
+          alert('Could not parse the backup file. Is it valid JSON?');
+        }
+      };
+      reader.readAsText(file);
+      e.target.value = ''; // Reset file input
+    });
+
+    // Boot
+    window.addEventListener('DOMContentLoaded', loadProfileData);
+
+  </script>
+</body>
+</html>
