@@ -115,6 +115,7 @@
 
     .profile-switch {
       display: flex;
+      align-items: center;
       background: rgba(14, 20, 36, 0.8);
       border: 1px solid var(--border-subtle);
       border-radius: 0.6rem;
@@ -139,6 +140,24 @@
       background: var(--accent-neon);
       color: #04060a;
       box-shadow: 0 0 8px rgba(0, 240, 255, 0.3);
+    }
+
+    .profile-manage-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-dim);
+      cursor: pointer;
+      padding: 0.25rem;
+      border-radius: 0.4rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: 0.2s;
+    }
+
+    .profile-manage-btn:hover {
+      color: #fff;
+      background: rgba(255,255,255,0.1);
     }
 
     .nav-tabs {
@@ -1483,6 +1502,31 @@
       height: 1rem;
       accent-color: var(--accent-neon);
     }
+    
+    .profile-list-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .profile-list-item input {
+      background: transparent;
+      border: none;
+      color: #fff;
+      outline: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+      width: 60%;
+    }
+
+    .profile-list-item input:focus {
+      border-bottom: 1px solid var(--accent-neon);
+    }
 
     .mobile-nav {
       display: none;
@@ -1531,7 +1575,7 @@
       .timer-dial-wrapper { width: 230px; height: 230px; }
       .timer-digits { font-size: 2.7rem; }
       .checklist-item:hover .checklist-actions { opacity: 1; }
-      .checklist-actions { opacity: 1; }
+      .checklist-actions { opacity: 1; } /* Always show on mobile for accessibility */
       .hidden-mobile { display: none !important; }
       .pipeline-canvas-hint { display: none; }
     }
@@ -1555,10 +1599,15 @@
           <h1>AetherFocus</h1>
         </div>
       </div>
-      <!-- Offline Profile Switcher -->
-      <div class="profile-switch" title="Switch User Profile">
-        <button class="profile-btn active" data-profile="M">M</button>
-        <button class="profile-btn" data-profile="H">H</button>
+      <!-- Dynamic Offline Profile Switcher -->
+      <div class="profile-switch" title="Manage Profiles">
+        <div id="profile-buttons-container" style="display: flex; gap: 0.15rem;"></div>
+        <button class="profile-manage-btn" onclick="openProfileManager()" title="Edit Profiles">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/>
+            <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
+          </svg>
+        </button>
       </div>
     </div>
 
@@ -1906,6 +1955,21 @@
     </section>
   </main>
 
+  <!-- Profile Management Modal -->
+  <div class="modal-backdrop" id="modal-manage-profiles">
+    <div class="modal-box">
+      <h3 style="font-size: 1.1rem; font-weight: 800; color: #fff; margin-bottom: 1rem;">Manage Profiles</h3>
+      <div id="profile-list-container" style="max-height: 200px; overflow-y: auto; margin-bottom: 1rem;"></div>
+      <div style="display: flex; gap: 0.5rem;">
+        <input type="text" id="new-profile-input" class="form-input" placeholder="New profile name (e.g. Work)">
+        <button class="btn-primary" onclick="addProfile()">Add</button>
+      </div>
+      <div style="display: flex; justify-content: flex-end; margin-top: 1.5rem;">
+        <button type="button" class="btn-secondary" onclick="closeModal('modal-manage-profiles')">Close</button>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL: ADD / EDIT SUBJECT -->
   <div class="modal-backdrop" id="modal-subject">
     <div class="modal-box">
@@ -2097,7 +2161,7 @@
 
   <script>
     const swCode = `
-      const CACHE_NAME = 'aether-focus-v3.2.1';
+      const CACHE_NAME = 'aether-focus-v3.2.1-profiles';
       self.addEventListener('install', (e) => self.skipWaiting());
       self.addEventListener('activate', (e) => e.waitUntil(clients.claim()));
       self.addEventListener('fetch', (e) => {
@@ -2342,8 +2406,12 @@
       }
     ];
 
-    // Profile State
-    let currentProfile = localStorage.getItem('aether_profile') || 'M';
+    /* Dynamic Profile Engine */
+    let profiles = JSON.parse(localStorage.getItem('aether_profiles') || '["Main"]');
+    let currentProfile = localStorage.getItem('aether_profile') || profiles[0];
+    if (!profiles.includes(currentProfile)) {
+      currentProfile = profiles[0];
+    }
 
     // Helper to namespace all localStorage keys to the active profile
     function sKey(key) {
@@ -2357,6 +2425,118 @@
     let pipelines = []; // Project Pipelines
     let savedPomoMinutes = 25;
 
+    function renderProfileHeader() {
+      const container = document.getElementById('profile-buttons-container');
+      container.innerHTML = '';
+      profiles.slice(0, 3).forEach(p => {
+        const btn = document.createElement('button');
+        btn.className = `profile-btn ${p === currentProfile ? 'active' : ''}`;
+        btn.textContent = p.substring(0, 2).toUpperCase();
+        btn.title = `Switch to ${p}`;
+        btn.onclick = () => switchProfile(p);
+        container.appendChild(btn);
+      });
+    }
+
+    function switchProfile(pName) {
+      if (pName === currentProfile) return;
+      if (isRunning) pauseTimer();
+      currentProfile = pName;
+      localStorage.setItem('aether_profile', currentProfile);
+      loadProfileData();
+    }
+
+    function openProfileManager() {
+      const list = document.getElementById('profile-list-container');
+      list.innerHTML = '';
+      profiles.forEach(p => {
+        const item = document.createElement('div');
+        item.className = 'profile-list-item';
+        
+        const input = document.createElement('input');
+        input.value = p;
+        input.onchange = (e) => renameProfile(p, e.target.value.trim());
+        
+        const delBtn = document.createElement('button');
+        delBtn.className = 'icon-btn';
+        delBtn.style = 'width: 1.8rem; height: 1.8rem; border-color: rgba(239,68,68,0.3); color: var(--danger);';
+        delBtn.innerHTML = '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6"/></svg>';
+        
+        let confirmTimeout;
+        delBtn.onclick = () => {
+          if (profiles.length === 1) {
+            return promptUser("Cannot Delete", "You cannot delete your only profile.");
+          }
+          if (delBtn.textContent === "Sure?") {
+            clearTimeout(confirmTimeout);
+            deleteProfile(p);
+          } else {
+            delBtn.innerHTML = "<span style='font-size:0.6rem; font-weight:bold;'>Sure?</span>";
+            confirmTimeout = setTimeout(() => {
+               delBtn.innerHTML = '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6"/></svg>';
+            }, 2500);
+          }
+        };
+
+        item.appendChild(input);
+        item.appendChild(delBtn);
+        list.appendChild(item);
+      });
+      openModal('modal-manage-profiles');
+    }
+
+    function addProfile() {
+      const input = document.getElementById('new-profile-input');
+      const name = input.value.trim();
+      if (!name || profiles.includes(name)) return;
+      profiles.push(name);
+      localStorage.setItem('aether_profiles', JSON.stringify(profiles));
+      input.value = '';
+      openProfileManager();
+      renderProfileHeader();
+    }
+
+    function renameProfile(oldName, newName) {
+      if (!newName || newName === oldName || profiles.includes(newName)) {
+        return openProfileManager();
+      }
+      profiles = profiles.map(p => p === oldName ? newName : p);
+      localStorage.setItem('aether_profiles', JSON.stringify(profiles));
+      
+      const keysToMigrate = ['aether_subjects', 'aether_logs', 'aether_tasks', 'aether_task_completions', 'aether_pipelines', 'aether_pomo_minutes', 'aether_active_session'];
+      keysToMigrate.forEach(key => {
+        const data = localStorage.getItem(`${oldName}_${key}`);
+        if (data) { 
+          localStorage.setItem(`${newName}_${key}`, data); 
+          localStorage.removeItem(`${oldName}_${key}`); 
+        }
+      });
+      
+      if (currentProfile === oldName) {
+        currentProfile = newName;
+        localStorage.setItem('aether_profile', currentProfile);
+      }
+      openProfileManager();
+      renderProfileHeader();
+    }
+
+    function deleteProfile(name) {
+      profiles = profiles.filter(p => p !== name);
+      localStorage.setItem('aether_profiles', JSON.stringify(profiles));
+      
+      const keysToDelete = ['aether_subjects', 'aether_logs', 'aether_tasks', 'aether_task_completions', 'aether_pipelines', 'aether_pomo_minutes', 'aether_active_session'];
+      keysToDelete.forEach(key => {
+        localStorage.removeItem(`${name}_${key}`);
+      });
+      
+      if (currentProfile === name) { 
+        switchProfile(profiles[0]); 
+      } else { 
+        openProfileManager(); 
+        renderProfileHeader(); 
+      }
+    }
+
     function persistData() {
       localStorage.setItem(sKey('aether_subjects'), JSON.stringify(subjects));
       localStorage.setItem(sKey('aether_logs'), JSON.stringify(studyLogs));
@@ -2367,7 +2547,7 @@
       
       updateOverviewStats();
       renderSubjectsList();
-      renderCalendar(); // This also triggers inspectCalendarDate to update checklist
+      renderCalendar(); 
       renderAnalytics();
       
       const pipelineCanvasActive = document.getElementById('pipelines-active').classList.contains('active') || !document.getElementById('pipelines-active').classList.contains('hidden');
@@ -2423,38 +2603,13 @@
         activeSubjectId = subjects.length > 0 ? subjects[0].id : null;
       }
 
-      // Restore session state for this user
+      renderProfileHeader();
       restoreActiveSessionState();
-
-      // UI Re-render
+      
       updatePomoDuration(savedPomoMinutes);
       populateTimerSubjectSelect();
-      updateOverviewStats();
-      renderSubjectsList();
-      renderCalendar();
-      renderAnalytics();
-      
-      // Sync Profile Buttons
-      document.querySelectorAll('.profile-btn').forEach(b => {
-        b.classList.toggle('active', b.getAttribute('data-profile') === currentProfile);
-      });
+      persistData();
     }
-
-    document.querySelectorAll('.profile-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const newProfile = btn.getAttribute('data-profile');
-        if (newProfile === currentProfile) return;
-
-        // Vital: Always pause active timer before swapping to save the delta to old profile
-        if (isRunning) pauseTimer();
-        
-        currentProfile = newProfile;
-        localStorage.setItem('aether_profile', currentProfile);
-        
-        // Full reload of data context
-        loadProfileData();
-      });
-    });
 
     let timerMode = 'stopwatch'; // 'stopwatch' | 'pomodoro'
     let pomoStage = 'focus';     // 'focus' | 'shortBreak' | 'longBreak'
@@ -2505,7 +2660,6 @@
     function restoreActiveSessionState() {
       const raw = localStorage.getItem(sKey('aether_active_session'));
       if (!raw) {
-        // If clean state, reset completely for safety
         resetTimerState();
         return;
       }
@@ -2538,7 +2692,7 @@
 
         populateTimerSubjectSelect();
 
-        // If it was running when user left or refreshed, calculate exact elapsed time!
+        // If it was running when user left or refreshed, calculate exact elapsed time
         if (isRunning && startTimestamp) {
           const delta = Math.floor((Date.now() - startTimestamp) / 1000);
           totalElapsedSeconds = accumulatedSeconds + Math.max(0, delta);
@@ -3307,7 +3461,7 @@
       persistData();
     }
 
-    // PIPELINE NODE EDITOR LOGIC 
+    // PIPELINE NODE EDITOR LOGIC
     let activePipelineId = null;
     let draggedGHNode = null; 
     let ghNodeOffset = { x: 0, y: 0 };
@@ -3993,7 +4147,7 @@
     document.getElementById('btn-export-json').addEventListener('click', () => {
       const backupData = {
         exportDate: new Date().toISOString(),
-        version: "3.2.1",
+        version: "3.2.1-profiles",
         profile: currentProfile,
         pomoMinutes: savedPomoMinutes,
         subjects: subjects,
