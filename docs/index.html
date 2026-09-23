@@ -907,6 +907,26 @@
       box-shadow: 0 0 12px var(--accent-glow); 
     }
 
+    .cal-day-cell.is-today {
+      box-shadow: inset 0 0 0 1.5px #fff;
+    }
+
+    .cal-day-cell span { pointer-events: none; }
+
+    .cal-task-dot {
+      position: absolute;
+      bottom: 3px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .cal-task-dot.dot-pending { background: #fbbf24; box-shadow: 0 0 4px rgba(251,191,36,0.7); }
+    .cal-task-dot.dot-done { background: var(--break-green); box-shadow: 0 0 4px rgba(52,211,153,0.7); }
+
     .heat-lvl-0 { background: rgba(14, 20, 36, 0.5); }
     .heat-lvl-1 { background: rgba(0, 240, 255, 0.15); border-color: rgba(0, 240, 255, 0.25); color: #7dd3fc; }
     .heat-lvl-2 { background: rgba(0, 240, 255, 0.35); border-color: rgba(0, 240, 255, 0.5); color: #e0f2fe; }
@@ -934,22 +954,92 @@
       padding: 0.75rem; 
       border-radius: 0.5rem; 
       border: 1px solid rgba(255,255,255,0.05); 
-      transition: 0.2s; 
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s; 
       margin-bottom: 0.5rem; 
+      touch-action: pan-y;
+    }
+
+    .checklist-task-item.done {
+      background: rgba(52, 211, 153, 0.05);
+      border-color: rgba(52, 211, 153, 0.15);
     }
 
     .checklist-task-item.dragging { 
-      opacity: 0.5; 
       border-color: var(--accent-neon); 
+      box-shadow: 0 10px 24px rgba(0,0,0,0.5), 0 0 0 1px var(--accent-neon); 
+      background: var(--bg-card-hover);
+      cursor: grabbing;
     }
 
     .checklist-drag-handle { 
       cursor: grab; 
       color: var(--text-dim); 
+      touch-action: none;
+      padding: 0.5rem 0.25rem;
+      margin: -0.5rem -0.25rem;
+      display: flex;
+      align-items: center;
+      border-radius: 0.35rem;
+      transition: color 0.2s, background 0.2s;
+    }
+
+    .checklist-drag-handle:hover {
+      color: var(--accent-neon);
+      background: rgba(0, 240, 255, 0.08);
     }
 
     .checklist-drag-handle:active { 
       cursor: grabbing; 
+      color: var(--accent-neon);
+    }
+
+    .checklist-checkbox {
+      transition: transform 0.15s ease;
+    }
+
+    .checklist-checkbox:active {
+      transform: scale(0.85);
+    }
+
+    .checklist-empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 1.75rem 1rem;
+      color: var(--text-dim);
+      text-align: center;
+    }
+
+    .checklist-empty-state svg {
+      opacity: 0.5;
+    }
+
+    .checklist-empty-state span {
+      font-size: 0.8rem;
+    }
+
+    .checklist-complete-banner {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(52, 211, 153, 0.1);
+      border: 1px solid rgba(52, 211, 153, 0.3);
+      color: var(--break-green);
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 0.55rem 0.8rem;
+      border-radius: 0.6rem;
+      margin-bottom: 0.85rem;
+    }
+
+    #btn-clear-completed {
+      transition: all 0.2s ease;
+    }
+
+    #btn-clear-completed:hover {
+      background: rgba(239, 68, 68, 0.15) !important;
     }
 
     .checklist-task-num { 
@@ -1716,6 +1806,7 @@
         <div class="calendar-header">
           <div><h2 class="section-title">Interactive Study Heatmap</h2></div>
           <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <button class="cal-nav-btn" id="cal-today" title="Jump to today" style="font-size: 0.72rem; font-weight: 700;">Today</button>
             <button class="cal-nav-btn" id="cal-prev">&lt;</button>
             <span id="cal-month-label" class="font-mono text-neon" style="font-size: 0.85rem; font-weight: 700; min-width: 110px; text-align: center;"></span>
             <button class="cal-nav-btn" id="cal-next">&gt;</button>
@@ -1733,13 +1824,21 @@
         </div>
         
         <div class="day-details-panel" id="checklist-panel" style="margin-top: 1.25rem;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
             <h3 class="font-mono" style="font-size: 0.9rem; color: #fff;">Daily Checklist</h3>
-            <span id="checklist-stats-text" class="font-mono text-neon" style="font-size: 0.85rem; font-weight: 700;">0/0 Completed</span>
+            <div style="display: flex; align-items: center; gap: 0.6rem;">
+              <button id="btn-clear-completed" class="hidden" style="background: transparent; border: 1px solid rgba(239,68,68,0.3); color: #f87171; font-size: 0.7rem; font-weight: 600; padding: 0.3rem 0.6rem; border-radius: 0.5rem; cursor: pointer;">Clear completed</button>
+              <span id="checklist-stats-text" class="font-mono text-neon" style="font-size: 0.85rem; font-weight: 700;">0/0 Completed</span>
+            </div>
           </div>
           
           <div class="checklist-progress-bg">
             <div class="checklist-progress-fill" id="checklist-progress" style="width: 0%;"></div>
+          </div>
+
+          <div id="checklist-complete-banner" class="checklist-complete-banner hidden">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            All tasks complete for this day
           </div>
           
           <div id="checklist-tasks" style="display: flex; flex-direction: column; min-height: 20px; padding-bottom: 0.5rem;"></div>
@@ -2764,9 +2863,15 @@
           else hClass = 'heat-lvl-4'; 
         }
         
+        const dayTasks = checklists[dayStr] || [];
+        const hasTasks = dayTasks.length > 0;
+        const allTasksDone = hasTasks && dayTasks.every(t => t.done);
+        const isToday = dayStr === getTodayString();
+
         const cell = document.createElement('div'); 
-        cell.className = `cal-day-cell ${hClass} ${selectedCalDayStr === dayStr ? 'is-selected' : ''}`; 
-        cell.textContent = day;
+        cell.className = `cal-day-cell ${hClass} ${selectedCalDayStr === dayStr ? 'is-selected' : ''} ${isToday ? 'is-today' : ''}`; 
+        cell.title = hasTasks ? `${dayTasks.filter(t=>t.done).length}/${dayTasks.length} tasks done` : '';
+        cell.innerHTML = `<span>${day}</span>${hasTasks ? `<span class="cal-task-dot ${allTasksDone ? 'dot-done' : 'dot-pending'}"></span>` : ''}`;
         cell.onclick = () => { 
           selectedCalDayStr = dayStr; 
           renderCalendar(); 
@@ -2775,6 +2880,12 @@
       }
       inspectCalendarDate(selectedCalDayStr);
     }
+
+    document.getElementById('cal-today').addEventListener('click', () => {
+      currentCalDate = new Date();
+      selectedCalDayStr = getTodayString();
+      renderCalendar();
+    });
 
     document.getElementById('cal-prev').addEventListener('click', () => { 
       currentCalDate.setMonth(currentCalDate.getMonth() - 1); 
@@ -2786,8 +2897,18 @@
       renderCalendar(); 
     });
 
+    function getRelativeDayLabel(dateStr) {
+      const diffDays = Math.round((new Date(dateStr + 'T00:00:00') - new Date(getTodayString() + 'T00:00:00')) / 86400000);
+      if (diffDays === 0) return 'Today';
+      if (diffDays === -1) return 'Yesterday';
+      if (diffDays === 1) return 'Tomorrow';
+      return null;
+    }
+
     function inspectCalendarDate(dateStr) {
-      document.getElementById('cal-inspect-date').textContent = new Date(dateStr + 'T00:00:00').toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+      const relLabel = getRelativeDayLabel(dateStr);
+      const fullLabel = new Date(dateStr + 'T00:00:00').toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+      document.getElementById('cal-inspect-date').textContent = relLabel ? `${relLabel} · ${fullLabel}` : fullLabel;
       const dayLogs = studyLogs.filter(l => l.dateString === dateStr);
       document.getElementById('cal-inspect-total').textContent = formatHours(dayLogs.reduce((a,c) => a+c.duration, 0));
       
@@ -2816,10 +2937,15 @@
       renderChecklist(dateStr);
     }
 
-    let draggedChecklistTaskIndex = null;
-    
+    // Pointer-based drag reorder state (replaces the old HTML5 drag/drop, which
+    // never reliably fires touch events on mobile browsers).
+    let checklistDrag = null; // { pointerId, itemEl, handleEl, container, startClientY }
+
     function renderChecklist(dateStr) {
       const tasks = checklists[dateStr] || [];
+      // Defensive: legacy/imported tasks may be missing an id.
+      tasks.forEach(t => { if (!t.id) t.id = generateId(); });
+
       const container = document.getElementById('checklist-tasks'); 
       container.innerHTML = '';
       
@@ -2829,12 +2955,25 @@
       
       document.getElementById('checklist-stats-text').textContent = `${completed}/${total} Completed`;
       document.getElementById('checklist-progress').style.width = `${progress}%`;
+      document.getElementById('checklist-progress').style.background = (total > 0 && completed === total) ? 'var(--break-green)' : 'var(--accent-neon)';
+
+      document.getElementById('btn-clear-completed').classList.toggle('hidden', completed === 0);
+      document.getElementById('checklist-complete-banner').classList.toggle('hidden', !(total > 0 && completed === total));
+
+      if (total === 0) {
+        container.innerHTML = `
+          <div class="checklist-empty-state">
+            <svg width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <span>No tasks yet for this day. Add one below.</span>
+          </div>
+        `;
+        return;
+      }
 
       tasks.forEach((t, index) => {
         const item = document.createElement('div'); 
         item.className = `checklist-task-item ${t.done ? 'done' : ''}`; 
-        item.draggable = true; 
-        item.dataset.index = index;
+        item.dataset.taskId = t.id;
         
         item.innerHTML = `
           <div class="checklist-drag-handle" title="Drag to reorder">
@@ -2851,18 +2990,20 @@
         `;
 
         item.querySelector('.checklist-checkbox').addEventListener('change', (e) => { 
-          tasks[index].done = e.target.checked; 
+          const task = (checklists[dateStr] || []).find(x => x.id === t.id);
+          if (task) task.done = e.target.checked; 
           persistData(); 
           renderChecklist(dateStr); 
         });
         
         const textEl = item.querySelector('.checklist-task-text');
         textEl.addEventListener('blur', () => { 
+          const task = (checklists[dateStr] || []).find(x => x.id === t.id);
           if(textEl.textContent.trim()) { 
-            tasks[index].text = textEl.textContent.trim(); 
+            if (task) task.text = textEl.textContent.trim(); 
             persistData(); 
-          } else { 
-            textEl.textContent = tasks[index].text; 
+          } else if (task) { 
+            textEl.textContent = task.text; 
           } 
         });
         
@@ -2874,39 +3015,95 @@
         });
         
         item.querySelector('.del-task-btn').addEventListener('click', () => { 
-          tasks.splice(index, 1); 
+          checklists[dateStr] = (checklists[dateStr] || []).filter(x => x.id !== t.id); 
           persistData(); 
           renderChecklist(dateStr); 
         });
 
-        item.addEventListener('dragstart', () => { 
-          draggedChecklistTaskIndex = index; 
-          item.classList.add('dragging'); 
-        });
-        
-        item.addEventListener('dragend', () => { 
-          item.classList.remove('dragging'); 
-          draggedChecklistTaskIndex = null; 
-        });
-        
-        item.addEventListener('dragover', e => e.preventDefault());
-        
-        item.addEventListener('drop', e => { 
-          e.preventDefault(); 
-          if (draggedChecklistTaskIndex !== null && draggedChecklistTaskIndex !== index) { 
-            const moved = tasks.splice(draggedChecklistTaskIndex, 1)[0]; 
-            tasks.splice(index, 0, moved); 
-            persistData(); 
-            renderChecklist(dateStr); 
-          } 
-        });
+        attachChecklistDragHandlers(item, container, dateStr);
         
         container.appendChild(item);
       });
-      container.addEventListener('dragover', e => e.preventDefault());
     }
 
-    document.getElementById('btn-add-checklist-task').addEventListener('click', () => {
+    function attachChecklistDragHandlers(item, container, dateStr) {
+      const handle = item.querySelector('.checklist-drag-handle');
+
+      handle.addEventListener('pointerdown', (e) => {
+        if (e.button !== undefined && e.button !== 0) return;
+        e.preventDefault();
+        try { handle.setPointerCapture(e.pointerId); } catch (err) {}
+        checklistDrag = { pointerId: e.pointerId, itemEl: item, handleEl: handle, container, startClientY: e.clientY };
+        item.classList.add('dragging');
+        item.style.position = 'relative';
+        item.style.zIndex = '10';
+      });
+
+      handle.addEventListener('pointermove', (e) => {
+        if (!checklistDrag || checklistDrag.itemEl !== item) return;
+        const deltaY = e.clientY - checklistDrag.startClientY;
+        item.style.transform = `translateY(${deltaY}px)`;
+
+        const itemRect = item.getBoundingClientRect();
+        const itemMidY = itemRect.top + itemRect.height / 2;
+        const siblings = Array.from(container.children).filter(el => el !== item);
+
+        for (const sib of siblings) {
+          const sibRect = sib.getBoundingClientRect();
+          const sibMidY = sibRect.top + sibRect.height / 2;
+          const itemIsBefore = !!(item.compareDocumentPosition(sib) & Node.DOCUMENT_POSITION_FOLLOWING);
+
+          if (itemIsBefore && itemMidY > sibMidY) {
+            // dragged item has moved down past this later sibling
+            container.insertBefore(item, sib.nextSibling);
+            checklistDrag.startClientY = e.clientY;
+            item.style.transform = 'translateY(0px)';
+            break;
+          } else if (!itemIsBefore && itemMidY < sibMidY) {
+            // dragged item has moved up past this earlier sibling
+            container.insertBefore(item, sib);
+            checklistDrag.startClientY = e.clientY;
+            item.style.transform = 'translateY(0px)';
+            break;
+          }
+        }
+      });
+
+      const endChecklistDrag = (e) => {
+        if (!checklistDrag || checklistDrag.itemEl !== item) return;
+        try { handle.releasePointerCapture(checklistDrag.pointerId); } catch (err) {}
+        item.style.transform = '';
+        item.style.zIndex = '';
+        item.style.position = '';
+        item.classList.remove('dragging');
+        checklistDrag = null;
+
+        const newOrderIds = Array.from(container.children).map(el => el.dataset.taskId);
+        const currentTasks = checklists[dateStr] || [];
+        const reordered = newOrderIds.map(id => currentTasks.find(t => t.id === id)).filter(Boolean);
+        if (reordered.length === currentTasks.length) {
+          checklists[dateStr] = reordered;
+          persistData(); 
+          renderChecklist(dateStr);
+        }
+      };
+
+      handle.addEventListener('pointerup', endChecklistDrag);
+      handle.addEventListener('pointercancel', endChecklistDrag);
+    }
+
+    document.getElementById('btn-clear-completed').addEventListener('click', async () => {
+      const remaining = (checklists[selectedCalDayStr] || []).filter(t => !t.done).length;
+      const removing = (checklists[selectedCalDayStr] || []).length - remaining;
+      const res = await promptUser('Clear Completed', `Remove ${removing} completed task${removing === 1 ? '' : 's'} from this day?`);
+      if (res) {
+        checklists[selectedCalDayStr] = (checklists[selectedCalDayStr] || []).filter(t => !t.done);
+        persistData();
+        renderChecklist(selectedCalDayStr);
+      }
+    });
+
+    function addChecklistTaskFromInput() {
       const input = document.getElementById('checklist-input'); 
       const text = input.value.trim(); 
       if (!text) return;
@@ -2919,6 +3116,16 @@
       input.value = ''; 
       persistData(); 
       renderChecklist(selectedCalDayStr);
+      input.focus();
+    }
+
+    document.getElementById('btn-add-checklist-task').addEventListener('click', addChecklistTaskFromInput);
+
+    document.getElementById('checklist-input').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        addChecklistTaskFromInput();
+      }
     });
 
     /* ================== PIPELINE NODE EDITOR (with mobile zoom/pan) ================== */
