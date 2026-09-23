@@ -1,0 +1,3568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>AetherFocus - Precision AI Study Engine</title>
+  <meta name="theme-color" content="#05070c">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="AetherFocus">
+  
+  <style>
+    :root {
+      --bg-primary: #04060a;
+      --bg-surface: #090d18;
+      --bg-card: #0e1424;
+      --bg-card-hover: #131b30;
+      --border-subtle: rgba(0, 240, 255, 0.12);
+      --border-active: rgba(0, 240, 255, 0.45);
+      --accent-neon: #00f0ff;
+      --accent-blue: #0070f3;
+      --accent-indigo: #6366f1;
+      --accent-glow: rgba(0, 240, 255, 0.35);
+      --text-main: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-dim: #64748b;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --success: #10b981;
+      --break-green: #34d399;
+      --break-purple: #c084fc;
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+    }
+
+    * { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+      -webkit-tap-highlight-color: transparent; 
+    }
+
+    body { 
+      background-color: var(--bg-primary); 
+      color: var(--text-main); 
+      font-family: var(--font-family); 
+      line-height: 1.5; 
+      min-height: 100vh; 
+      display: flex; 
+      flex-direction: column; 
+      overflow-x: hidden; 
+    }
+
+    body::before { 
+      content: ''; 
+      position: fixed; 
+      top: -160px; 
+      right: -120px; 
+      width: 500px; 
+      height: 500px; 
+      background: radial-gradient(circle, rgba(0, 240, 255, 0.08) 0%, transparent 70%); 
+      pointer-events: none; 
+      z-index: 0; 
+    }
+
+    header { 
+      position: sticky; 
+      top: 0; 
+      z-index: 50; 
+      background: rgba(9, 13, 24, 0.88); 
+      backdrop-filter: blur(16px); 
+      -webkit-backdrop-filter: blur(16px); 
+      border-bottom: 1px solid var(--border-subtle); 
+      padding: 0.75rem 1.25rem; 
+      display: flex; 
+      align-items: center; 
+      justify-content: space-between; 
+      gap: 0.75rem; 
+    }
+
+    .brand-group { 
+      display: flex; 
+      align-items: center; 
+      gap: 0.75rem; 
+    }
+
+    .brand-icon { 
+      width: 2.25rem; 
+      height: 2.25rem; 
+      border-radius: 0.75rem; 
+      background: linear-gradient(135deg, var(--accent-neon), var(--accent-blue)); 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      box-shadow: 0 0 16px var(--accent-glow); 
+    }
+
+    .brand-icon svg { 
+      width: 1.25rem; 
+      height: 1.25rem; 
+      color: #04060a; 
+    }
+
+    .brand-text h1 { 
+      font-size: 1.15rem; 
+      font-weight: 800; 
+      letter-spacing: -0.02em; 
+      background: linear-gradient(90deg, #ffffff, var(--accent-neon)); 
+      -webkit-background-clip: text; 
+      -webkit-text-fill-color: transparent; 
+    }
+
+    .profile-switch { 
+      display: flex; 
+      align-items: center; 
+      background: rgba(14, 20, 36, 0.8); 
+      border: 1px solid var(--border-subtle); 
+      border-radius: 0.6rem; 
+      padding: 0.15rem; 
+      gap: 0.15rem; 
+      margin-left: 0.5rem; 
+    }
+
+    .profile-btn { 
+      background: transparent; 
+      border: none; 
+      color: var(--text-secondary); 
+      padding: 0.25rem 0.6rem; 
+      border-radius: 0.45rem; 
+      font-size: 0.75rem; 
+      font-weight: 700; 
+      cursor: pointer; 
+      transition: all 0.2s ease; 
+    }
+
+    .profile-btn.active { 
+      background: var(--accent-neon); 
+      color: #04060a; 
+      box-shadow: 0 0 8px rgba(0, 240, 255, 0.3); 
+    }
+
+    .profile-manage-btn { 
+      background: transparent; 
+      border: none; 
+      color: var(--text-dim); 
+      cursor: pointer; 
+      padding: 0.25rem; 
+      border-radius: 0.4rem; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      transition: 0.2s; 
+    }
+
+    .profile-manage-btn:hover { 
+      color: #fff; 
+      background: rgba(255,255,255,0.1); 
+    }
+
+    .nav-tabs { 
+      display: flex; 
+      background: rgba(14, 20, 36, 0.8); 
+      border: 1px solid var(--border-subtle); 
+      border-radius: 0.75rem; 
+      padding: 0.25rem; 
+      gap: 0.25rem; 
+    }
+
+    .nav-btn { 
+      background: transparent; 
+      border: none; 
+      color: var(--text-secondary); 
+      padding: 0.5rem 0.9rem; 
+      border-radius: 0.5rem; 
+      font-size: 0.8rem; 
+      font-weight: 600; 
+      cursor: pointer; 
+      display: flex; 
+      align-items: center; 
+      gap: 0.4rem; 
+      transition: all 0.2s ease; 
+    }
+
+    .nav-btn.active { 
+      background: rgba(0, 240, 255, 0.15); 
+      color: var(--accent-neon); 
+      border: 1px solid rgba(0, 240, 255, 0.35); 
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.15); 
+    }
+
+    .header-actions { 
+      display: flex; 
+      align-items: center; 
+      gap: 0.45rem; 
+    }
+
+    .icon-btn { 
+      background: var(--bg-card); 
+      border: 1px solid var(--border-subtle); 
+      color: var(--text-secondary); 
+      width: 2.25rem; 
+      height: 2.25rem; 
+      border-radius: 0.65rem; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      cursor: pointer; 
+      transition: all 0.2s ease; 
+    }
+
+    .icon-btn:hover { 
+      color: var(--accent-neon); 
+      border-color: var(--accent-neon); 
+      transform: translateY(-1px); 
+    }
+
+    .btn-primary { 
+      background: linear-gradient(135deg, var(--accent-neon), var(--accent-blue)); 
+      color: #04060a; 
+      font-weight: 700; 
+      font-size: 0.8rem; 
+      padding: 0.55rem 1rem; 
+      border-radius: 0.65rem; 
+      border: none; 
+      cursor: pointer; 
+      display: flex; 
+      align-items: center; 
+      gap: 0.4rem; 
+      box-shadow: 0 0 16px var(--accent-glow); 
+      transition: all 0.2s ease; 
+    }
+
+    .btn-primary:hover { 
+      box-shadow: 0 0 24px rgba(0, 240, 255, 0.5); 
+      transform: translateY(-1px); 
+    }
+
+    .btn-secondary { 
+      background: var(--bg-card); 
+      border: 1px solid var(--border-subtle); 
+      color: var(--text-main); 
+      font-weight: 600; 
+      font-size: 0.8rem; 
+      padding: 0.55rem 1rem; 
+      border-radius: 0.65rem; 
+      cursor: pointer; 
+      display: flex; 
+      align-items: center; 
+      gap: 0.4rem; 
+      transition: all 0.2s ease; 
+    }
+
+    .btn-secondary:hover { 
+      border-color: var(--accent-neon); 
+      color: var(--accent-neon); 
+    }
+
+    main { 
+      flex: 1; 
+      max-width: 1200px; 
+      width: 100%; 
+      margin: 0 auto; 
+      padding: 1.25rem; 
+      position: relative; 
+      z-index: 1; 
+      display: flex; 
+      flex-direction: column; 
+    }
+
+    .banner-engine { 
+      background: linear-gradient(90deg, #0d1527, #09101f); 
+      border: 1px solid var(--border-subtle); 
+      border-radius: 1rem; 
+      padding: 0.9rem 1.25rem; 
+      margin-bottom: 1.25rem; 
+      display: flex; 
+      align-items: center; 
+      justify-content: space-between; 
+      flex-wrap: wrap; 
+      gap: 0.75rem; 
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4); 
+    }
+
+    .engine-pills { 
+      display: flex; 
+      align-items: center; 
+      gap: 0.5rem; 
+      flex-wrap: wrap; 
+    }
+
+    .chip-badge { 
+      display: inline-flex; 
+      align-items: center; 
+      gap: 0.35rem; 
+      padding: 0.2rem 0.55rem; 
+      border-radius: 9999px; 
+      font-size: 0.68rem; 
+      font-weight: 700; 
+      letter-spacing: 0.04em; 
+      text-transform: uppercase; 
+      font-family: monospace; 
+      background: rgba(0, 240, 255, 0.08); 
+      border: 1px solid rgba(0, 240, 255, 0.25); 
+      color: var(--accent-neon); 
+    }
+
+    .chip-badge.active-green { 
+      background: rgba(16, 185, 129, 0.12); 
+      border-color: rgba(16, 185, 129, 0.35); 
+      color: #34d399; 
+    }
+
+    .stats-grid { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); 
+      gap: 1rem; 
+      margin-bottom: 1.5rem; 
+    }
+
+    .stat-card { 
+      background: var(--bg-card); 
+      border: 1px solid var(--border-subtle); 
+      border-radius: 1rem; 
+      padding: 1.2rem; 
+      position: relative; 
+      overflow: hidden; 
+      transition: all 0.25s ease; 
+    }
+
+    .stat-card:hover { 
+      border-color: var(--border-active); 
+      transform: translateY(-2px); 
+      box-shadow: 0 8px 20px rgba(0, 240, 255, 0.08); 
+    }
+
+    .stat-card-stripe { 
+      position: absolute; 
+      top: 0; 
+      left: 0; 
+      width: 4px; 
+      height: 100%; 
+      background: var(--accent-neon); 
+    }
+
+    .stat-label { 
+      font-size: 0.75rem; 
+      text-transform: uppercase; 
+      letter-spacing: 0.05em; 
+      color: var(--text-dim); 
+      font-weight: 600; 
+      margin-bottom: 0.4rem; 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+    }
+
+    .stat-value { 
+      font-size: 1.6rem; 
+      font-weight: 800; 
+      font-family: monospace; 
+      color: #ffffff; 
+      letter-spacing: -0.02em; 
+    }
+
+    .stat-subtext { 
+      font-size: 0.75rem; 
+      color: var(--text-secondary); 
+      margin-top: 0.3rem; 
+    }
+
+    .section-header { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      margin-bottom: 1rem; 
+    }
+
+    .section-title { 
+      font-size: 1.1rem; 
+      font-weight: 700; 
+      color: var(--text-main); 
+      display: flex; 
+      align-items: center; 
+      gap: 0.5rem; 
+      margin: 0; 
+    }
+    
+    .subject-grid { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+      gap: 1rem; 
+      margin-bottom: 1.75rem; 
+    }
+
+    .subject-card { 
+      background: var(--bg-card); 
+      border: 1px solid var(--border-subtle); 
+      border-radius: 1.1rem; 
+      padding: 1.25rem; 
+      display: flex; 
+      flex-direction: column; 
+      justify-content: space-between; 
+      position: relative; 
+      cursor: pointer; 
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1); 
+      overflow: hidden; 
+    }
+
+    .subject-card:hover { 
+      border-color: var(--accent-neon); 
+      box-shadow: 0 8px 24px rgba(0, 240, 255, 0.12); 
+      transform: translateY(-2px); 
+    }
+
+    .subject-card.is-active-subject { 
+      border-color: var(--accent-neon); 
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.25); 
+    }
+
+    .subject-head { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: flex-start; 
+      margin-bottom: 0.75rem; 
+    }
+
+    .subject-pill { 
+      display: inline-flex; 
+      align-items: center; 
+      gap: 0.4rem; 
+      padding: 0.2rem 0.55rem; 
+      border-radius: 0.5rem; 
+      background: rgba(255, 255, 255, 0.04); 
+      border: 1px solid rgba(255, 255, 255, 0.08); 
+      font-size: 0.7rem; 
+      font-family: monospace; 
+      color: var(--text-secondary); 
+    }
+
+    .subject-color-dot { 
+      width: 8px; 
+      height: 8px; 
+      border-radius: 50%; 
+    }
+
+    .subject-name { 
+      font-size: 1.05rem; 
+      font-weight: 700; 
+      color: #ffffff; 
+      margin-bottom: 0.25rem; 
+      white-space: nowrap; 
+      overflow: hidden; 
+      text-overflow: ellipsis; 
+    }
+
+    .subject-time-summary { 
+      display: flex; 
+      justify-content: space-between; 
+      padding: 0.6rem 0; 
+      border-top: 1px solid rgba(255, 255, 255, 0.06); 
+      margin-top: 0.75rem; 
+      font-size: 0.75rem; 
+    }
+
+    .subject-time-summary div span { 
+      display: block; 
+      color: var(--text-dim); 
+      font-size: 0.65rem; 
+      text-transform: uppercase; 
+    }
+
+    .subject-time-summary div strong { 
+      font-family: monospace; 
+      font-size: 0.85rem; 
+      color: var(--accent-neon); 
+    }
+
+    .subject-actions { 
+      display: flex; 
+      align-items: center; 
+      gap: 0.4rem; 
+    }
+
+    .subject-btn-launch { 
+      width: 100%; 
+      margin-top: 0.75rem; 
+      background: rgba(0, 240, 255, 0.08); 
+      border: 1px solid rgba(0, 240, 255, 0.3); 
+      color: var(--accent-neon); 
+      padding: 0.6rem; 
+      border-radius: 0.65rem; 
+      font-weight: 700; 
+      font-size: 0.75rem; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      gap: 0.4rem; 
+      cursor: pointer; 
+      transition: all 0.2s ease; 
+    }
+
+    .subject-btn-launch:hover { 
+      background: var(--accent-neon); 
+      color: #04060a; 
+      box-shadow: 0 0 16px var(--accent-glow); 
+    }
+
+    .timer-container { 
+      max-width: 640px; 
+      margin: 0 auto; 
+      background: var(--bg-surface); 
+      border: 1px solid var(--border-subtle); 
+      border-radius: 1.5rem; 
+      padding: 1.75rem 1.25rem; 
+      text-align: center; 
+      box-shadow: 0 16px 40px rgba(0,0,0,0.6); 
+      position: relative; 
+    }
+
+    .mode-switch { 
+      display: inline-flex; 
+      background: var(--bg-card); 
+      border: 1px solid var(--border-subtle); 
+      border-radius: 0.75rem; 
+      padding: 0.25rem; 
+      gap: 0.25rem; 
+      margin-bottom: 0.75rem; 
+    }
+
+    .mode-switch button { 
+      background: transparent; 
+      border: none; 
+      color: var(--text-dim); 
+      font-size: 0.75rem; 
+      font-weight: 600; 
+      padding: 0.45rem 0.9rem; 
+      border-radius: 0.5rem; 
+      cursor: pointer; 
+      transition: all 0.2s ease; 
+    }
+
+    .mode-switch button.active { 
+      background: var(--accent-neon); 
+      color: #04060a; 
+      font-weight: 700; 
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.3); 
+    }
+
+    .pomo-stage-bar { 
+      display: flex; 
+      justify-content: center; 
+      gap: 0.4rem; 
+      margin-bottom: 0.9rem; 
+    }
+
+    .pomo-stage-btn { 
+      background: rgba(14, 20, 36, 0.8); 
+      border: 1px solid rgba(255, 255, 255, 0.08); 
+      color: var(--text-secondary); 
+      font-size: 0.72rem; 
+      font-weight: 600; 
+      padding: 0.3rem 0.7rem; 
+      border-radius: 0.5rem; 
+      cursor: pointer; 
+      transition: all 0.2s ease; 
+    }
+
+    .pomo-stage-btn.active[data-stage="focus"] { 
+      background: rgba(0, 240, 255, 0.2); 
+      border-color: var(--accent-neon); 
+      color: var(--accent-neon); 
+    }
+
+    .pomo-stage-btn.active[data-stage="shortBreak"] { 
+      background: rgba(52, 211, 153, 0.2); 
+      border-color: var(--break-green); 
+      color: var(--break-green); 
+    }
+
+    .pomo-stage-btn.active[data-stage="longBreak"] { 
+      background: rgba(192, 132, 252, 0.2); 
+      border-color: var(--break-purple); 
+      color: var(--break-purple); 
+    }
+
+    .pomo-customizer-box { 
+      background: var(--bg-card); 
+      border: 1px solid var(--border-subtle); 
+      border-radius: 0.9rem; 
+      padding: 0.75rem 1rem; 
+      margin: 0.5rem auto 1rem auto; 
+      max-width: 520px; 
+    }
+
+    .pomo-customizer-header { 
+      display: flex; 
+      align-items: center; 
+      justify-content: space-between; 
+      margin-bottom: 0.6rem; 
+    }
+
+    .pomo-customizer-title { 
+      font-size: 0.72rem; 
+      font-weight: 700; 
+      text-transform: uppercase; 
+      letter-spacing: 0.05em; 
+      color: var(--text-dim); 
+      display: flex; 
+      align-items: center; 
+      gap: 0.35rem; 
+    }
+
+    .pomo-presets-grid { 
+      display: flex; 
+      flex-wrap: wrap; 
+      justify-content: center; 
+      gap: 0.35rem; 
+      margin-bottom: 0.6rem; 
+    }
+
+    .preset-chip { 
+      background: rgba(255, 255, 255, 0.04); 
+      border: 1px solid rgba(255, 255, 255, 0.08); 
+      color: var(--text-secondary); 
+      font-size: 0.75rem; 
+      font-weight: 600; 
+      padding: 0.3rem 0.6rem; 
+      border-radius: 0.45rem; 
+      cursor: pointer; 
+      transition: all 0.15s ease; 
+    }
+
+    .preset-chip:hover { 
+      border-color: var(--accent-neon); 
+      color: #fff; 
+    }
+
+    .preset-chip.active { 
+      background: rgba(0, 240, 255, 0.2); 
+      border-color: var(--accent-neon); 
+      color: var(--accent-neon); 
+      font-weight: 700; 
+    }
+
+    .custom-input-stepper { 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      gap: 0.4rem; 
+    }
+
+    .stepper-btn { 
+      width: 1.85rem; 
+      height: 1.85rem; 
+      background: var(--bg-surface); 
+      border: 1px solid var(--border-subtle); 
+      color: var(--text-main); 
+      border-radius: 0.45rem; 
+      font-weight: 800; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      cursor: pointer; 
+    }
+
+    .stepper-btn:hover { 
+      border-color: var(--accent-neon); 
+      color: var(--accent-neon); 
+    }
+
+    .stepper-input { 
+      width: 4.2rem; 
+      text-align: center; 
+      background: var(--bg-surface); 
+      border: 1px solid var(--border-subtle); 
+      color: var(--accent-neon); 
+      font-family: monospace; 
+      font-weight: 700; 
+      font-size: 0.85rem; 
+      border-radius: 0.45rem; 
+      padding: 0.3rem 0.35rem; 
+      outline: none; 
+    }
+
+    .stepper-input:focus { 
+      border-color: var(--accent-neon); 
+      box-shadow: 0 0 8px var(--accent-glow); 
+    }
+
+    .controls-aux-bar { 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      gap: 0.6rem; 
+      margin: 0.5rem auto 1rem auto; 
+      flex-wrap: wrap; 
+    }
+
+    .aux-toggle-btn { 
+      background: rgba(14, 20, 36, 0.7); 
+      border: 1px solid var(--border-subtle); 
+      color: var(--text-secondary); 
+      border-radius: 0.65rem; 
+      padding: 0.35rem 0.75rem; 
+      font-size: 0.72rem; 
+      font-weight: 600; 
+      display: flex; 
+      align-items: center; 
+      gap: 0.4rem; 
+      cursor: pointer; 
+      transition: all 0.2s ease; 
+    }
+
+    .aux-toggle-btn.active { 
+      color: var(--accent-neon); 
+      border-color: var(--accent-neon); 
+      background: rgba(0, 240, 255, 0.12); 
+    }
+
+    .timer-dial-wrapper { 
+      position: relative; 
+      width: 270px; 
+      height: 270px; 
+      margin: 0.75rem auto 1.25rem auto; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+    }
+
+    .timer-svg { 
+      width: 100%; 
+      height: 100%; 
+      transform: rotate(-90deg); 
+    }
+
+    .timer-track { 
+      fill: none; 
+      stroke: rgba(255, 255, 255, 0.05); 
+      stroke-width: 5.5; 
+    }
+
+    .timer-progress { 
+      fill: none; 
+      stroke: var(--accent-neon); 
+      stroke-width: 5.5; 
+      stroke-linecap: round; 
+      stroke-dasharray: 283; 
+      stroke-dashoffset: 0; 
+      transition: stroke-dashoffset 0.4s ease, stroke 0.3s ease; 
+      filter: drop-shadow(0 0 8px var(--accent-neon)); 
+    }
+
+    .timer-content { 
+      position: absolute; 
+      inset: 0; 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      justify-content: center; 
+    }
+
+    .timer-digits { 
+      font-size: 3.1rem; 
+      font-weight: 800; 
+      font-family: monospace; 
+      color: #ffffff; 
+      text-shadow: 0 0 20px rgba(0, 240, 255, 0.35); 
+      line-height: 1.05; 
+      margin: 0.25rem 0; 
+    }
+
+    .timer-mode-tag { 
+      font-size: 0.7rem; 
+      font-weight: 700; 
+      letter-spacing: 0.1em; 
+      text-transform: uppercase; 
+      color: var(--accent-neon); 
+    }
+
+    .timer-subject-name { 
+      font-size: 0.85rem; 
+      color: var(--text-secondary); 
+      max-width: 190px; 
+      white-space: nowrap; 
+      overflow: hidden; 
+      text-overflow: ellipsis; 
+    }
+
+    .timer-controls { 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      gap: 0.75rem; 
+      margin-top: 1rem; 
+    }
+
+    .btn-ctrl { 
+      padding: 0.75rem 1.5rem; 
+      border-radius: 0.75rem; 
+      font-size: 0.9rem; 
+      font-weight: 700; 
+      display: flex; 
+      align-items: center; 
+      gap: 0.4rem; 
+      cursor: pointer; 
+      border: none; 
+      transition: all 0.2s ease; 
+    }
+
+    .btn-ctrl-primary { 
+      background: linear-gradient(135deg, var(--accent-neon), var(--accent-blue)); 
+      color: #04060a; 
+      box-shadow: 0 0 16px var(--accent-glow); 
+    }
+
+    .btn-ctrl-primary:hover { 
+      box-shadow: 0 0 24px rgba(0, 240, 255, 0.6); 
+      transform: scale(1.02); 
+    }
+
+    .btn-ctrl-pause { 
+      background: var(--warning); 
+      color: #04060a; 
+      box-shadow: 0 0 16px rgba(245, 158, 11, 0.3); 
+    }
+
+    .btn-ctrl-stop { 
+      background: rgba(239, 68, 68, 0.15); 
+      border: 1px solid rgba(239, 68, 68, 0.3); 
+      color: #f87171; 
+    }
+
+    .btn-ctrl-stop:hover { 
+      background: var(--danger); 
+      color: #fff; 
+    }
+
+    .calendar-container { 
+      background: var(--bg-surface); 
+      border: 1px solid var(--border-subtle); 
+      border-radius: 1.25rem; 
+      padding: 1.5rem; 
+      margin-bottom: 1.5rem; 
+    }
+
+    .calendar-header { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      margin-bottom: 1.25rem; 
+    }
+
+    .cal-nav-btn { 
+      background: var(--bg-card); 
+      border: 1px solid var(--border-subtle); 
+      color: var(--text-secondary); 
+      padding: 0.4rem 0.8rem; 
+      border-radius: 0.5rem; 
+      font-size: 0.8rem; 
+      cursor: pointer; 
+    }
+
+    .cal-nav-btn:hover { 
+      color: var(--accent-neon); 
+      border-color: var(--accent-neon); 
+    }
+    
+    .calendar-grid { 
+      display: grid; 
+      grid-template-columns: repeat(7, 1fr); 
+      gap: 0.4rem; 
+    }
+
+    .calendar-day-label { 
+      text-align: center; 
+      font-size: 0.7rem; 
+      font-weight: 700; 
+      color: var(--text-dim); 
+      text-transform: uppercase; 
+      padding-bottom: 0.5rem; 
+    }
+
+    .cal-day-cell { 
+      aspect-ratio: 1; 
+      border-radius: 0.5rem; 
+      border: 1px solid rgba(255, 255, 255, 0.05); 
+      background: rgba(14, 20, 36, 0.5); 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      justify-content: center; 
+      cursor: pointer; 
+      position: relative; 
+      transition: all 0.2s ease; 
+      font-size: 0.75rem; 
+      color: var(--text-secondary); 
+      font-family: monospace; 
+    }
+
+    .cal-day-cell:hover { 
+      border-color: var(--accent-neon); 
+      transform: scale(1.05); 
+      z-index: 2; 
+    }
+
+    .cal-day-cell.is-selected { 
+      border-color: var(--accent-neon); 
+      box-shadow: 0 0 12px var(--accent-glow); 
+    }
+
+    .heat-lvl-0 { background: rgba(14, 20, 36, 0.5); }
+    .heat-lvl-1 { background: rgba(0, 240, 255, 0.15); border-color: rgba(0, 240, 255, 0.25); color: #7dd3fc; }
+    .heat-lvl-2 { background: rgba(0, 240, 255, 0.35); border-color: rgba(0, 240, 255, 0.5); color: #e0f2fe; }
+    .heat-lvl-3 { background: rgba(0, 240, 255, 0.65); border-color: var(--accent-neon); color: #04060a; font-weight: 800; }
+    .heat-lvl-4 { background: #00f0ff; border-color: #ffffff; color: #000; font-weight: 900; box-shadow: 0 0 10px var(--accent-glow); }
+    
+    .cal-day-empty { 
+      aspect-ratio: 1; 
+      visibility: hidden; 
+    }
+
+    .day-details-panel { 
+      background: var(--bg-card); 
+      border: 1px solid var(--border-subtle); 
+      border-radius: 1rem; 
+      padding: 1.25rem; 
+      margin-top: 1.25rem; 
+    }
+
+    .checklist-task-item { 
+      display: flex; 
+      align-items: center; 
+      gap: 0.75rem; 
+      background: var(--bg-surface); 
+      padding: 0.75rem; 
+      border-radius: 0.5rem; 
+      border: 1px solid rgba(255,255,255,0.05); 
+      transition: 0.2s; 
+      margin-bottom: 0.5rem; 
+    }
+
+    .checklist-task-item.dragging { 
+      opacity: 0.5; 
+      border-color: var(--accent-neon); 
+    }
+
+    .checklist-drag-handle { 
+      cursor: grab; 
+      color: var(--text-dim); 
+    }
+
+    .checklist-drag-handle:active { 
+      cursor: grabbing; 
+    }
+
+    .checklist-task-num { 
+      font-family: monospace; 
+      font-size: 0.75rem; 
+      color: var(--text-dim); 
+      min-width: 20px; 
+      text-align: right; 
+    }
+
+    .checklist-checkbox { 
+      appearance: none; 
+      width: 1.2rem; 
+      height: 1.2rem; 
+      border: 1px solid var(--text-dim); 
+      border-radius: 0.25rem; 
+      cursor: pointer; 
+      position: relative; 
+      transition: 0.2s; 
+      flex-shrink: 0; 
+    }
+
+    .checklist-checkbox:checked { 
+      background: var(--accent-neon); 
+      border-color: var(--accent-neon); 
+    }
+
+    .checklist-checkbox:checked::after { 
+      content: '✓'; 
+      position: absolute; 
+      color: #000; 
+      font-size: 0.85rem; 
+      font-weight: bold; 
+      top: -2px; 
+      left: 3px; 
+    }
+
+    .checklist-task-text { 
+      flex: 1; 
+      font-size: 0.85rem; 
+      color: var(--text-main); 
+      word-break: break-word; 
+      outline: none; 
+    }
+
+    .checklist-task-item.done .checklist-task-text { 
+      text-decoration: line-through; 
+      color: var(--text-dim); 
+    }
+
+    .checklist-progress-bg { 
+      background: rgba(255, 255, 255, 0.05); 
+      border-radius: 9999px; 
+      height: 8px; 
+      overflow: hidden; 
+      margin-bottom: 1rem; 
+    }
+
+    .checklist-progress-fill { 
+      height: 100%; 
+      border-radius: 9999px; 
+      background: var(--accent-neon); 
+      transition: width 0.4s ease; 
+      box-shadow: 0 0 8px var(--accent-glow); 
+    }
+
+    .analytics-section { 
+      background: var(--bg-card); 
+      border: 1px solid var(--border-subtle); 
+      border-radius: 1rem; 
+      padding: 1.5rem; 
+      margin-bottom: 1.5rem; 
+    }
+
+    .breakdown-row { 
+      margin-bottom: 1.25rem; 
+    }
+
+    .breakdown-info { 
+      display: flex; 
+      justify-content: space-between; 
+      font-size: 0.825rem; 
+      margin-bottom: 0.35rem; 
+    }
+
+    .pipeline-grid { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+      gap: 1rem; 
+    }
+
+    .pipeline-card { 
+      background: var(--bg-card); 
+      border: 1px solid var(--border-subtle); 
+      border-radius: 1rem; 
+      padding: 1.5rem; 
+      cursor: pointer; 
+      transition: 0.2s; 
+      position: relative; 
+      overflow: hidden; 
+    }
+
+    .pipeline-card:hover { 
+      border-color: var(--accent-neon); 
+      transform: translateY(-3px); 
+      box-shadow: 0 8px 24px rgba(0, 240, 255, 0.12); 
+    }
+
+    .pipeline-color-bar { 
+      position: absolute; 
+      top: 0; 
+      left: 0; 
+      width: 100%; 
+      height: 6px; 
+    }
+
+    .pipeline-card-title { 
+      font-size: 1.1rem; 
+      font-weight: 700; 
+      margin-bottom: 0.5rem; 
+      margin-top: 0.5rem; 
+    }
+    
+    .pipeline-editor-wrapper { 
+      display: flex; 
+      flex-direction: column; 
+      flex: 1; 
+      min-height: 70vh; 
+      background: #0d1117; 
+      border-radius: 1rem; 
+      overflow: hidden; 
+      position: relative; 
+      border: 1px solid #30363d; 
+    }
+
+    .pipeline-editor-toolbar { 
+      background: #161b22; 
+      padding: 0.75rem 1.25rem; 
+      border-bottom: 1px solid #30363d; 
+      display: flex; 
+      align-items: center; 
+      justify-content: space-between; 
+      z-index: 30; 
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .pipeline-canvas { 
+      flex: 1; 
+      position: relative; 
+      overflow: hidden; 
+      background-color: #0d1117; 
+      background-image: radial-gradient(circle, #23272e 1px, transparent 1px);
+      background-size: 22px 22px;
+      cursor: grab; 
+      touch-action: none; /* Mobile fix: prevents screen from scrolling while interacting; we implement our own pan/pinch */
+    }
+
+    .pipeline-canvas.is-panning {
+      cursor: grabbing;
+    }
+    
+    .pipeline-svg-layer { 
+      position: absolute; 
+      inset: 0; 
+      width: 100%; 
+      height: 100%; 
+      pointer-events: none; 
+      z-index: 10; 
+    }
+
+    .pipeline-edge { 
+      fill: none; 
+      stroke: #8b949e; 
+      stroke-width: 2.5px; 
+      transition: stroke 0.2s; 
+      pointer-events: stroke; 
+      cursor: pointer; 
+    }
+
+    .pipeline-edge:hover { 
+      stroke: #f85149; 
+      stroke-width: 4px; 
+    }
+
+    .pipeline-edge-drawing { 
+      fill: none; 
+      stroke: #58a6ff; 
+      stroke-width: 2.5px; 
+      stroke-dasharray: 4; 
+      pointer-events: none; 
+    }
+
+    .gh-node { 
+      position: absolute; 
+      background: #1c2128; 
+      border: 1px solid #30363d; 
+      border-radius: 6px; 
+      padding: 12px 16px; 
+      min-width: 220px; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 8px; 
+      cursor: grab; 
+      z-index: 20; 
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5); 
+      user-select: none; 
+      transition: box-shadow 0.2s, border-color 0.2s; 
+      pointer-events: auto; 
+      touch-action: none; /* Mobile fix: prevents bouncing while dragging nodes */
+    }
+
+    .gh-node:hover { 
+      border-color: #8b949e; 
+    }
+
+    .gh-node:active { 
+      cursor: grabbing; 
+      box-shadow: 0 8px 24px rgba(0,0,0,0.8); 
+      z-index: 25; 
+    }
+    
+    .gh-node-header { 
+      display: flex; 
+      align-items: center; 
+      justify-content: space-between; 
+      gap: 12px; 
+    }
+
+    .gh-node-title-group { 
+      display: flex; 
+      align-items: center; 
+      gap: 8px; 
+    }
+
+    .gh-icon-check { 
+      width: 16px; 
+      height: 16px; 
+      fill: #238636; 
+      flex-shrink: 0; 
+    }
+
+    .gh-node-title { 
+      color: #c9d1d9; 
+      font-weight: 600; 
+      font-size: 0.9rem; 
+    }
+
+    .gh-node-duration { 
+      color: #8b949e; 
+      font-size: 0.8rem; 
+      font-variant-numeric: tabular-nums; 
+    }
+
+    .gh-node-link { 
+      color: #58a6ff; 
+      font-size: 0.75rem; 
+      text-decoration: none; 
+      word-break: break-all; 
+      margin-top: 2px; 
+      display: inline-block; 
+    }
+
+    .gh-node-link:hover { 
+      text-decoration: underline; 
+    }
+
+    .gh-node-delete { 
+      position: absolute; 
+      top: -8px; 
+      right: -8px; 
+      background: #f85149; 
+      color: #fff; 
+      border-radius: 50%; 
+      width: 22px; 
+      height: 22px; 
+      display: none; 
+      align-items: center; 
+      justify-content: center; 
+      font-size: 11px; 
+      cursor: pointer; 
+      border: none; 
+      z-index: 30; 
+      touch-action: none;
+    }
+
+    .gh-node:hover .gh-node-delete { 
+      display: flex; 
+    }
+
+    /* Always show delete button on touch devices, since there's no hover state */
+    @media (hover: none) and (pointer: coarse) {
+      .gh-node-delete {
+        display: flex;
+      }
+    }
+
+    .gh-port { 
+      position: absolute; 
+      width: 14px; 
+      height: 14px; 
+      background: #30363d; 
+      border: 2px solid #1c2128; 
+      border-radius: 50%; 
+      top: 50%; 
+      transform: translateY(-50%); 
+      z-index: 22; 
+      cursor: crosshair; 
+      transition: background 0.2s, transform 0.2s; 
+      pointer-events: auto; 
+    }
+
+    /* Invisible larger hit-area so ports are easy to grab on a touchscreen */
+    .gh-port::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 40px;
+      height: 40px;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+    }
+
+    .gh-port:hover, .gh-port.port-active { 
+      background: #58a6ff; 
+      transform: translateY(-50%) scale(1.35); 
+    }
+
+    .gh-port-in { left: -7px; }
+    .gh-port-out { right: -7px; }
+
+    @media (hover: none) and (pointer: coarse) {
+      .gh-port {
+        width: 20px;
+        height: 20px;
+        background: #58a6ff;
+        border-width: 3px;
+      }
+      .gh-port-in { left: -10px; }
+      .gh-port-out { right: -10px; }
+    }
+
+    .pipeline-zoom-controls {
+      position: absolute;
+      right: 14px;
+      bottom: 14px;
+      z-index: 40;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: rgba(22, 27, 34, 0.92);
+      border: 1px solid #30363d;
+      border-radius: 0.75rem;
+      overflow: hidden;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+    }
+
+    .zoom-ctrl-btn {
+      width: 2.75rem;
+      height: 2.75rem;
+      background: transparent;
+      border: none;
+      color: #c9d1d9;
+      font-size: 1.2rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      touch-action: manipulation;
+    }
+
+    .zoom-ctrl-btn:active {
+      background: rgba(0, 240, 255, 0.15);
+      color: var(--accent-neon);
+    }
+
+    .zoom-ctrl-divider {
+      width: 100%;
+      height: 1px;
+      background: #30363d;
+    }
+
+    .zoom-ctrl-level {
+      font-size: 0.65rem;
+      font-family: monospace;
+      color: #8b949e;
+      padding: 0.3rem 0;
+      text-align: center;
+      width: 100%;
+    }
+
+    .pipeline-canvas-hint {
+      position: absolute;
+      left: 14px;
+      bottom: 14px;
+      z-index: 40;
+      font-size: 0.68rem;
+      color: #8b949e;
+      background: rgba(22, 27, 34, 0.8);
+      border: 1px solid #30363d;
+      border-radius: 0.5rem;
+      padding: 0.35rem 0.6rem;
+      pointer-events: none;
+    }
+
+    .modal-backdrop { 
+      position: fixed; 
+      inset: 0; 
+      background: rgba(0, 0, 0, 0.85); 
+      backdrop-filter: blur(8px); 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      padding: 1rem; 
+      z-index: 100; 
+      opacity: 0; 
+      pointer-events: none; 
+      transition: opacity 0.2s ease; 
+    }
+
+    .modal-backdrop.open { 
+      opacity: 1; 
+      pointer-events: auto; 
+    }
+
+    .modal-box { 
+      background: var(--bg-surface); 
+      border: 1px solid var(--border-subtle); 
+      border-radius: 1.25rem; 
+      padding: 1.75rem; 
+      width: 100%; 
+      max-width: 480px; 
+      box-shadow: 0 20px 50px rgba(0,0,0,0.8); 
+      position: relative; 
+    }
+    
+    .form-group { 
+      margin-bottom: 1.25rem; 
+    }
+
+    .form-label { 
+      display: block; 
+      font-size: 0.75rem; 
+      font-weight: 700; 
+      text-transform: uppercase; 
+      letter-spacing: 0.05em; 
+      color: var(--text-dim); 
+      margin-bottom: 0.4rem; 
+    }
+
+    .form-input { 
+      width: 100%; 
+      background: var(--bg-card); 
+      border: 1px solid var(--border-subtle); 
+      border-radius: 0.65rem; 
+      padding: 0.65rem 0.9rem; 
+      color: #fff; 
+      font-size: 0.85rem; 
+      outline: none; 
+    }
+
+    .form-input:focus { 
+      border-color: var(--accent-neon); 
+      box-shadow: 0 0 10px var(--accent-glow); 
+    }
+    
+    .color-picker-grid { 
+      display: flex; 
+      gap: 0.5rem; 
+    }
+
+    .color-option { 
+      width: 2rem; 
+      height: 2rem; 
+      border-radius: 50%; 
+      cursor: pointer; 
+      border: 2px solid transparent; 
+      transition: all 0.2s ease; 
+    }
+
+    .color-option.selected { 
+      border-color: #fff; 
+      transform: scale(1.15); 
+    }
+
+    .mobile-nav { 
+      display: none; 
+      position: fixed; 
+      bottom: 0; 
+      left: 0; 
+      right: 0; 
+      background: rgba(9, 13, 24, 0.95); 
+      backdrop-filter: blur(16px); 
+      border-top: 1px solid var(--border-subtle); 
+      padding: 0.5rem; 
+      justify-content: space-around; 
+      z-index: 50; 
+    }
+
+    .mobile-nav-btn { 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      gap: 0.25rem; 
+      background: transparent; 
+      border: none; 
+      color: var(--text-dim); 
+      font-size: 0.65rem; 
+      font-weight: 600; 
+      padding: 0.35rem 0.75rem; 
+      border-radius: 0.5rem; 
+      cursor: pointer; 
+    }
+
+    .mobile-nav-btn.active { 
+      color: var(--accent-neon); 
+    }
+
+    .mobile-nav-btn svg { 
+      width: 1.25rem; 
+      height: 1.25rem; 
+    }
+    
+    .profile-list-item { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      padding: 0.75rem; 
+      background: var(--bg-card); 
+      border: 1px solid var(--border-subtle); 
+      border-radius: 0.5rem; 
+      margin-bottom: 0.5rem; 
+    }
+
+    .profile-list-item input { 
+      background: transparent; 
+      border: none; 
+      color: #fff; 
+      outline: none; 
+      font-size: 0.9rem; 
+      font-weight: 600; 
+      width: 60%; 
+    }
+
+    .profile-list-item input:focus { 
+      border-bottom: 1px solid var(--accent-neon); 
+    }
+
+    @media (max-width: 768px) {
+      .nav-tabs { display: none; }
+      .mobile-nav { display: flex; }
+      main { padding-bottom: 5rem; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .timer-dial-wrapper { width: 230px; height: 230px; }
+      .timer-digits { font-size: 2.7rem; }
+      .pipeline-editor-wrapper { min-height: 80vh; }
+      .hidden-mobile { display: none !important; }
+      .pipeline-canvas-hint { display: none; }
+    }
+
+    .hidden { display: none !important; }
+    .text-neon { color: var(--accent-neon); }
+    .font-mono { font-family: monospace; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand-group">
+      <div class="brand-icon">
+        <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+      </div>
+      <div class="brand-text">
+        <h1>AetherFocus</h1>
+      </div>
+      <!-- Profile Management Switcher -->
+      <div class="profile-switch" title="Manage Profiles">
+        <div id="profile-buttons-container" style="display: flex; gap: 0.15rem;"></div>
+        <button class="profile-manage-btn" onclick="openProfileManager()" title="Edit Profiles">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/>
+            <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Desktop Navigation -->
+    <nav class="nav-tabs" id="desktop-tabs">
+      <button class="nav-btn active" data-tab="dashboard">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg> 
+        Overview
+      </button>
+      <button class="nav-btn" data-tab="timer">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> 
+        Timer
+      </button>
+      <button class="nav-btn" data-tab="calendar">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg> 
+        Calendar
+      </button>
+      <button class="nav-btn" data-tab="pipelines">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg> 
+        Pipelines
+      </button>
+      <button class="nav-btn" data-tab="analytics">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg> 
+        Analytics
+      </button>
+    </nav>
+
+    <!-- Global Actions -->
+    <div class="header-actions">
+      <button class="icon-btn" id="btn-open-clear-data" title="Clear / Reset All Data" style="color: #f87171; border-color: rgba(239, 68, 68, 0.3);">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+      </button>
+      <button class="icon-btn" id="btn-open-sync" title="Export / Import Data Backup">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+      </button>
+      <button class="icon-btn" id="btn-toggle-sound" title="Toggle Sound">
+        <svg id="sound-icon-on" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+      </button>
+      <button class="btn-primary" id="btn-add-subject">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <span class="hidden-mobile">Add Subject</span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <!-- Background Engine Flags -->
+    <div class="banner-engine">
+      <div class="engine-pills">
+        <span class="chip-badge active-green" id="sync-engine-badge">
+          <svg width="10" height="10" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg> 
+          Delta Sync Active
+        </span>
+        <span class="chip-badge" id="wake-lock-badge" style="display: none;">
+          <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg> 
+          Sleep Prevented
+        </span>
+        <span class="chip-badge" id="notif-badge" style="display: none;">
+          <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg> 
+          Push Alerts Ready
+        </span>
+      </div>
+      <span style="font-size: 0.72rem; color: var(--text-dim);">Background throttling immune</span>
+    </div>
+
+    <!-- TAB 1: OVERVIEW & DASHBOARD -->
+    <section id="view-dashboard" class="tab-view">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-card-stripe"></div>
+          <div class="stat-label"><span>Today's Total</span></div>
+          <div class="stat-value" id="stat-today">00:00:00</div>
+          <div class="stat-subtext" id="stat-today-sub">0 sessions logged today</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-stripe" style="background: var(--accent-blue);"></div>
+          <div class="stat-label"><span>Past 7 Days</span></div>
+          <div class="stat-value" id="stat-week">0.0 hrs</div>
+          <div class="stat-subtext">Weekly focus volume</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-stripe" style="background: #f59e0b;"></div>
+          <div class="stat-label"><span>Focus Streak</span></div>
+          <div class="stat-value" id="stat-streak" style="color: #fcd34d;">0 Days</div>
+          <div class="stat-subtext">Daily consistency score</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-stripe" style="background: #a855f7;"></div>
+          <div class="stat-label"><span>Subjects Tracked</span></div>
+          <div class="stat-value" id="stat-subjects-count">0</div>
+          <div class="stat-subtext" id="stat-alltime-sub">All-time: 0.0 hrs</div>
+        </div>
+      </div>
+      <div class="section-header">
+        <h2 class="section-title">Study Topics Overview</h2>
+      </div>
+      <div class="subject-grid" id="subjects-container"></div>
+    </section>
+
+    <!-- TAB 2: TIMER -->
+    <section id="view-timer" class="tab-view hidden">
+      <div class="timer-container">
+        <div class="mode-switch">
+          <button class="active" id="btn-mode-stopwatch">Stopwatch</button>
+          <button id="btn-mode-pomodoro">Pomodoro Focus</button>
+        </div>
+        
+        <div class="pomo-stage-bar hidden" id="pomo-stage-bar">
+          <button class="pomo-stage-btn active" data-stage="focus">Focus</button>
+          <button class="pomo-stage-btn" data-stage="shortBreak">Short Break</button>
+          <button class="pomo-stage-btn" data-stage="longBreak">Long Break</button>
+        </div>
+        
+        <div class="pomo-customizer-box hidden" id="pomo-customizer-box">
+          <div class="pomo-customizer-header">
+            <span class="pomo-customizer-title">Customize Duration</span>
+            <span style="font-size: 0.7rem; color: var(--text-secondary);" id="pomo-selected-label">25 Minutes</span>
+          </div>
+          <div class="pomo-presets-grid" id="pomo-presets-container">
+            <button class="preset-chip" data-mins="15">15m</button>
+            <button class="preset-chip active" data-mins="25">25m</button>
+            <button class="preset-chip" data-mins="45">45m</button>
+            <button class="preset-chip" data-mins="60">60m</button>
+            <button class="preset-chip" data-mins="90">90m</button>
+          </div>
+          <div class="custom-input-stepper">
+            <button class="stepper-btn" id="btn-step-dec">-</button>
+            <input type="number" id="input-pomo-minutes" class="stepper-input" min="1" max="180" value="25">
+            <button class="stepper-btn" id="btn-step-inc">+</button>
+          </div>
+        </div>
+        
+        <div class="controls-aux-bar">
+          <button class="aux-toggle-btn" id="btn-toggle-wakelock">
+            <span id="label-wakelock">Keep Screen Awake: Off</span>
+          </button>
+          <button class="aux-toggle-btn" id="btn-toggle-notifs">
+            <span id="label-notifs">Push Alerts: Enable</span>
+          </button>
+        </div>
+        
+        <div style="margin-bottom: 0.5rem;">
+          <select id="timer-subject-select" class="form-input" style="max-width: 280px; margin: 0 auto; display: block; text-align: center;"></select>
+        </div>
+        
+        <div class="timer-dial-wrapper">
+          <svg class="timer-svg" viewBox="0 0 100 100">
+            <circle class="timer-track" cx="50" cy="50" r="45" />
+            <circle class="timer-progress" id="timer-ring" cx="50" cy="50" r="45" />
+          </svg>
+          <div class="timer-content">
+            <span class="timer-mode-tag" id="timer-status-badge">Ready</span>
+            <div class="timer-digits" id="timer-display">00:00:00</div>
+            <div class="timer-subject-name" id="timer-selected-title">Machine Learning</div>
+          </div>
+        </div>
+        
+        <div class="timer-controls">
+          <button class="btn-ctrl btn-ctrl-primary" id="btn-timer-toggle">
+            <span id="timer-toggle-text">Start Focus</span>
+          </button>
+          <button class="btn-ctrl btn-ctrl-stop" id="btn-timer-stop">
+            <span>Stop & Log</span>
+          </button>
+        </div>
+        
+        <div style="margin-top: 1.25rem;">
+          <input type="text" id="timer-session-note" class="form-input" placeholder="Optional session note..." style="font-size: 0.8rem; text-align: center;">
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: CALENDAR & CHECKLIST -->
+    <section id="view-calendar" class="tab-view hidden">
+      <div class="calendar-container">
+        <div class="calendar-header">
+          <div><h2 class="section-title">Interactive Study Heatmap</h2></div>
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <button class="cal-nav-btn" id="cal-prev">&lt;</button>
+            <span id="cal-month-label" class="font-mono text-neon" style="font-size: 0.85rem; font-weight: 700; min-width: 110px; text-align: center;"></span>
+            <button class="cal-nav-btn" id="cal-next">&gt;</button>
+          </div>
+        </div>
+        
+        <div class="calendar-grid" id="calendar-grid-cells"></div>
+        
+        <div class="day-details-panel" id="calendar-day-details">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+            <h3 id="cal-inspect-date" class="font-mono" style="font-size: 0.9rem; color: #fff;">Selected Date</h3>
+            <span id="cal-inspect-total" class="font-mono text-neon" style="font-size: 1rem; font-weight: 800;">0 hrs</span>
+          </div>
+          <div id="cal-inspect-breakdown" style="font-size: 0.8rem; color: var(--text-secondary);"></div>
+        </div>
+        
+        <div class="day-details-panel" id="checklist-panel" style="margin-top: 1.25rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+            <h3 class="font-mono" style="font-size: 0.9rem; color: #fff;">Daily Checklist</h3>
+            <span id="checklist-stats-text" class="font-mono text-neon" style="font-size: 0.85rem; font-weight: 700;">0/0 Completed</span>
+          </div>
+          
+          <div class="checklist-progress-bg">
+            <div class="checklist-progress-fill" id="checklist-progress" style="width: 0%;"></div>
+          </div>
+          
+          <div id="checklist-tasks" style="display: flex; flex-direction: column; min-height: 20px; padding-bottom: 0.5rem;"></div>
+          
+          <div style="display: flex; gap: 0.5rem;">
+            <input type="text" id="checklist-input" class="form-input" placeholder="Add a new task for this day...">
+            <button class="btn-primary" id="btn-add-checklist-task">Add</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: VISUAL NODE PIPELINES -->
+    <section id="view-pipelines" class="tab-view hidden" style="display: flex; flex-direction: column; flex: 1;">
+      <!-- Dashboard View of Plans -->
+      <div id="pipelines-dashboard">
+        <div class="section-header">
+          <h2 class="section-title">Project Pipelines</h2>
+          <button class="btn-primary" onclick="openModal('modal-add-pipeline')" style="font-size: 0.75rem;">+ New Plan</button>
+        </div>
+        <div class="pipeline-grid" id="pipelines-grid"></div>
+      </div>
+
+      <!-- Active Pipeline Node Editor Canvas -->
+      <div id="pipelines-active" class="hidden pipeline-editor-wrapper">
+        <div class="pipeline-editor-toolbar">
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <button class="btn-secondary" onclick="closePipeline()" style="padding: 0.4rem 0.8rem;">← Dashboard</button>
+            <h2 class="section-title" id="active-pipeline-title" style="margin: 0; font-family: monospace;">Pipeline</h2>
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <span style="font-size: 0.75rem; color: var(--text-dim); margin-right: 0.5rem;" class="hidden-mobile">Double-click canvas to add node · drag empty space to pan · pinch to zoom</span>
+            <button class="btn-primary" onclick="addPipelineNode()" style="padding: 0.4rem 0.8rem; font-size: 0.75rem;">+ Node</button>
+            <button class="icon-btn" style="color:var(--danger); border-color:rgba(239,68,68,0.3); width: 1.8rem; height: 1.8rem;" onclick="promptDeleteActivePipeline()" title="Delete Pipeline">
+              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+            </button>
+          </div>
+        </div>
+        
+        <div class="pipeline-canvas" id="pipeline-canvas">
+          <!-- SVG Layer for drawing connecting curves (kept in screen-space, unaffected by the nodes-layer zoom/pan transform) -->
+          <svg class="pipeline-svg-layer" id="pipeline-svg">
+            <g id="pipeline-edges-group"></g>
+            <path id="pipeline-edge-preview" class="pipeline-edge-drawing" d="" style="display:none;"></path>
+          </svg>
+          <!-- DOM Layer for Nodes: this layer is scaled/panned for zoom -->
+          <div id="pipeline-nodes-layer" style="position: absolute; inset: 0; pointer-events: none; transform-origin: 0 0;"></div>
+
+          <!-- Zoom controls -->
+          <div class="pipeline-zoom-controls">
+            <button class="zoom-ctrl-btn" id="btn-zoom-in" title="Zoom in">+</button>
+            <div class="zoom-ctrl-divider"></div>
+            <span class="zoom-ctrl-level" id="zoom-level-label">100%</span>
+            <div class="zoom-ctrl-divider"></div>
+            <button class="zoom-ctrl-btn" id="btn-zoom-out" title="Zoom out">&minus;</button>
+            <div class="zoom-ctrl-divider"></div>
+            <button class="zoom-ctrl-btn" id="btn-zoom-reset" title="Reset view" style="font-size: 0.9rem;">⟲</button>
+          </div>
+          <div class="pipeline-canvas-hint">Drag empty space to pan · pinch to zoom · double-tap for new node</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 5: ANALYTICS -->
+    <section id="view-analytics" class="tab-view hidden">
+      <div class="analytics-section">
+        <h2 class="section-title">Subject Time Distribution</h2>
+        <p style="font-size: 0.75rem; color: var(--text-dim); margin-bottom: 1.5rem;">Total accumulated study volume per subject.</p>
+        <div id="analytics-distribution-list"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Subject Modal -->
+  <div class="modal-backdrop" id="modal-subject">
+    <div class="modal-box">
+      <h3 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 1.25rem;" id="modal-subject-title">Add Study Subject</h3>
+      <form id="form-subject">
+        <input type="hidden" id="sub-id">
+        <div class="form-group">
+          <label class="form-label">Subject Name</label>
+          <input type="text" id="sub-name" class="form-input" required placeholder="e.g. Distributed Systems Architecture">
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;" class="form-group">
+          <div>
+            <label class="form-label">Tag / Domain</label>
+            <input type="text" id="sub-tag" class="form-input" placeholder="e.g. CS">
+          </div>
+          <div>
+            <label class="form-label">Target (Mins/Day)</label>
+            <input type="number" id="sub-goal" class="form-input" value="60">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Color Theme</label>
+          <div class="color-picker-grid" id="color-options">
+            <div class="color-option selected" data-color="#00f0ff" style="background: #00f0ff;"></div>
+            <div class="color-option" data-color="#0070f3" style="background: #0070f3;"></div>
+            <div class="color-option" data-color="#6366f1" style="background: #6366f1;"></div>
+            <div class="color-option" data-color="#10b981" style="background: #10b981;"></div>
+            <div class="color-option" data-color="#f59e0b" style="background: #f59e0b;"></div>
+            <div class="color-option" data-color="#ec4899" style="background: #ec4899;"></div>
+          </div>
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1.5rem;">
+          <button type="button" class="btn-secondary" onclick="closeModal('modal-subject')">Cancel</button>
+          <button type="submit" class="btn-primary">Save Subject</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Add Pipeline Modal -->
+  <div class="modal-backdrop" id="modal-add-pipeline">
+    <div class="modal-box">
+      <h3 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 1.25rem;">Create New Pipeline Plan</h3>
+      <div class="form-group">
+        <label class="form-label">Pipeline Title</label>
+        <input type="text" id="input-pipe-title" class="form-input" placeholder="e.g. STM32 Firmware Workflow">
+      </div>
+      <div class="form-group" style="display:flex; gap:0.5rem; align-items:center;">
+        <label class="form-label" style="margin:0;">Theme Color:</label>
+        <input type="color" id="input-pipe-color" value="#00f0ff" style="border:none; width:30px; height:30px; cursor:pointer; background:transparent;">
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1.5rem;">
+        <button type="button" class="btn-secondary" onclick="closeModal('modal-add-pipeline')">Cancel</button>
+        <button type="button" class="btn-primary" onclick="createPipeline()">Create Canvas</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Backup/Sync Modal -->
+  <div class="modal-backdrop" id="modal-sync">
+    <div class="modal-box">
+      <h3 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 1.25rem;">Data Portability (Offline)</h3>
+      <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+        <button class="btn-primary" id="btn-export-json" style="justify-content: center;">Export Study Database (JSON)</button>
+        <label class="btn-secondary" style="justify-content: center; cursor: pointer;">
+          Import JSON Backup
+          <input type="file" id="input-import-json" accept=".json" style="display: none;">
+        </label>
+      </div>
+      <div style="display: flex; justify-content: flex-end; margin-top: 1.5rem;">
+        <button type="button" class="btn-secondary" onclick="closeModal('modal-sync')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Clear Data Modal -->
+  <div class="modal-backdrop" id="modal-clear-data">
+    <div class="modal-box" style="border-color: rgba(239, 68, 68, 0.4);">
+      <h3 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 1.25rem;">Clear Data</h3>
+      <div style="display: flex; flex-direction: column; gap: 0.65rem;">
+        <button class="btn-secondary" id="btn-action-wipe-logs-only" style="justify-content: center; color: #fbbf24;">Clear Logs Only</button>
+        <button class="btn-ctrl-stop" id="btn-action-wipe-all" style="justify-content: center; padding: 0.65rem; border-radius: 0.65rem; font-weight: 700; cursor: pointer;">Factory Reset Profile</button>
+      </div>
+      <div style="display: flex; justify-content: flex-end; margin-top: 1.25rem;">
+        <button type="button" class="btn-secondary" onclick="closeModal('modal-clear-data')">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Profile Management Modal -->
+  <div class="modal-backdrop" id="modal-manage-profiles">
+    <div class="modal-box">
+      <h3 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 1rem;">Manage Profiles</h3>
+      <div id="profile-list-container" style="max-height: 200px; overflow-y: auto; margin-bottom: 1rem;"></div>
+      <div style="display: flex; gap: 0.5rem;">
+        <input type="text" id="new-profile-input" class="form-input" placeholder="New profile name (e.g. Work)">
+        <button class="btn-primary" onclick="addProfile()">Add</button>
+      </div>
+      <div style="display: flex; justify-content: flex-end; margin-top: 1.5rem;">
+        <button type="button" class="btn-secondary" onclick="closeModal('modal-manage-profiles')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Prompt/Confirm Modal -->
+  <div class="modal-backdrop" id="modal-custom-action">
+    <div class="modal-box" style="z-index: 105;">
+      <h3 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 0.75rem;" id="modal-action-title">Confirm</h3>
+      <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.25rem;" id="modal-action-desc"></p>
+      <input type="text" id="modal-action-input" class="form-input hidden" style="margin-bottom: 1.25rem;">
+      <div style="display: flex; justify-content: flex-end; gap: 0.5rem;">
+        <button type="button" class="btn-secondary" id="btn-action-cancel">Cancel</button>
+        <button type="button" class="btn-primary" id="btn-action-confirm">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Bottom Navigation -->
+  <nav class="mobile-nav" id="mobile-tabs">
+    <button class="mobile-nav-btn active" data-tab="dashboard">Overview</button>
+    <button class="mobile-nav-btn" data-tab="timer">Timer</button>
+    <button class="mobile-nav-btn" data-tab="calendar">Calendar</button>
+    <button class="mobile-nav-btn" data-tab="pipelines">Pipelines</button>
+    <button class="mobile-nav-btn" data-tab="analytics">Stats</button>
+  </nav>
+
+  <script>
+    const CACHE_NAME = 'aether-focus-v7-mobile-zoom';
+    const swCode = `
+      self.addEventListener('install', (e) => {
+        self.skipWaiting();
+      }); 
+      self.addEventListener('activate', (e) => {
+        e.waitUntil(
+          caches.keys().then(keys => Promise.all(
+            keys.map(k => { 
+              if(k !== '${CACHE_NAME}') {
+                return caches.delete(k); 
+              }
+            })
+          )).then(() => clients.claim())
+        );
+      });
+      self.addEventListener('fetch', (e) => { 
+        e.respondWith(fetch(e.request).catch(() => caches.match(e.request))); 
+      });
+    `;
+    if ('serviceWorker' in navigator) { 
+      try { 
+        const swBlob = new Blob([swCode], { type: 'application/javascript' }); 
+        navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(e => console.warn(e)); 
+      } catch (e) {
+        console.warn(e);
+      } 
+    }
+
+    // --- Utility Functions ---
+    function openModal(id) { 
+      document.getElementById(id).classList.add('open'); 
+    }
+    function closeModal(id) { 
+      document.getElementById(id).classList.remove('open'); 
+    }
+    
+    // Safely extract coordinates from either mouse or touch event
+    function getEventCoords(e) {
+      if (e.changedTouches && e.changedTouches.length > 0) {
+        return { clientX: e.changedTouches[0].clientX, clientY: e.changedTouches[0].clientY };
+      } else if (e.touches && e.touches.length > 0) {
+        return { clientX: e.touches[0].clientX, clientY: e.touches[0].clientY };
+      }
+      return { clientX: e.clientX, clientY: e.clientY };
+    }
+
+    /* Custom Confirm/Prompt Logic */
+    function promptUser(title, desc, isPrompt = false, defaultVal = '') {
+      return new Promise((resolve) => {
+        const modal = document.getElementById('modal-custom-action');
+        document.getElementById('modal-action-title').textContent = title;
+        document.getElementById('modal-action-desc').textContent = desc;
+        
+        const input = document.getElementById('modal-action-input');
+        if (isPrompt) { 
+          input.classList.remove('hidden'); 
+          input.value = defaultVal; 
+          input.focus(); 
+        } else { 
+          input.classList.add('hidden'); 
+        }
+        
+        const cleanup = (val) => { 
+          modal.classList.remove('open'); 
+          resolve(val); 
+        };
+        
+        document.getElementById('btn-action-cancel').onclick = () => cleanup(null);
+        document.getElementById('btn-action-confirm').onclick = () => cleanup(isPrompt ? input.value : true);
+        
+        modal.classList.add('open');
+      });
+    }
+
+    const generateId = () => Math.random().toString(36).substr(2, 9);
+    const getTodayString = () => new Date().toISOString().split('T')[0];
+    const formatTime = (secs) => { 
+      const h = Math.floor(secs/3600); 
+      const m = Math.floor((secs%3600)/60); 
+      const s = secs%60; 
+      return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`; 
+    };
+    const formatHours = (secs) => (secs/3600).toFixed(1) + ' hrs';
+
+    let soundMuted = false;
+    function playChime(freq = 587.33, freq2 = 880) {
+      if (soundMuted) return;
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext; 
+        if (!AudioContext) return;
+        const ctx = new AudioContext(); 
+        const osc = ctx.createOscillator(); 
+        const gain = ctx.createGain();
+        osc.type = 'sine'; 
+        osc.frequency.setValueAtTime(freq, ctx.currentTime); 
+        osc.frequency.exponentialRampToValueAtTime(freq2, ctx.currentTime + 0.18);
+        gain.gain.setValueAtTime(0.25, ctx.currentTime); 
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.9);
+        osc.connect(gain); 
+        gain.connect(ctx.destination); 
+        osc.start(); 
+        osc.stop(ctx.currentTime + 0.9);
+      } catch (e) {
+        console.warn(e);
+      }
+    }
+
+    function triggerNativeNotification(title, body) { 
+      if ('Notification' in window && Notification.permission === 'granted') { 
+        try { 
+          new Notification(title, { body: body }); 
+        } catch (err) {
+          console.warn(err);
+        } 
+      } 
+    }
+
+    let wakeLockSentinel = null;
+    let wakeLockRequestedByUser = false;
+    async function requestScreenWakeLock() {
+      if ('wakeLock' in navigator) {
+        try { 
+          wakeLockSentinel = await navigator.wakeLock.request('screen'); 
+          document.getElementById('btn-toggle-wakelock').classList.add('active'); 
+          document.getElementById('label-wakelock').textContent = 'Screen Awake: ACTIVE'; 
+          document.getElementById('wake-lock-badge').style.display = 'inline-flex'; 
+        } catch (err) {
+          console.warn(err);
+        }
+      }
+    }
+    function releaseScreenWakeLock() { 
+      if (wakeLockSentinel) { 
+        wakeLockSentinel.release().then(() => { 
+          wakeLockSentinel = null; 
+          document.getElementById('btn-toggle-wakelock').classList.remove('active'); 
+          document.getElementById('label-wakelock').textContent = 'Keep Screen Awake: Off'; 
+          document.getElementById('wake-lock-badge').style.display = 'none'; 
+        }); 
+      } 
+    }
+
+    document.getElementById('btn-toggle-wakelock').addEventListener('click', () => { 
+      wakeLockRequestedByUser = !wakeLockRequestedByUser; 
+      if (wakeLockRequestedByUser) {
+        requestScreenWakeLock(); 
+      } else {
+        releaseScreenWakeLock();
+      }
+    });
+
+    document.getElementById('btn-toggle-notifs').addEventListener('click', async () => { 
+      if ('Notification' in window) { 
+        const res = await Notification.requestPermission(); 
+        if (res === 'granted') { 
+          document.getElementById('btn-toggle-notifs').classList.add('active'); 
+          document.getElementById('label-notifs').textContent = 'Push Alerts: ACTIVE'; 
+          document.getElementById('notif-badge').style.display = 'inline-flex'; 
+        } 
+      } 
+    });
+
+    document.getElementById('btn-toggle-sound').addEventListener('click', () => { 
+      soundMuted = !soundMuted; 
+      document.getElementById('btn-toggle-sound').style.opacity = soundMuted ? '0.4' : '1'; 
+    });
+
+
+    let profiles = JSON.parse(localStorage.getItem('aether_profiles') || '["Main"]');
+    let currentProfile = localStorage.getItem('aether_profile') || profiles[0];
+    if (!profiles.includes(currentProfile)) {
+      currentProfile = profiles[0];
+    }
+    const sKey = (key) => `${currentProfile}_${key}`;
+
+    const DEFAULT_SUBJECTS = [{ id: 'sub-1', name: 'Advanced Machine Learning', color: '#00f0ff', tag: 'AI/Tech', goalMinutes: 60 }];
+    const DEFAULT_PIPELINES = [
+      {
+        id: 'pipe-sample-1', 
+        title: 'STM32 Firmware Build', 
+        color: '#00f0ff',
+        nodes: [
+          { id: 'n1', title: 'build', duration: '21s', link: '', x: 50, y: 150 },
+          { id: 'n2', title: 'report-build-status', duration: '4s', link: '', x: 350, y: 50 },
+          { id: 'n3', title: 'deploy', duration: '13s', link: 'https://github.io/deploy', x: 350, y: 250 }
+        ],
+        edges: [ 
+          { id: 'e1', source: 'n1', target: 'n2' }, 
+          { id: 'e2', source: 'n1', target: 'n3' } 
+        ]
+      }
+    ];
+
+    let subjects = [];
+    let studyLogs = [];
+    let savedPomoMinutes = 25;
+    let checklists = {};
+    let pipelines = [];
+
+    function renderProfileHeader() {
+      const container = document.getElementById('profile-buttons-container');
+      container.innerHTML = '';
+      profiles.slice(0, 3).forEach(p => {
+        const btn = document.createElement('button');
+        btn.className = `profile-btn ${p === currentProfile ? 'active' : ''}`;
+        btn.textContent = p.substring(0, 2).toUpperCase();
+        btn.title = `Switch to ${p}`;
+        btn.onclick = () => switchProfile(p);
+        container.appendChild(btn);
+      });
+    }
+
+    function switchProfile(pName) {
+      if (pName === currentProfile) return;
+      if (isRunning) pauseTimer();
+      currentProfile = pName;
+      localStorage.setItem('aether_profile', currentProfile);
+      loadProfileData();
+    }
+
+    function openProfileManager() {
+      const list = document.getElementById('profile-list-container');
+      list.innerHTML = '';
+      profiles.forEach(p => {
+        const item = document.createElement('div');
+        item.className = 'profile-list-item';
+        
+        const input = document.createElement('input');
+        input.value = p;
+        input.onchange = (e) => renameProfile(p, e.target.value.trim());
+        
+        const delBtn = document.createElement('button');
+        delBtn.className = 'icon-btn';
+        delBtn.style = 'width: 1.8rem; height: 1.8rem; border-color: rgba(239,68,68,0.3); color: var(--danger);';
+        delBtn.innerHTML = '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6"/></svg>';
+        
+        let confirmTimeout;
+        delBtn.onclick = () => {
+          if (profiles.length === 1) {
+            return promptUser("Cannot Delete", "You cannot delete your only profile.");
+          }
+          if (delBtn.textContent === "Sure?") {
+            clearTimeout(confirmTimeout);
+            deleteProfile(p);
+          } else {
+            delBtn.innerHTML = "<span style='font-size:0.6rem; font-weight:bold;'>Sure?</span>";
+            confirmTimeout = setTimeout(() => {
+               delBtn.innerHTML = '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6"/></svg>';
+            }, 2500);
+          }
+        };
+
+        item.appendChild(input);
+        item.appendChild(delBtn);
+        list.appendChild(item);
+      });
+      openModal('modal-manage-profiles');
+    }
+
+    function addProfile() {
+      const input = document.getElementById('new-profile-input');
+      const name = input.value.trim();
+      if (!name || profiles.includes(name)) return;
+      profiles.push(name);
+      localStorage.setItem('aether_profiles', JSON.stringify(profiles));
+      input.value = '';
+      openProfileManager();
+      renderProfileHeader();
+    }
+
+    function renameProfile(oldName, newName) {
+      if (!newName || newName === oldName || profiles.includes(newName)) {
+        return openProfileManager();
+      }
+      profiles = profiles.map(p => p === oldName ? newName : p);
+      localStorage.setItem('aether_profiles', JSON.stringify(profiles));
+      
+      const keysToMigrate = ['aether_subjects', 'aether_logs', 'aether_pomo_minutes', 'aether_checklists', 'aether_pipelines', 'aether_active_session'];
+      keysToMigrate.forEach(key => {
+        const data = localStorage.getItem(`${oldName}_${key}`);
+        if (data) { 
+          localStorage.setItem(`${newName}_${key}`, data); 
+          localStorage.removeItem(`${oldName}_${key}`); 
+        }
+      });
+      
+      if (currentProfile === oldName) {
+        currentProfile = newName;
+        localStorage.setItem('aether_profile', currentProfile);
+      }
+      openProfileManager();
+      renderProfileHeader();
+    }
+
+    function deleteProfile(name) {
+      profiles = profiles.filter(p => p !== name);
+      localStorage.setItem('aether_profiles', JSON.stringify(profiles));
+      
+      const keysToDelete = ['aether_subjects', 'aether_logs', 'aether_pomo_minutes', 'aether_checklists', 'aether_pipelines', 'aether_active_session'];
+      keysToDelete.forEach(key => {
+        localStorage.removeItem(`${name}_${key}`);
+      });
+      
+      if (currentProfile === name) { 
+        switchProfile(profiles[0]); 
+      } else { 
+        openProfileManager(); 
+        renderProfileHeader(); 
+      }
+    }
+
+    function persistData() {
+      localStorage.setItem(sKey('aether_subjects'), JSON.stringify(subjects));
+      localStorage.setItem(sKey('aether_logs'), JSON.stringify(studyLogs));
+      localStorage.setItem(sKey('aether_pomo_minutes'), savedPomoMinutes.toString());
+      localStorage.setItem(sKey('aether_checklists'), JSON.stringify(checklists));
+      localStorage.setItem(sKey('aether_pipelines'), JSON.stringify(pipelines));
+      
+      updateOverviewStats(); 
+      renderSubjectsList(); 
+      renderCalendar(); 
+      renderAnalytics(); 
+      
+      // CRITICAL FIX: Only redraw dashboard if pipeline is NOT active. Prevents popping out!
+      const pipelineCanvasActive = document.getElementById('pipelines-active').classList.contains('active');
+      if (activePipelineId === null && !pipelineCanvasActive) { 
+        renderPipelinesDashboard(); 
+      }
+    }
+
+    function loadProfileData() {
+      subjects = JSON.parse(localStorage.getItem(sKey('aether_subjects')) || 'null') || DEFAULT_SUBJECTS;
+      studyLogs = JSON.parse(localStorage.getItem(sKey('aether_logs')) || 'null') || [];
+      checklists = JSON.parse(localStorage.getItem(sKey('aether_checklists')) || 'null') || {};
+      
+      // Sanitization: Guarantee pipelines is properly structured
+      let loadedPipelines = JSON.parse(localStorage.getItem(sKey('aether_pipelines')) || 'null');
+      if (loadedPipelines && Array.isArray(loadedPipelines)) {
+        pipelines = loadedPipelines.map(p => ({
+          id: p.id || generateId(),
+          title: p.title || 'Untitled Plan',
+          color: p.color || '#00f0ff',
+          nodes: Array.isArray(p.nodes) ? p.nodes : [],
+          edges: Array.isArray(p.edges) ? p.edges : []
+        }));
+      } else {
+        pipelines = DEFAULT_PIPELINES;
+      }
+
+      savedPomoMinutes = parseInt(localStorage.getItem(sKey('aether_pomo_minutes')) || '25', 10);
+      if (!activeSubjectId || !subjects.find(s => s.id === activeSubjectId)) { 
+        activeSubjectId = subjects.length > 0 ? subjects[0].id : null; 
+      }
+      
+      renderProfileHeader();
+      restoreActiveSessionState(); 
+      updatePomoDuration(savedPomoMinutes); 
+      populateTimerSubjectSelect(); 
+      persistData();
+    }
+
+    let timerMode = 'stopwatch';
+    let pomoStage = 'focus';
+    let timerTargetSeconds = savedPomoMinutes * 60;
+    let activeSubjectId = null;
+    let isRunning = false;
+    let startTimestamp = null;
+    let accumulatedSeconds = 0;
+    let totalElapsedSeconds = 0;
+    let timerTickInterval = null;
+
+    const timerDisplay = document.getElementById('timer-display');
+    const timerRing = document.getElementById('timer-ring');
+    const timerStatusBadge = document.getElementById('timer-status-badge');
+
+    function saveActiveSessionState() { 
+      localStorage.setItem(sKey('aether_active_session'), JSON.stringify({ 
+        isRunning, 
+        timerMode, 
+        pomoStage, 
+        startTimestamp, 
+        accumulatedSeconds, 
+        timerTargetSeconds, 
+        activeSubjectId, 
+        savedPomoMinutes 
+      })); 
+    }
+
+    function clearActiveSessionState() { 
+      localStorage.removeItem(sKey('aether_active_session')); 
+    }
+
+    function restoreActiveSessionState() {
+      try {
+        const state = JSON.parse(localStorage.getItem(sKey('aether_active_session'))); 
+        if(!state) { 
+          resetTimerState(); 
+          return; 
+        }
+        
+        timerMode = state.timerMode || 'stopwatch'; 
+        pomoStage = state.pomoStage || 'focus'; 
+        timerTargetSeconds = state.timerTargetSeconds; 
+        activeSubjectId = state.activeSubjectId;
+        accumulatedSeconds = state.accumulatedSeconds; 
+        isRunning = state.isRunning; 
+        startTimestamp = state.startTimestamp;
+        
+        syncActiveSubjectUI();
+        
+        if (isRunning && startTimestamp) { 
+          const delta = Math.floor((Date.now() - startTimestamp) / 1000); 
+          totalElapsedSeconds = accumulatedSeconds + Math.max(0, delta); 
+          
+          if (timerMode === 'pomodoro' && totalElapsedSeconds >= timerTargetSeconds) {
+            handleTimerCompletion(); 
+          } else {
+            startOrResumeTimer(); 
+          }
+        } else { 
+          totalElapsedSeconds = accumulatedSeconds; 
+          updateTimerDial(); 
+        }
+      } catch (err) { 
+        resetTimerState(); 
+      }
+    }
+
+    function syncTimeDelta() { 
+      if (!isRunning || !startTimestamp) return; 
+      
+      totalElapsedSeconds = accumulatedSeconds + Math.max(0, Math.floor((Date.now() - startTimestamp) / 1000)); 
+      
+      if (timerMode === 'pomodoro' && totalElapsedSeconds >= timerTargetSeconds) { 
+        handleTimerCompletion(); 
+        return; 
+      } 
+      
+      updateTimerDial(); 
+    }
+
+    function updateTimerDial() { 
+      if (timerMode === 'pomodoro') { 
+        const remaining = Math.max(0, timerTargetSeconds - totalElapsedSeconds); 
+        timerDisplay.textContent = formatTime(remaining); 
+        timerRing.style.strokeDashoffset = 283 - (Math.min(totalElapsedSeconds / timerTargetSeconds, 1) * 283); 
+      } else { 
+        timerDisplay.textContent = formatTime(totalElapsedSeconds); 
+        timerRing.style.strokeDashoffset = 283 - (((totalElapsedSeconds % 3600) / 3600) * 283); 
+      } 
+    }
+
+    function startOrResumeTimer() { 
+      if (isRunning) return; 
+      
+      isRunning = true; 
+      startTimestamp = Date.now(); 
+      saveActiveSessionState(); 
+      
+      timerStatusBadge.textContent = (timerMode === 'pomodoro' && pomoStage !== 'focus') ? 'Resting...' : 'Session Active'; 
+      document.getElementById('timer-toggle-text').textContent = 'Pause'; 
+      document.getElementById('btn-timer-toggle').classList.replace('btn-ctrl-primary', 'btn-ctrl-pause'); 
+      
+      if (wakeLockRequestedByUser) {
+        requestScreenWakeLock(); 
+      }
+      
+      clearInterval(timerTickInterval); 
+      timerTickInterval = setInterval(syncTimeDelta, 500); 
+      syncTimeDelta(); 
+    }
+
+    function pauseTimer() { 
+      if (!isRunning) return; 
+      
+      accumulatedSeconds += Math.max(0, Math.floor((Date.now() - startTimestamp) / 1000)); 
+      totalElapsedSeconds = accumulatedSeconds; 
+      startTimestamp = null; 
+      isRunning = false; 
+      
+      clearInterval(timerTickInterval); 
+      saveActiveSessionState(); 
+      
+      timerStatusBadge.textContent = 'Paused'; 
+      document.getElementById('timer-toggle-text').textContent = 'Resume'; 
+      document.getElementById('btn-timer-toggle').classList.replace('btn-ctrl-pause', 'btn-ctrl-primary'); 
+      updateTimerDial(); 
+    }
+
+    function handleTimerCompletion() { 
+      pauseTimer(); 
+      playChime(659.25, 880); 
+      
+      const subName = subjects.find(s => s.id === activeSubjectId)?.name || 'Session'; 
+      triggerNativeNotification(
+        pomoStage === 'focus' ? "Time's Up!" : "Break Over!", 
+        pomoStage === 'focus' ? `Logged "${subName}".` : "Ready to focus?"
+      ); 
+      
+      timerStatusBadge.textContent = pomoStage === 'focus' ? 'Session Complete!' : 'Break Finished!'; 
+      
+      if (pomoStage === 'focus') {
+        stopAndLogTimer(); 
+      }
+    }
+
+    function stopAndLogTimer() { 
+      if (isRunning) { 
+        accumulatedSeconds += Math.floor((Date.now() - startTimestamp) / 1000); 
+        totalElapsedSeconds = accumulatedSeconds; 
+      } 
+      
+      const durationToLog = (timerMode === 'pomodoro') ? Math.min(totalElapsedSeconds, timerTargetSeconds) : totalElapsedSeconds; 
+      
+      if (durationToLog >= 5 && (timerMode === 'stopwatch' || pomoStage === 'focus')) { 
+        studyLogs.unshift({ 
+          id: 'log-' + Date.now(), 
+          subjectId: activeSubjectId, 
+          duration: durationToLog, 
+          timestamp: new Date().toISOString(), 
+          dateString: getTodayString(), 
+          note: document.getElementById('timer-session-note').value.trim() 
+        }); 
+        persistData(); 
+        playChime(523.25, 783.99); 
+      } 
+      
+      resetTimerState(); 
+      document.getElementById('timer-session-note').value = ''; 
+    }
+
+    function resetTimerState() { 
+      clearInterval(timerTickInterval); 
+      isRunning = false; 
+      startTimestamp = null; 
+      accumulatedSeconds = 0; 
+      totalElapsedSeconds = 0; 
+      
+      clearActiveSessionState(); 
+      
+      timerStatusBadge.textContent = 'Ready'; 
+      document.getElementById('timer-toggle-text').textContent = 'Start Focus'; 
+      document.getElementById('btn-timer-toggle').classList.replace('btn-ctrl-pause', 'btn-ctrl-primary'); 
+      updateTimerDial(); 
+    }
+
+    document.getElementById('btn-timer-toggle').addEventListener('click', () => { 
+      isRunning ? pauseTimer() : startOrResumeTimer(); 
+    });
+    document.getElementById('btn-timer-stop').addEventListener('click', stopAndLogTimer);
+
+    function updatePomoDuration(mins) { 
+      savedPomoMinutes = Math.max(1, Math.min(180, parseInt(mins, 10) || 25)); 
+      localStorage.setItem(sKey('aether_pomo_minutes'), savedPomoMinutes.toString()); 
+      
+      document.getElementById('input-pomo-minutes').value = savedPomoMinutes; 
+      document.getElementById('pomo-selected-label').textContent = `${savedPomoMinutes} Minutes`; 
+      
+      document.querySelectorAll('.preset-chip').forEach(c => {
+        c.classList.toggle('active', parseInt(c.dataset.mins) === savedPomoMinutes)
+      }); 
+      
+      if (timerMode === 'pomodoro' && pomoStage === 'focus') { 
+        timerTargetSeconds = savedPomoMinutes * 60; 
+        if (!isRunning) {
+          resetTimerState(); 
+        } else {
+          saveActiveSessionState(); 
+        }
+      } 
+    }
+
+    document.querySelectorAll('.preset-chip').forEach(c => c.addEventListener('click', () => updatePomoDuration(c.dataset.mins)));
+    document.getElementById('btn-step-dec').addEventListener('click', () => updatePomoDuration(savedPomoMinutes - 5)); 
+    document.getElementById('btn-step-inc').addEventListener('click', () => updatePomoDuration(savedPomoMinutes + 5));
+
+    document.getElementById('btn-mode-stopwatch').addEventListener('click', function() { 
+      this.classList.add('active'); 
+      document.getElementById('btn-mode-pomodoro').classList.remove('active'); 
+      document.getElementById('pomo-customizer-box').classList.add('hidden'); 
+      document.getElementById('pomo-stage-bar').classList.add('hidden'); 
+      timerMode = 'stopwatch'; 
+      syncActiveSubjectUI(); 
+      resetTimerState(); 
+    });
+
+    document.getElementById('btn-mode-pomodoro').addEventListener('click', function() { 
+      this.classList.add('active'); 
+      document.getElementById('btn-mode-stopwatch').classList.remove('active'); 
+      document.getElementById('pomo-customizer-box').classList.remove('hidden'); 
+      document.getElementById('pomo-stage-bar').classList.remove('hidden'); 
+      timerMode = 'pomodoro'; 
+      setPomoStage('focus'); 
+      resetTimerState(); 
+    });
+
+    document.querySelectorAll('.pomo-stage-btn').forEach(btn => btn.addEventListener('click', () => setPomoStage(btn.dataset.stage)));
+
+    function setPomoStage(stage) { 
+      pomoStage = stage; 
+      document.querySelectorAll('.pomo-stage-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.stage === stage)
+      }); 
+      
+      if (stage === 'focus') { 
+        timerTargetSeconds = savedPomoMinutes * 60; 
+        syncActiveSubjectUI(); 
+      } else if (stage === 'shortBreak') { 
+        timerTargetSeconds = 5 * 60; 
+        timerRing.style.stroke = 'var(--break-green)'; 
+      } else if (stage === 'longBreak') { 
+        timerTargetSeconds = 15 * 60; 
+        timerRing.style.stroke = 'var(--break-purple)'; 
+      } 
+      resetTimerState(); 
+    }
+
+    function populateTimerSubjectSelect() { 
+      const sel = document.getElementById('timer-subject-select'); 
+      sel.innerHTML = ''; 
+      subjects.forEach(s => { 
+        const opt = document.createElement('option'); 
+        opt.value = s.id; 
+        opt.textContent = s.name; 
+        if(s.id === activeSubjectId) opt.selected = true; 
+        sel.appendChild(opt); 
+      }); 
+      syncActiveSubjectUI(); 
+    }
+
+    function syncActiveSubjectUI() { 
+      const sub = subjects.find(s => s.id === activeSubjectId) || subjects[0]; 
+      if (sub) { 
+        document.getElementById('timer-selected-title').textContent = sub.name; 
+        if (timerMode !== 'pomodoro' || pomoStage === 'focus') {
+          timerRing.style.stroke = sub.color; 
+        }
+      } 
+    }
+
+    document.getElementById('timer-subject-select').addEventListener('change', (e) => { 
+      activeSubjectId = e.target.value; 
+      syncActiveSubjectUI(); 
+      saveActiveSessionState(); 
+    });
+
+
+    function updateOverviewStats() {
+      const today = getTodayString();
+      const pastWeek = new Date(); 
+      pastWeek.setDate(pastWeek.getDate() - 7);
+      
+      let todaySecs = 0;
+      let weekSecs = 0;
+      let allTimeSecs = 0;
+      
+      studyLogs.forEach(l => { 
+        allTimeSecs += l.duration; 
+        if(l.dateString === today) todaySecs += l.duration; 
+        if(new Date(l.dateString) >= pastWeek) weekSecs += l.duration; 
+      });
+      
+      document.getElementById('stat-today').textContent = formatTime(todaySecs); 
+      document.getElementById('stat-week').textContent = formatHours(weekSecs); 
+      document.getElementById('stat-subjects-count').textContent = subjects.length; 
+      document.getElementById('stat-alltime-sub').textContent = `All-time: ${formatHours(allTimeSecs)}`;
+      
+      let streak = 0;
+      let check = new Date();
+      let activeDays = new Set(studyLogs.map(l => l.dateString));
+      
+      while(true) { 
+        if(activeDays.has(check.toISOString().split('T')[0])) { 
+          streak++; 
+          check.setDate(check.getDate() - 1); 
+        } else { 
+          if(streak === 0) { 
+            check.setDate(check.getDate() - 1); 
+            if(activeDays.has(check.toISOString().split('T')[0])) { 
+              streak++; 
+              check.setDate(check.getDate() - 1); 
+              continue; 
+            } 
+          } 
+          break; 
+        } 
+      }
+      document.getElementById('stat-streak').textContent = `${streak} Days`;
+    }
+
+    function renderSubjectsList() {
+      const cont = document.getElementById('subjects-container'); 
+      cont.innerHTML = '';
+      
+      subjects.forEach(sub => {
+        const totalSecs = studyLogs.filter(l => l.subjectId === sub.id).reduce((a,c) => a+c.duration, 0);
+        const card = document.createElement('div'); 
+        card.className = 'subject-card';
+        
+        card.innerHTML = `
+          <div class="subject-head">
+            <span class="subject-pill">
+              <span class="subject-color-dot" style="background:${sub.color};"></span>${sub.tag||'General'}
+            </span>
+            <div class="subject-actions">
+              <button class="icon-btn edit-sub" style="width:1.75rem;height:1.75rem;">
+                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              </button>
+              <button class="icon-btn del-sub" style="width:1.75rem;height:1.75rem;">
+                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6"/></svg>
+              </button>
+            </div>
+          </div>
+          <h3 class="subject-name">${sub.name}</h3>
+          <div class="subject-time-summary">
+            <div>
+              <span>Total</span><strong style="color:#fff;">${formatHours(totalSecs)}</strong>
+            </div>
+          </div>
+          <button class="subject-btn-launch">
+            <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg> Launch Timer
+          </button>
+        `;
+        
+        card.querySelector('.subject-btn-launch').onclick = (e) => { 
+          e.stopPropagation(); 
+          activeSubjectId = sub.id; 
+          populateTimerSubjectSelect(); 
+          switchTab('timer'); 
+          startOrResumeTimer(); 
+        };
+        
+        card.querySelector('.edit-sub').onclick = (e) => { 
+          e.stopPropagation(); 
+          openSubjectModal(sub); 
+        };
+        
+        card.querySelector('.del-sub').onclick = async (e) => { 
+          e.stopPropagation(); 
+          const res = await promptUser("Delete Subject", `Are you sure you want to delete "${sub.name}"?`); 
+          if(res) { 
+            subjects = subjects.filter(s => s.id !== sub.id); 
+            studyLogs = studyLogs.filter(l => l.subjectId !== sub.id); 
+            persistData(); 
+            populateTimerSubjectSelect(); 
+          } 
+        };
+        
+        cont.appendChild(card);
+      });
+    }
+
+    function renderAnalytics() {
+      const cont = document.getElementById('analytics-distribution-list'); 
+      cont.innerHTML = '';
+      
+      const totalAll = studyLogs.reduce((a,c) => a+c.duration, 0) || 1;
+      
+      subjects.forEach(sub => {
+        const subSecs = studyLogs.filter(l => l.subjectId === sub.id).reduce((a,c) => a+c.duration, 0);
+        const pct = ((subSecs/totalAll)*100).toFixed(1);
+        
+        cont.innerHTML += `
+          <div class="breakdown-row">
+            <div class="breakdown-info">
+              <div style="display:flex; gap:0.4rem; align-items:center;">
+                <span style="width:8px;height:8px;border-radius:50%;background:${sub.color};"></span>
+                <span style="font-weight:600;">${sub.name}</span>
+              </div>
+              <div>
+                <span class="font-mono text-neon">${pct}%</span>
+              </div>
+            </div>
+            <div style="background:rgba(255,255,255,0.05); height:8px; border-radius:4px;">
+              <div style="width:${pct}%; background:${sub.color}; height:100%; border-radius:4px;"></div>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+
+    let currentCalDate = new Date();
+    let selectedCalDayStr = getTodayString();
+
+    function renderCalendar() {
+      const year = currentCalDate.getFullYear();
+      const month = currentCalDate.getMonth();
+      
+      document.getElementById('cal-month-label').textContent = currentCalDate.toLocaleString('default', { month: 'short', year: 'numeric' });
+      
+      const grid = document.getElementById('calendar-grid-cells'); 
+      grid.innerHTML = '';
+      
+      const firstDay = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      
+      ['S','M','T','W','T','F','S'].forEach(d => { 
+        const l = document.createElement('div'); 
+        l.className = 'calendar-day-label'; 
+        l.textContent = d; 
+        grid.appendChild(l); 
+      });
+      
+      for(let i=0; i<firstDay; i++) { 
+        const b = document.createElement('div'); 
+        b.className = 'cal-day-empty'; 
+        grid.appendChild(b); 
+      }
+      
+      for(let day=1; day<=daysInMonth; day++) {
+        const dayStr = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+        const dSecs = studyLogs.filter(l => l.dateString === dayStr).reduce((a,c) => a+c.duration, 0);
+        const dHrs = dSecs/3600;
+        
+        let hClass = 'heat-lvl-0'; 
+        if(dSecs > 0) { 
+          if(dHrs < 0.75) hClass = 'heat-lvl-1'; 
+          else if(dHrs < 1.75) hClass = 'heat-lvl-2'; 
+          else if(dHrs < 3.0) hClass = 'heat-lvl-3'; 
+          else hClass = 'heat-lvl-4'; 
+        }
+        
+        const cell = document.createElement('div'); 
+        cell.className = `cal-day-cell ${hClass} ${selectedCalDayStr === dayStr ? 'is-selected' : ''}`; 
+        cell.textContent = day;
+        cell.onclick = () => { 
+          selectedCalDayStr = dayStr; 
+          renderCalendar(); 
+        }; 
+        grid.appendChild(cell);
+      }
+      inspectCalendarDate(selectedCalDayStr);
+    }
+
+    document.getElementById('cal-prev').addEventListener('click', () => { 
+      currentCalDate.setMonth(currentCalDate.getMonth() - 1); 
+      renderCalendar(); 
+    });
+    
+    document.getElementById('cal-next').addEventListener('click', () => { 
+      currentCalDate.setMonth(currentCalDate.getMonth() + 1); 
+      renderCalendar(); 
+    });
+
+    function inspectCalendarDate(dateStr) {
+      document.getElementById('cal-inspect-date').textContent = new Date(dateStr + 'T00:00:00').toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+      const dayLogs = studyLogs.filter(l => l.dateString === dateStr);
+      document.getElementById('cal-inspect-total').textContent = formatHours(dayLogs.reduce((a,c) => a+c.duration, 0));
+      
+      const breakdown = document.getElementById('cal-inspect-breakdown'); 
+      breakdown.innerHTML = '';
+      
+      if (dayLogs.length === 0) { 
+        breakdown.innerHTML = '<span style="color:var(--text-dim);">No study sessions recorded.</span>'; 
+      } else {
+        const grouped = {}; 
+        dayLogs.forEach(l => { grouped[l.subjectId] = (grouped[l.subjectId] || 0) + l.duration; });
+        
+        Object.entries(grouped).forEach(([sId, secs]) => {
+          const sub = subjects.find(s => s.id === sId);
+          breakdown.innerHTML += `
+            <div style="display:flex; justify-content:space-between; margin:0.35rem 0;">
+              <div style="display:flex; gap:0.4rem; align-items:center;">
+                <span style="width:8px;height:8px;border-radius:50%;background:${sub?.color||'#64748b'};"></span>
+                <span style="color:#fff;">${sub?.name||'Archived'}</span>
+              </div>
+              <span class="font-mono text-neon">${formatTime(secs)}</span>
+            </div>
+          `;
+        });
+      }
+      renderChecklist(dateStr);
+    }
+
+    let draggedChecklistTaskIndex = null;
+    
+    function renderChecklist(dateStr) {
+      const tasks = checklists[dateStr] || [];
+      const container = document.getElementById('checklist-tasks'); 
+      container.innerHTML = '';
+      
+      const total = tasks.length;
+      const completed = tasks.filter(t => t.done).length;
+      const progress = total === 0 ? 0 : (completed / total) * 100;
+      
+      document.getElementById('checklist-stats-text').textContent = `${completed}/${total} Completed`;
+      document.getElementById('checklist-progress').style.width = `${progress}%`;
+
+      tasks.forEach((t, index) => {
+        const item = document.createElement('div'); 
+        item.className = `checklist-task-item ${t.done ? 'done' : ''}`; 
+        item.draggable = true; 
+        item.dataset.index = index;
+        
+        item.innerHTML = `
+          <div class="checklist-drag-handle" title="Drag to reorder">
+            <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M8 6a2 2 0 11-4 0 2 2 0 014 0zm0 6a2 2 0 11-4 0 2 2 0 014 0zm0 6a2 2 0 11-4 0 2 2 0 014 0zm8-12a2 2 0 11-4 0 2 2 0 014 0zm0 6a2 2 0 11-4 0 2 2 0 014 0zm0 6a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+          </div>
+          <div class="checklist-task-num">#${index + 1}</div>
+          <input type="checkbox" class="checklist-checkbox" ${t.done ? 'checked' : ''}>
+          <div class="checklist-task-text" contenteditable="true" title="Click to edit">${t.text}</div>
+          <div style="display:flex; gap:0.4rem; margin-left:auto;">
+            <button class="icon-btn del-task-btn" style="width:1.5rem; height:1.5rem; color:var(--danger); border-color:rgba(239,68,68,0.2);">
+              <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6"/></svg>
+            </button>
+          </div>
+        `;
+
+        item.querySelector('.checklist-checkbox').addEventListener('change', (e) => { 
+          tasks[index].done = e.target.checked; 
+          persistData(); 
+          renderChecklist(dateStr); 
+        });
+        
+        const textEl = item.querySelector('.checklist-task-text');
+        textEl.addEventListener('blur', () => { 
+          if(textEl.textContent.trim()) { 
+            tasks[index].text = textEl.textContent.trim(); 
+            persistData(); 
+          } else { 
+            textEl.textContent = tasks[index].text; 
+          } 
+        });
+        
+        textEl.addEventListener('keydown', (e) => { 
+          if (e.key === 'Enter') { 
+            e.preventDefault(); 
+            textEl.blur(); 
+          } 
+        });
+        
+        item.querySelector('.del-task-btn').addEventListener('click', () => { 
+          tasks.splice(index, 1); 
+          persistData(); 
+          renderChecklist(dateStr); 
+        });
+
+        item.addEventListener('dragstart', () => { 
+          draggedChecklistTaskIndex = index; 
+          item.classList.add('dragging'); 
+        });
+        
+        item.addEventListener('dragend', () => { 
+          item.classList.remove('dragging'); 
+          draggedChecklistTaskIndex = null; 
+        });
+        
+        item.addEventListener('dragover', e => e.preventDefault());
+        
+        item.addEventListener('drop', e => { 
+          e.preventDefault(); 
+          if (draggedChecklistTaskIndex !== null && draggedChecklistTaskIndex !== index) { 
+            const moved = tasks.splice(draggedChecklistTaskIndex, 1)[0]; 
+            tasks.splice(index, 0, moved); 
+            persistData(); 
+            renderChecklist(dateStr); 
+          } 
+        });
+        
+        container.appendChild(item);
+      });
+      container.addEventListener('dragover', e => e.preventDefault());
+    }
+
+    document.getElementById('btn-add-checklist-task').addEventListener('click', () => {
+      const input = document.getElementById('checklist-input'); 
+      const text = input.value.trim(); 
+      if (!text) return;
+      
+      if (!checklists[selectedCalDayStr]) {
+        checklists[selectedCalDayStr] = [];
+      }
+      
+      checklists[selectedCalDayStr].push({ id: generateId(), text: text, done: false });
+      input.value = ''; 
+      persistData(); 
+      renderChecklist(selectedCalDayStr);
+    });
+
+    /* ================== PIPELINE NODE EDITOR (with mobile zoom/pan) ================== */
+
+    let activePipelineId = null;
+    let draggedGHNode = null; 
+    let ghNodeOffset = { x: 0, y: 0 };
+    let drawingEdgeSourceId = null;
+
+    // Zoom/Pan state for the nodes layer. The SVG edges layer stays in screen-space
+    // (it reads live getBoundingClientRect() positions) so it never needs its own transform.
+    let canvasScale = 1;
+    let canvasPanX = 0;
+    let canvasPanY = 0;
+    const MIN_SCALE = 0.3;
+    const MAX_SCALE = 2.5;
+
+    let isPanning = false;
+    let panStart = { x: 0, y: 0 };
+    let panStartOffset = { x: 0, y: 0 };
+
+    let pinchStartDist = null;
+    let pinchStartScale = 1;
+    let pinchStartPan = { x: 0, y: 0 };
+    let pinchMidpoint = { x: 0, y: 0 };
+    
+    const svgCanvas = document.getElementById('pipeline-svg');
+    const edgesGroup = document.getElementById('pipeline-edges-group');
+    const nodesLayer = document.getElementById('pipeline-nodes-layer');
+    const edgePreview = document.getElementById('pipeline-edge-preview');
+    const editorCanvas = document.getElementById('pipeline-canvas');
+    const zoomLevelLabel = document.getElementById('zoom-level-label');
+
+    // Convert a point expressed relative to the canvas element (screen-space, post-transform)
+    // into "world" coordinates (the un-transformed coordinate space nodes are stored in).
+    function screenToWorld(canvasRelX, canvasRelY) {
+      return {
+        x: (canvasRelX - canvasPanX) / canvasScale,
+        y: (canvasRelY - canvasPanY) / canvasScale
+      };
+    }
+
+    function updateCanvasTransform() {
+      nodesLayer.style.transform = `translate(${canvasPanX}px, ${canvasPanY}px) scale(${canvasScale})`;
+      if (zoomLevelLabel) zoomLevelLabel.textContent = `${Math.round(canvasScale * 100)}%`;
+      updateAllEdges();
+    }
+
+    function zoomCanvasAt(factor, screenX, screenY) {
+      const rect = editorCanvas.getBoundingClientRect();
+      const cx = screenX - rect.left;
+      const cy = screenY - rect.top;
+      const world = screenToWorld(cx, cy);
+      canvasScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, canvasScale * factor));
+      canvasPanX = cx - world.x * canvasScale;
+      canvasPanY = cy - world.y * canvasScale;
+      updateCanvasTransform();
+    }
+
+    function resetCanvasView() {
+      canvasScale = 1;
+      canvasPanX = 0;
+      canvasPanY = 0;
+      updateCanvasTransform();
+    }
+
+    document.getElementById('btn-zoom-in').addEventListener('click', () => {
+      const rect = editorCanvas.getBoundingClientRect();
+      zoomCanvasAt(1.25, rect.left + rect.width / 2, rect.top + rect.height / 2);
+    });
+    document.getElementById('btn-zoom-out').addEventListener('click', () => {
+      const rect = editorCanvas.getBoundingClientRect();
+      zoomCanvasAt(0.8, rect.left + rect.width / 2, rect.top + rect.height / 2);
+    });
+    document.getElementById('btn-zoom-reset').addEventListener('click', resetCanvasView);
+
+    // Desktop: mouse wheel to zoom
+    editorCanvas.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const factor = e.deltaY < 0 ? 1.1 : 0.9;
+      zoomCanvasAt(factor, e.clientX, e.clientY);
+    }, { passive: false });
+
+    // Desktop: click-drag on empty canvas to pan
+    editorCanvas.addEventListener('mousedown', (e) => {
+      if (e.target !== editorCanvas && e.target !== svgCanvas && e.target.tagName !== 'svg') return;
+      if (e.button !== 0) return;
+      isPanning = true;
+      editorCanvas.classList.add('is-panning');
+      panStart = { x: e.clientX, y: e.clientY };
+      panStartOffset = { x: canvasPanX, y: canvasPanY };
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isPanning) return;
+      canvasPanX = panStartOffset.x + (e.clientX - panStart.x);
+      canvasPanY = panStartOffset.y + (e.clientY - panStart.y);
+      updateCanvasTransform();
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (isPanning) {
+        isPanning = false;
+        editorCanvas.classList.remove('is-panning');
+      }
+    });
+
+    // Mobile: pinch-to-zoom and single-finger pan on empty canvas.
+    // Touches that start on a node or port are stopped from propagating here
+    // (see handleNodeStart / handlePortStart), so this only fires on empty space.
+    editorCanvas.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        isPanning = false;
+        draggedGHNode = null;
+        drawingEdgeSourceId = null;
+        edgePreview.style.display = 'none';
+        const [t1, t2] = e.touches;
+        pinchStartDist = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+        pinchStartScale = canvasScale;
+        pinchStartPan = { x: canvasPanX, y: canvasPanY };
+        pinchMidpoint = { x: (t1.clientX + t2.clientX) / 2, y: (t1.clientY + t2.clientY) / 2 };
+      } else if (e.touches.length === 1 && !draggedGHNode && !drawingEdgeSourceId) {
+        const t = e.touches[0];
+        isPanning = true;
+        editorCanvas.classList.add('is-panning');
+        panStart = { x: t.clientX, y: t.clientY };
+        panStartOffset = { x: canvasPanX, y: canvasPanY };
+      }
+    }, { passive: false });
+
+    editorCanvas.addEventListener('touchmove', (e) => {
+      if (e.touches.length === 2 && pinchStartDist) {
+        e.preventDefault();
+        const [t1, t2] = e.touches;
+        const dist = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+        const newScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, pinchStartScale * (dist / pinchStartDist)));
+        const rect = editorCanvas.getBoundingClientRect();
+        const cx = pinchMidpoint.x - rect.left;
+        const cy = pinchMidpoint.y - rect.top;
+        const world = { x: (cx - pinchStartPan.x) / pinchStartScale, y: (cy - pinchStartPan.y) / pinchStartScale };
+        canvasScale = newScale;
+        canvasPanX = cx - world.x * canvasScale;
+        canvasPanY = cy - world.y * canvasScale;
+        updateCanvasTransform();
+      } else if (isPanning && e.touches.length === 1) {
+        e.preventDefault();
+        const t = e.touches[0];
+        canvasPanX = panStartOffset.x + (t.clientX - panStart.x);
+        canvasPanY = panStartOffset.y + (t.clientY - panStart.y);
+        updateCanvasTransform();
+      }
+    }, { passive: false });
+
+    const endCanvasTouch = (e) => {
+      if (e.touches.length < 2) pinchStartDist = null;
+      if (e.touches.length === 0) {
+        isPanning = false;
+        editorCanvas.classList.remove('is-panning');
+      }
+    };
+    editorCanvas.addEventListener('touchend', endCanvasTouch);
+    editorCanvas.addEventListener('touchcancel', endCanvasTouch);
+
+    function renderPipelinesDashboard() {
+      document.getElementById('pipelines-dashboard').classList.remove('hidden');
+      document.getElementById('pipelines-active').classList.add('hidden');
+      
+      const grid = document.getElementById('pipelines-grid'); 
+      grid.innerHTML = '';
+      
+      pipelines.forEach(p => {
+        const card = document.createElement('div'); 
+        card.className = 'pipeline-card';
+        card.innerHTML = `
+          <div class="pipeline-color-bar" style="background: ${p.color};"></div>
+          <h3 class="pipeline-card-title">${p.title}</h3>
+          <p style="font-size:0.8rem; color:var(--text-dim);">${(p.nodes||[]).length} Nodes</p>
+        `;
+        card.onclick = () => openPipeline(p.id); 
+        grid.appendChild(card);
+      });
+    }
+
+    function createPipeline() {
+      const title = document.getElementById('input-pipe-title').value.trim(); 
+      const color = document.getElementById('input-pipe-color').value; 
+      
+      if (!title) return;
+      
+      pipelines.push({ id: 'pipe-' + Date.now(), title, color, nodes: [], edges: [] });
+      
+      document.getElementById('input-pipe-title').value = ''; 
+      persistData(); 
+      closeModal('modal-add-pipeline'); 
+      renderPipelinesDashboard();
+    }
+
+    function openPipeline(id) {
+      activePipelineId = id;
+      document.getElementById('pipelines-dashboard').classList.add('hidden');
+      document.getElementById('pipelines-active').classList.remove('hidden');
+      canvasScale = 1;
+      canvasPanX = 0;
+      canvasPanY = 0;
+      renderNodeGraph();
+    }
+    
+    function closePipeline() { 
+      activePipelineId = null; 
+      renderPipelinesDashboard(); 
+    }
+    
+    async function promptDeleteActivePipeline() {
+       const res = await promptUser("Delete Pipeline", "Are you sure you want to delete this pipeline and all its nodes?");
+       if (res) { 
+         pipelines = pipelines.filter(p => p.id !== activePipelineId); 
+         persistData(); 
+         closePipeline(); 
+       }
+    }
+    
+    function getBezierPath(startX, startY, endX, endY) {
+      const curvature = Math.max(Math.abs(endX - startX) / 2, 40);
+      return `M ${startX} ${startY} C ${startX + curvature} ${startY}, ${endX - curvature} ${endY}, ${endX} ${endY}`;
+    }
+
+    function renderNodeGraph() {
+      if (!activePipelineId) return;
+      const pipe = pipelines.find(p => p.id === activePipelineId);
+      if (!pipe) return;
+      
+      document.getElementById('active-pipeline-title').textContent = pipe.title;
+      document.getElementById('active-pipeline-title').style.color = pipe.color;
+      
+      edgesGroup.innerHTML = '';
+      nodesLayer.innerHTML = '';
+      
+      if (!pipe.nodes) pipe.nodes = [];
+      if (!pipe.edges) pipe.edges = [];
+      
+      pipe.nodes.forEach(node => {
+        const div = document.createElement('div');
+        div.className = 'gh-node';
+        div.dataset.id = node.id;
+        div.style.left = `${node.x}px`;
+        div.style.top = `${node.y}px`;
+        
+        const checkSvg = `<svg class="gh-icon-check" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path></svg>`;
+        
+        div.innerHTML = `
+          <button class="gh-node-delete" title="Delete Node">X</button>
+          <div class="gh-node-header">
+            <div class="gh-node-title-group">
+              ${checkSvg}
+              <span class="gh-node-title">${node.title}</span>
+            </div>
+            <span class="gh-node-duration">${node.duration || ''}</span>
+          </div>
+          ${node.link ? `<a href="${node.link}" class="gh-node-link" target="_blank" onclick="event.stopPropagation()">${node.link}</a>` : ''}
+          <div class="gh-port gh-port-in" data-type="in"></div>
+          <div class="gh-port gh-port-out" data-type="out"></div>
+        `;
+
+        const handleNodeStart = (e) => {
+          if (e.target.classList.contains('gh-port') || e.target.tagName === 'A' || e.target.tagName === 'BUTTON') return;
+          if (e.type === 'touchstart' && e.touches.length > 1) return; // ignore multi-touch (let canvas handle pinch)
+          if (e.type !== 'touchstart') e.preventDefault(); // allow mobile double-tap
+          e.stopPropagation(); 
+          const rect = div.getBoundingClientRect();
+          const coords = getEventCoords(e);
+          draggedGHNode = node;
+          ghNodeOffset = { x: coords.clientX - rect.left, y: coords.clientY - rect.top };
+        };
+
+        div.addEventListener('mousedown', handleNodeStart);
+        div.addEventListener('touchstart', handleNodeStart, {passive: false});
+
+        const portOut = div.querySelector('.gh-port-out');
+        const handlePortStart = (e) => {
+          if (e.type === 'touchstart' && e.touches.length > 1) return;
+          e.preventDefault();
+          e.stopPropagation();
+          drawingEdgeSourceId = node.id;
+          portOut.classList.add('port-active');
+          edgePreview.style.display = 'block';
+        };
+
+        portOut.addEventListener('mousedown', handlePortStart);
+        portOut.addEventListener('touchstart', handlePortStart, {passive: false});
+
+        div.querySelector('.gh-node-delete').addEventListener('click', (e) => {
+          e.stopPropagation();
+          pipe.nodes = pipe.nodes.filter(n => n.id !== node.id);
+          pipe.edges = pipe.edges.filter(edge => edge.source !== node.id && edge.target !== node.id);
+          persistData(); 
+          renderNodeGraph();
+        });
+        div.querySelector('.gh-node-delete').addEventListener('touchstart', (e) => {
+          e.stopPropagation();
+        }, {passive: true});
+
+        div.addEventListener('dblclick', async (e) => {
+          e.stopPropagation();
+          if (e.target.classList.contains('gh-port')) return;
+          const newTitle = await promptUser(
+            "Edit Node", 
+            "Enter title, duration, link (comma separated)", 
+            true, 
+            `${node.title},${node.duration||''},${node.link||''}`
+          );
+          if (newTitle) {
+            const parts = newTitle.split(',');
+            node.title = parts[0]?.trim() || 'Node';
+            node.duration = parts[1]?.trim() || '';
+            node.link = parts[2]?.trim() || '';
+            persistData(); 
+            renderNodeGraph();
+          }
+        });
+
+        nodesLayer.appendChild(div);
+      });
+
+      updateCanvasTransform();
+      setTimeout(() => updateAllEdges(), 0);
+    }
+
+    function updateAllEdges() {
+      if (!activePipelineId) return;
+      const pipe = pipelines.find(p => p.id === activePipelineId);
+      if(!pipe) return;
+      
+      const canvasRect = editorCanvas.getBoundingClientRect();
+      edgesGroup.innerHTML = '';
+
+      pipe.edges.forEach(edge => {
+        const sNode = document.querySelector(`.gh-node[data-id="${edge.source}"]`);
+        const tNode = document.querySelector(`.gh-node[data-id="${edge.target}"]`);
+        
+        if (sNode && tNode) {
+          const sRect = sNode.getBoundingClientRect();
+          const tRect = tNode.getBoundingClientRect();
+          
+          const startX = (sRect.right - canvasRect.left) + 6;
+          const startY = (sRect.top + sRect.height/2) - canvasRect.top;
+          const endX = (tRect.left - canvasRect.left) - 6;
+          const endY = (tRect.top + tRect.height/2) - canvasRect.top;
+
+          const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+          path.setAttribute("d", getBezierPath(startX, startY, endX, endY));
+          path.setAttribute("class", "pipeline-edge");
+          path.dataset.edgeId = edge.id;
+          
+          path.onclick = (e) => {
+            e.stopPropagation();
+            pipe.edges = pipe.edges.filter(x => x.id !== edge.id);
+            persistData(); 
+            updateAllEdges();
+          };
+          
+          edgesGroup.appendChild(path);
+        }
+      });
+    }
+
+    function updateNodePosition(node) {
+      const div = document.querySelector(`.gh-node[data-id="${node.id}"]`);
+      if (div) { 
+        div.style.left = `${node.x}px`; 
+        div.style.top = `${node.y}px`; 
+      }
+      updateAllEdges();
+    }
+
+    async function addPipelineNode(worldX, worldY) {
+      if (!activePipelineId) return;
+      const pipe = pipelines.find(p => p.id === activePipelineId);
+
+      // If no explicit world position was given (e.g. the toolbar "+ Node" button),
+      // place the new node at the center of the current viewport.
+      if (typeof worldX !== 'number' || typeof worldY !== 'number') {
+        const rect = editorCanvas.getBoundingClientRect();
+        const center = screenToWorld(rect.width / 2, rect.height / 2);
+        worldX = center.x - 110;
+        worldY = center.y - 40;
+      }
+
+      const val = await promptUser("New Node", "Enter title, duration (optional) (comma separated)", true, "build, 10s");
+      
+      if (val) {
+        const parts = val.split(',');
+        pipe.nodes.push({ 
+          id: generateId(), 
+          title: parts[0]?.trim() || 'Node', 
+          duration: parts[1]?.trim() || '', 
+          link: '', 
+          x: worldX, 
+          y: worldY 
+        });
+        persistData(); 
+        renderNodeGraph();
+      }
+    }
+
+    const handleGlobalMove = (e) => {
+      if (!activePipelineId) return;
+      if (!draggedGHNode && !drawingEdgeSourceId) return;
+
+      if (e.type === 'touchmove') {
+        e.preventDefault(); // crucial for mobile dragging
+      }
+
+      const rect = editorCanvas.getBoundingClientRect();
+      const coords = getEventCoords(e);
+      const mouseX = coords.clientX - rect.left;
+      const mouseY = coords.clientY - rect.top;
+
+      if (draggedGHNode) {
+        // mouseX/mouseY and ghNodeOffset are both in screen-space (post-zoom),
+        // so convert the resulting screen position back into world coordinates.
+        const desiredScreenX = mouseX - ghNodeOffset.x;
+        const desiredScreenY = mouseY - ghNodeOffset.y;
+        const world = screenToWorld(desiredScreenX, desiredScreenY);
+        draggedGHNode.x = world.x;
+        draggedGHNode.y = world.y;
+        updateNodePosition(draggedGHNode);
+      } 
+      else if (drawingEdgeSourceId) {
+        const sNodeDiv = document.querySelector(`.gh-node[data-id="${drawingEdgeSourceId}"]`);
+        if (sNodeDiv) {
+          const sRect = sNodeDiv.getBoundingClientRect();
+          const startX = (sRect.right - rect.left) + 6;
+          const startY = (sRect.top + sRect.height/2) - rect.top;
+          edgePreview.setAttribute('d', getBezierPath(startX, startY, mouseX, mouseY));
+        }
+      }
+    };
+
+    window.addEventListener('mousemove', handleGlobalMove);
+    window.addEventListener('touchmove', handleGlobalMove, {passive: false});
+
+    const handleGlobalEnd = (e) => {
+      if (draggedGHNode) { 
+        persistData(); 
+        draggedGHNode = null; 
+      }
+      if (drawingEdgeSourceId) {
+        let targetElement = e.target;
+        if (e.type === 'touchend' || e.type === 'touchcancel') {
+          const coords = getEventCoords(e);
+          targetElement = document.elementFromPoint(coords.clientX, coords.clientY);
+        }
+
+        if (targetElement) {
+          const portIn = targetElement.closest('.gh-port-in');
+          if (portIn) {
+            const targetNodeId = portIn.closest('.gh-node').dataset.id;
+            if (drawingEdgeSourceId !== targetNodeId) {
+              const pipe = pipelines.find(p => p.id === activePipelineId);
+              const exists = pipe.edges.find(edge => edge.source === drawingEdgeSourceId && edge.target === targetNodeId);
+              if (!exists) { 
+                pipe.edges.push({ id: generateId(), source: drawingEdgeSourceId, target: targetNodeId }); 
+                persistData(); 
+                renderNodeGraph(); 
+              }
+            }
+          }
+        }
+        document.querySelectorAll('.gh-port.port-active').forEach(p => p.classList.remove('port-active'));
+        drawingEdgeSourceId = null;
+        edgePreview.style.display = 'none';
+      }
+    };
+
+    window.addEventListener('mouseup', handleGlobalEnd);
+    window.addEventListener('touchend', handleGlobalEnd);
+    window.addEventListener('touchcancel', handleGlobalEnd);
+
+    if (editorCanvas) {
+      editorCanvas.addEventListener('dblclick', (e) => {
+        if (e.target.id === 'pipeline-canvas' || e.target.tagName === 'svg') {
+          const rect = editorCanvas.getBoundingClientRect();
+          const world = screenToWorld(e.clientX - rect.left, e.clientY - rect.top);
+          addPipelineNode(world.x, world.y);
+        }
+      });
+    }
+
+    /* ================== END PIPELINE NODE EDITOR ================== */
+
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-view').forEach(v => v.classList.add('hidden'));
+      document.getElementById(`view-${tabId}`).classList.remove('hidden');
+      
+      document.querySelectorAll('.nav-btn, .mobile-nav-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.tab === tabId);
+      });
+      
+      if (tabId === 'dashboard') updateOverviewStats();
+      if (tabId === 'calendar') renderCalendar();
+      if (tabId === 'analytics') renderAnalytics();
+      if (tabId === 'pipelines') { 
+        if(activePipelineId) renderNodeGraph(); 
+        else renderPipelinesDashboard(); 
+      }
+      if (tabId === 'timer') syncActiveSubjectUI();
+    }
+
+    document.querySelectorAll('.nav-btn, .mobile-nav-btn').forEach(btn => {
+      btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+    });
+
+    document.getElementById('btn-add-subject').addEventListener('click', () => { 
+      document.getElementById('sub-id').value = ''; 
+      document.getElementById('sub-name').value = ''; 
+      document.getElementById('sub-tag').value = ''; 
+      document.getElementById('sub-goal').value = '60'; 
+      document.getElementById('modal-subject-title').textContent = 'Add Study Subject'; 
+      openModal('modal-subject'); 
+    });
+
+    document.getElementById('form-subject').addEventListener('submit', (e) => { 
+      e.preventDefault(); 
+      const id = document.getElementById('sub-id').value;
+      const name = document.getElementById('sub-name').value.trim();
+      const tag = document.getElementById('sub-tag').value.trim() || 'Core';
+      const goalMinutes = parseInt(document.getElementById('sub-goal').value) || 60; 
+      
+      if (!name) return; 
+      
+      if (id) {
+        subjects = subjects.map(s => s.id === id ? { ...s, name, tag, goalMinutes, color: selectedColor } : s); 
+      } else { 
+        const nId = 'sub-' + Date.now(); 
+        subjects.push({ id: nId, name, tag, goalMinutes, color: selectedColor }); 
+        if (!activeSubjectId) activeSubjectId = nId; 
+      } 
+      
+      persistData(); 
+      populateTimerSubjectSelect(); 
+      closeModal('modal-subject'); 
+    });
+    
+    document.getElementById('btn-open-sync').addEventListener('click', () => openModal('modal-sync'));
+    document.getElementById('btn-open-clear-data').addEventListener('click', () => openModal('modal-clear-data'));
+    
+    document.getElementById('btn-action-wipe-logs-only').addEventListener('click', async () => { 
+      const r = await promptUser('Clear Logs', 'Clear all logged times and checklists?'); 
+      if (r) { 
+        studyLogs = []; 
+        checklists = {}; 
+        resetTimerState(); 
+        persistData(); 
+        closeModal('modal-clear-data'); 
+        playChime(440, 587.33); 
+      } 
+    });
+    
+    document.getElementById('btn-action-wipe-all').addEventListener('click', async () => { 
+      const r = await promptUser('Factory Reset', 'Wipe EVERYTHING for this profile?'); 
+      if (r) { 
+        localStorage.removeItem(sKey('aether_subjects')); 
+        localStorage.removeItem(sKey('aether_logs')); 
+        localStorage.removeItem(sKey('aether_pomo_minutes')); 
+        localStorage.removeItem(sKey('aether_checklists')); 
+        localStorage.removeItem(sKey('aether_pipelines')); 
+        clearActiveSessionState(); 
+        
+        subjects = DEFAULT_SUBJECTS; 
+        studyLogs = []; 
+        checklists = {}; 
+        pipelines = DEFAULT_PIPELINES; 
+        activeSubjectId = subjects[0].id; 
+        
+        updatePomoDuration(25); 
+        resetTimerState(); 
+        persistData(); 
+        populateTimerSubjectSelect(); 
+        closeModal('modal-clear-data'); 
+        playChime(440, 330); 
+      } 
+    });
+
+    document.getElementById('btn-export-json').addEventListener('click', () => { 
+      const payload = { 
+        exportDate: new Date().toISOString(), 
+        profile: currentProfile, 
+        pomoMinutes: savedPomoMinutes, 
+        subjects, 
+        studyLogs, 
+        checklists, 
+        pipelines 
+      };
+      
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(payload, null, 2)); 
+      const a = document.createElement('a'); 
+      a.href = dataStr; 
+      a.download = `aetherfocus_backup_${getTodayString()}.json`; 
+      document.body.appendChild(a); 
+      a.click(); 
+      a.remove(); 
+    });
+
+    document.getElementById('input-import-json').addEventListener('change', (e) => { 
+      const file = e.target.files[0]; 
+      if (!file) return; 
+      const reader = new FileReader(); 
+      reader.onload = (event) => { 
+        try { 
+          const imp = JSON.parse(event.target.result); 
+          if (Array.isArray(imp.subjects) && Array.isArray(imp.studyLogs)) { 
+            subjects = imp.subjects; 
+            studyLogs = imp.studyLogs; 
+            if (imp.checklists) checklists = imp.checklists; 
+            if (imp.pipelines) pipelines = imp.pipelines; 
+            if (imp.pomoMinutes) updatePomoDuration(imp.pomoMinutes); 
+            
+            persistData(); 
+            populateTimerSubjectSelect(); 
+            closeModal('modal-sync'); 
+            playChime(659.25, 880); 
+          } 
+        } catch (err) {
+          console.error(err);
+        } 
+      }; 
+      reader.readAsText(file); 
+    });
+
+    let selectedColor = '#00f0ff';
+    document.querySelectorAll('.color-option').forEach(opt => {
+      opt.addEventListener('click', () => {
+        document.querySelectorAll('.color-option').forEach(o => o.classList.remove('selected'));
+        opt.classList.add('selected');
+        selectedColor = opt.getAttribute('data-color');
+      });
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      loadProfileData();
+    });
+
+  </script>
+</body>
+</html>
